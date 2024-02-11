@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 
 const Home = () => {
     return (
@@ -10,9 +10,9 @@ const Home = () => {
                 <p className="text-gray-600 text-lg mb-8">
                     Streamline your property management with our advanced tools and services.
                 </p>
-                <Link to="/register" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                {/* <Link to="/register" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                     Get Started
-                </Link>
+                </Link> */}
             </div>
 
             {/* Features Section */}
@@ -58,43 +58,28 @@ const Home = () => {
             </div>
 
             {/* Call to Action Section */}
-            <div className="call-to-action bg-white shadow-lg rounded-lg text-center p-10">
-                <h2 className="text-3xl font-bold text-gray-700 mb-6">Ready to Get Started?</h2>
-                <p className="text-gray-600 text-lg mb-8">Join the many property managers and owners using our platform to streamline their operations.</p>
-                <Link to="/contact" className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                    Contact Us
-                </Link>
+            <div className="call-to-action bg-green-500 text-white text-center p-10 rounded-lg">
+                <h2 className="text-4xl font-bold mb-6">Join the Revolution in Property Management</h2>
+                <p className="text-xl mb-8">Be a part of our growing community and take your property business to new heights.</p>
+                {/* <Link to="/contact" className="bg-white hover:bg-gray-200 text-green-500 font-bold py-2 px-4 rounded">
+                    Contact Us Now
+                </Link> */}
             </div>
 
             {/* FAQ Section */}
-            <div className="faq-section bg-gray-100 p-10 rounded-lg mb-10">
-                <h2 className="text-3xl font-bold text-center text-gray-700 mb-6">Frequently Asked Questions</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* FAQ 1 */}
-                    <div className="faq-item mb-4">
-                        <h3 className="text-xl font-semibold mb-2">How do I get started?</h3>
-                        <p>Simply sign up, add your properties, and you’re ready to go. It’s that easy!</p>
-                    </div>
-
-                    {/* FAQ 2 */}
-                    <div className="faq-item mb-4">
-                        <h3 className="text-xl font-semibold mb-2">Is there a mobile app?</h3>
-                        <p>Yes, our mobile app is available on both iOS and Android devices.</p>
-                    </div>
-
-                    {/* More FAQs... */}
-                </div>
+            <div className="faq-section bg-white p-10 rounded-lg mb-10">
+                {/* ... existing FAQs ... */}
             </div>
 
             {/* About Us Section */}
-            <div className="about-us-section bg-white p-10 rounded-lg mb-10">
-                <h2 className="text-3xl font-bold text-center text-gray-700 mb-6">About Us</h2>
-                <p className="text-gray-600 text-lg mb-8">
-                    Learn more about our journey and how we became leaders in property management.
+            <div className="about-us-section bg-blue-600 text-white p-10 rounded-lg mb-10">
+                <h2 className="text-4xl font-bold text-center mb-6">Driven by Innovation, Guided by Experience</h2>
+                <p className="text-xl text-center mb-8">
+                    Our team of experts brings together the best of technology and real estate acumen to offer a platform that’s not just a tool, but a game changer in property management.
                 </p>
-                <Link to="/about" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    Our Story
-                </Link>
+                {/* <Link to="/about" className="bg-white hover:bg-gray-200 text-blue-600 font-bold py-2 px-4 rounded">
+                    Learn More About Us
+                </Link> */}
             </div>
 
             {/* Property Gallery Section */}
@@ -119,9 +104,9 @@ const Home = () => {
                 <p className="text-gray-600 text-lg mb-8">
                     Have any questions? Reach out to us and we’ll be happy to help.
                 </p>
-                <Link to="/contact" className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                {/* <Link to="/contact" className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                     Contact Us
-                </Link>
+                </Link> */}
             </div>
         </div>
     );
