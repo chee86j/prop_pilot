@@ -1,8 +1,21 @@
 import React, { useState } from 'react';
-import PropertyDetails from './PropertyDetails';
 
 const PropertyForm = () => {
     const [propertyData, setPropertyData] = useState({
+        // Location
+        propertyName: '',
+        address: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        county: '',
+        // Departments
+        municipalBuildingAddress: '',
+        buildingDepartmentContact: '',
+        electricDepartmentContact: '',
+        plumbingDepartmentContact: '',
+        fireDepartmentContact: '',
+        environmentalDepartmentContact: '',
         // Total Outlay To Date
         purchaseCost: '',
         refinanceCosts: '',
@@ -51,11 +64,64 @@ const PropertyForm = () => {
         <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg text-sm">
             <h1 className="text-xl md:text-2xl font-bold text-gray-700 mb-6">Property Details Form</h1>
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <PropertyDetails propertyData={propertyData} handleChange={handleChange} />
+                <div className="propHeader bg-gray-50 p-4 shadow-sm rounded-md">
+                    <h2 className="text-lg font-semibold text-gray-700 mb-4">Location</h2>
+                    <label className="block">
+                        <span className="text-gray-700">Property Name:</span>
+                        <input type="text" name="propertyName" value={propertyData.propertyName} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                    </label>
+                    <label className="block">
+                        <span className="text-gray-700">Address:</span>
+                        <input type="text" name="address" value={propertyData.address} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                    </label>
+                    <label className="block">
+                        <span className="text-gray-700">City:</span>
+                        <input type="text" name="city" value={propertyData.city} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                    </label>
+                    <label className="block">
+                        <span className="text-gray-700">State:</span>
+                        <input type="text" name="state" value={propertyData.state} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                    </label>
+                    <label className="block">
+                        <span className="text-gray-700">Zip Code:</span>
+                        <input type="text" name="zipCode" value={propertyData.zipCode} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                    </label>
+                    <label className="block">
+                        <span className="text-gray-700">County:</span>
+                        <input type="text" name="county" value={propertyData.county} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                    </label>
+                </div>
 
-                <div className="grid grid-cols-2 gap-6 md:grid-cols-1 w-11/12 md:w-full mx-auto">
-                    <div className="totalOutlayToDate bg-gray-50 p-4 shadow-sm rounded-md w-11/12">
-                        <h2 className="text-lg font-semibold text-gray-700 mb-4">Total Outlay To Date:</h2>
+                <div className="propDepartments bg-gray-50 p-4 shadow-sm rounded-md">
+                    <h2 className="text-lg font-semibold text-gray-700 mb-4">Departments:</h2>
+                    <label className="block">
+                        <span className="text-gray-700">Municipal Building Address:</span>
+                        <input type="text" name="municipalBuildingAddress" value={propertyData.municipalBuildingAddress} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                    </label>
+                    <label className="block">
+                        <span className="text-gray-700">Building Dept:</span>
+                        <input type="text" name="buildingDepartmentContact" value={propertyData.buildingDepartmentContact} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                    </label>
+                    <label className="block">
+                        <span className="text-gray-700">Electric Dept:</span>
+                        <input type="text" name="electricDepartmentContact" value={propertyData.electricDepartmentContact} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                    </label>
+                    <label className="block">
+                        <span className="text-gray-700">Plumbing Dept:</span>
+                        <input type="text" name="plumbingDepartmentContact" value={propertyData.plumbingDepartmentContact} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                    </label>
+                    <label className="block">
+                        <span className="text-gray-700">Fire Dept:</span>
+                        <input type="text" name="fireDepartmentContact" value={propertyData.fireDepartmentContact} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                    </label>
+                    <label className="block">
+                        <span className="text-gray-700">Environmental Dept:</span>
+                        <input type="text" name="environmentalDepartmentContact" value={propertyData.environmentalDepartmentContact} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                    </label>
+                </div>
+
+                <div className="totalOutlayToDate bg-gray-50 p-4 shadow-sm rounded-md">
+                    <h2 className="text-lg font-semibold text-gray-700 mb-4">Total Outlay To Date:</h2>
                     <label className="block">
                         <span className="text-gray-700">Purchase Cost:</span>
                         <input type="number" name="purchaseCost" value={propertyData.purchaseCost} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
@@ -118,8 +184,8 @@ const PropertyForm = () => {
                     </label>
                 </div>
 
-                <div className="saleProjection bg-gray-50 p-4 shadow-sm rounded-md w-11/12">
-                        <h2 className="text-lg font-semibold text-gray-700 mb-4">Sale Projection</h2>
+                <div className="saleProjection bg-gray-50 p-4 shadow-sm rounded-md">
+                    <h2 className="text-lg font-semibold text-gray-700 mb-4">Sale Projection</h2>
                     <label className="block">
                         <span className="text-gray-700">ARV Sale Price:</span>
                         <input type="number" name="arvSalePrice" value={propertyData.arvSalePrice} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
@@ -184,7 +250,6 @@ const PropertyForm = () => {
                         <span className="text-gray-700">Project Net Profit If Sold:</span>
                         <input type="number" name="projectNetProfitIfSold" value={propertyData.projectNetProfitIfSold} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
                     </label>
-                    </div>
                 </div>
 
                 <button type="submit" className="md:col-span-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md">
