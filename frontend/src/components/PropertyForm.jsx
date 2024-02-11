@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const PropertyForm = () => {
     const [propertyData, setPropertyData] = useState({
@@ -62,6 +63,9 @@ const PropertyForm = () => {
 
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg text-sm">
+            <Link to="/home" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Home
+                </Link>
             <h1 className="text-xl md:text-2xl font-bold text-gray-700 mb-6">Property Details Form</h1>
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="propHeader bg-gray-50 p-4 shadow-sm rounded-md">
