@@ -124,7 +124,7 @@ const Lender = () => {
             </section>
 
 
-            {/* FAQs Section */}
+            {/* Lender FAQs Section */}
             <section className="faq-section">
                 <h3 className="text-2xl md:text-3xl font-semibold text-gray-700 mb-3 md:mb-4">Frequently Asked Questions</h3>
                 <div className="text-gray-600 text-md md:text-lg">
