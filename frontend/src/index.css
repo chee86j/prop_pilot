@@ -4,33 +4,44 @@
 @tailwind utilities;
 
 /* Custom CSS for 'Get Started' Button*/
-.custom-button {
+.custom-button,
+.submit-button {
     @apply inline-flex items-center bg-blue-500 text-white font-bold py-2 px-4 rounded cursor-pointer transition-all duration-200;
 }
 
-.custom-button span {
+.custom-button span,
+.submit-button span{
     margin-left: 0.3em;
     transition: transform 0.3s ease-in-out;
 }
 
-.custom-button svg {
+.custom-button svg,
+.submit-button svg {
     transition: transform 0.3s ease-in-out;
 }
 
-.custom-button:hover {
+.custom-button:hover,
+.submit-button:hover {
     background-color: #3B82F6;
 }
 
-.custom-button:hover img {
+.custom-button:hover img{
     transform: translateX(3em) rotate(45deg) scale(1.1);
     animation: fly-1 .3s ease-in-out infinite alternate;
 }
 
-.custom-button:hover span {
-    transform: translateX(7em);
+.submit-button:hover img {
+    transform: translateX(3em) rotate(45deg) scale(1.1);
+    animation: fly-2 .3s ease-in-out infinite alternate;
 }
 
-.custom-button:active {
+.custom-button:hover span,
+.submit-button:hover span{
+    transform: translateX(15em);
+}
+
+.custom-button:active,
+.submit-button:active {
     transform: scale(0.95);
 }
 
@@ -40,5 +51,14 @@
     }
     to {
         transform: translateY(-0.2em) translateX(3em) rotate(45deg);
+    }
+}
+
+@keyframes fly-2 {
+    from {
+        transform: translateY(0.2em) translateX(4.5em) rotate(45deg);
+    }
+    to {
+        transform: translateY(-0.2em) translateX(4.5em) rotate(45deg);
     }
 }
