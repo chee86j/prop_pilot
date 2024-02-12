@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Testimonials from './Testimonials';
+import planeIcon from '../assets/icons/plane.svg';
+
 
 const Home = () => {
     return (
@@ -11,8 +13,9 @@ const Home = () => {
                 <p className="text-gray-600 text-lg mb-8">
                     Streamline your property management with our advanced tools and services.
                 </p>
-                <Link to="/register" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    Get Started
+                <Link to="/register" className="custom-button">
+                    <img src={planeIcon} alt="Plane" className="mr-2" style={{ width: '24px', height: '24px' }} />
+                    <span>Get Started</span>
                 </Link>
             </div>
 

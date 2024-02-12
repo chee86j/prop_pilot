@@ -1,3 +1,44 @@
+/* CSS */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom CSS for 'Get Started' Button*/
+.custom-button {
+    @apply inline-flex items-center bg-blue-500 text-white font-bold py-2 px-4 rounded cursor-pointer transition-all duration-200;
+}
+
+.custom-button span {
+    margin-left: 0.3em;
+    transition: transform 0.3s ease-in-out;
+}
+
+.custom-button svg {
+    transition: transform 0.3s ease-in-out;
+}
+
+.custom-button:hover {
+    background-color: #3B82F6;
+}
+
+.custom-button:hover img {
+    transform: translateX(3em) rotate(45deg) scale(1.1);
+    animation: fly-1 .3s ease-in-out infinite alternate;
+}
+
+.custom-button:hover span {
+    transform: translateX(7em);
+}
+
+.custom-button:active {
+    transform: scale(0.95);
+}
+
+@keyframes fly-1 {
+    from {
+        transform: translateY(0.2em) translateX(3em) rotate(45deg);
+    }
+    to {
+        transform: translateY(-0.2em) translateX(3em) rotate(45deg);
+    }
+}
