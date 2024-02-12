@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Testimonials from './Testimonials';
 import planeIcon from '../assets/icons/plane.svg';
+import LogoIcon from '../assets/icons/logo.svg';
 
 
 const Home = () => {
@@ -9,8 +10,11 @@ const Home = () => {
         <div className="home-container">
             {/* Hero Section */}
             <div className="hero-section bg-white shadow-lg rounded-lg text-center p-6 md:p-10 mb-6 md:mb-10">
-                <h1 className="text-4xl md:text-5xl font-bold text-gray-700 mb-6">Welcome to Our Property Management System</h1>
-                <p className="text-gray-600 text-lg mb-8">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-700 mb-0">
+                    Welcome to <img src={LogoIcon} alt="Logo" className="inline-block align-middle mr-2" style={{ width: '68px', height: '68px' }} /> Property Pilot
+                </h1>
+                <h1 className="text-4xl md:text-5xl font-bold text-gray-700 mb-6">REI Property Management System</h1>               
+                 <p className="text-gray-600 text-lg mb-8">
                     Streamline your property management with our advanced tools and services.
                 </p>
                 <Link to="/register" className="custom-button">

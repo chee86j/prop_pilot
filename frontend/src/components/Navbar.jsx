@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import LogoIcon from '../assets/icons/logo.svg';
 
 const Navbar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -13,7 +14,10 @@ const Navbar = () => {
             <div className="container mx-auto px-4 py-3 md:flex md:justify-between md:items-center">
                 <div className="flex justify-between items-center">
                     {/* Logo and App Name */}
-                    <Link className="text-gray-800 text-xl font-bold md:text-2xl hover:text-blue-600" to="/home">Prop Pilot</Link>
+                    <Link className="flex items-center text-gray-800 text-xl font-bold md:text-2xl hover:text-blue-600" to="/home">
+                        <img src={LogoIcon} alt="Logo" className="mr-2" style={{ width: '42px', height: '42px' }} />
+                        Property Pilot
+                    </Link>
                     
                     {/* Mobile Menu Button */}
                     <button type="button" onClick={toggleMobileMenu} className="text-gray-500 hover:text-gray-600 focus:outline-none focus:text-gray-600 md:hidden">
