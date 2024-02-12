@@ -16,7 +16,7 @@ const Navbar = () => {
                     {/* Logo and App Name */}
                     <Link className="flex items-center text-gray-800 text-xl font-bold md:text-2xl hover:text-blue-600" to="/home">
                         <img src={LogoIcon} alt="Logo" className="mr-2" style={{ width: '42px', height: '42px' }} />
-                        Property Pilot
+                        Prop Pilot
                     </Link>
                     
                     {/* Mobile Menu Button */}
@@ -38,6 +38,7 @@ const Navbar = () => {
                         <Link className="my-1 text-sm text-gray-700 leading-5 hover:text-blue-600 md:mx-4 md:my-0" to="/faq">FAQ</Link>
                         <Link className="my-1 text-sm text-gray-700 leading-5 hover:text-blue-600 md:mx-4 md:my-0" to="/contact">Contact</Link>
                         <Link className="my-1 text-sm text-gray-700 leading-5 hover:text-blue-600 md:mx-4 md:my-0" to="/register">Register</Link>
+                        <Link className="my-1 text-sm text-gray-700 leading-5 hover:text-blue-600 md:mx-4 md:my-0" to="/login">Login</Link>
                         {/* Add other links as needed */}
                     </div>
                 </div>
