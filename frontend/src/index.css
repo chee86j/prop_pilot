@@ -56,9 +56,9 @@
 
 @keyframes fly-2 {
     from {
-        transform: translateY(0.2em) translateX(4.5em) rotate(45deg);
+        transform: translateY(0.2em) translateX(2.5em) rotate(45deg);
     }
     to {
-        transform: translateY(-0.2em) translateX(4.5em) rotate(45deg);
+        transform: translateY(-0.2em) translateX(2.5em) rotate(45deg);
     }
 }

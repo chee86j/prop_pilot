@@ -37,8 +37,7 @@ const Navbar = () => {
                         <Link className="my-1 text-sm text-gray-700 leading-5 hover:text-blue-600 md:mx-4 md:my-0" to="/testimonials">Testimonials</Link>
                         <Link className="my-1 text-sm text-gray-700 leading-5 hover:text-blue-600 md:mx-4 md:my-0" to="/faq">FAQ</Link>
                         <Link className="my-1 text-sm text-gray-700 leading-5 hover:text-blue-600 md:mx-4 md:my-0" to="/contact">Contact</Link>
-                        <Link className="my-1 text-sm text-gray-700 leading-5 hover:text-blue-600 md:mx-4 md:my-0" to="/register">Register</Link>
-                        <Link className="my-1 text-sm text-gray-700 leading-5 hover:text-blue-600 md:mx-4 md:my-0" to="/login">Login</Link>
+                        <Link className="my-1 text-sm text-gray-700 leading-5 hover:text-blue-600 md:mx-4 md:my-0" to="/authform">Login</Link>
                         {/* Add other links as needed */}
                     </div>
                 </div>
