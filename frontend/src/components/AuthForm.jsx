@@ -4,110 +4,82 @@ import GoogleIcon from '../assets/icons/google.svg';
 import FacebookIcon from '../assets/icons/facebook.svg';
 import GitHubIcon from '../assets/icons/github.svg';
 import planeIcon from '../assets/icons/plane.svg';
+import LogoIcon from '../assets/icons/logo.svg';
+import AuthFormImage from '../assets/images/authform02.jpeg';
+
 
 const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
 
+  const toggleForm = () => {
+    setIsLogin(!isLogin);
+  };
+
   return (
-    <div className="container mx-auto p-6">
-      <div className="tabs flex justify-center mb-8">
-        <button className={`tab ${isLogin ? 'text-blue-600' : 'text-gray-500'} text-2xl font-bold mr-4`} onClick={() => setIsLogin(true)}>Sign In</button>
-        <button className={`tab ${!isLogin ? 'text-blue-600' : 'text-gray-500'} text-2xl font-bold`} onClick={() => setIsLogin(false)}>Register</button>
-      </div>
-
-      {isLogin ? (
-
-        // Login Form
-        <div>
-          <form action="" className="form mt-8 max-w-md mx-auto">
-            <input required className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full mb-4" type="email" name="email" id="email" placeholder="E-mail" />
-            <input required className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full mb-4" type="password" name="password" id="password" placeholder="Password" />
-            <span className="forgot-password block text-sm text-blue-500 ml-1 mb-3"><a href="#">Forgot Password?</a></span>
-            <div className="flex justify-center">
-              <button className="submit-button submit">
-                <img src={planeIcon} alt="Plane" type="submit" className="mr-2" style={{ width: '64px', height: '24px' }} />
-                <span>Submit</span>
-              </button>
-            </div>
-          </form>
-
-          <div className="social-account-container mt-4 text-center">
-            {/* Social Login Buttons */}
-            <span className="title block text-xs text-gray-600">Or Sign in with</span>
-            <div className="social-accounts flex justify-center gap-4 mt-2">
-              {/* Google Login Button */}
-              <button className="social-button bg-white border border-white p-2 rounded-full shadow-md hover:scale-110 hover:shadow-lg transition duration-300">
-                <img src={GoogleIcon} alt="Google" className="w-6 h-6" />
-              </button>
-              {/* Facebook Login Button */}
-              <button className="social-button bg-white border border-white p-2 rounded-full shadow-md hover:scale-110 hover:shadow-lg transition duration-300">
-                <img src={FacebookIcon} alt="Facebook" className="w-6 h-6" />
-              </button>
-              {/* GitHub Login Button */}
-              <button className="social-button bg-white border border-white p-2 rounded-full shadow-md hover:scale-110 hover:shadow-lg transition duration-300">
-                <img src={GitHubIcon} alt="GitHub" className="w-6 h-6" />
-              </button>
-            </div>
+    <div className="min-h-screen bg-gray-100 flex justify-center">
+      <div className="max-w-screen-xl m-0 sm:m-20 bg-white shadow sm:rounded-lg flex justify-center flex-1">
+        {/* Form Container */}
+        <div className="lg:w-1/2 xl:w-5/12 p-6 sm:p-12">
+          {/* Logo */}
+          <div className="text-center">
+            <img src={LogoIcon} alt="App Logo" className="mx-auto h-12" />
           </div>
-          <p className="signin text-center mt-4 text-sm text-gray-700">Don't have an account? <button onClick={() => setIsLogin(false)} className="text-blue-600">Create One Here</button></p>
-        </div>
-      ) : (
 
-        // Registration Form
-        <div>
-          <form action="" className="form mt-8 max-w-md mx-auto space-y-4">
-            <h1 className="text-center text-gray-400 text-lg mt-4">Signup now and get full access to our app.</h1>
-            <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
-              {/* Firstname Input */}
-              <label className="relative flex-1">
-                <input className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full" type="text" placeholder="Firstname" required />
+          <div className="mt-4 flex flex-col items-center">
+            <h1 className="text-2xl xl:text-3xl font-extrabold">
+              {isLogin ? 'Login to Prop Pilot' : 'Sign up for Prop Pilot'}
+            </h1>
+
+            {/* Form */}
+            <form action="" className="form mt-8 max-w-md mx-auto space-y-4">
+              {!isLogin && (
+                <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+                  <label className="relative flex-1">
+                    <input className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full" type="text" placeholder="Firstname" required />
+                  </label>
+                  <label className="relative flex-1">
+                    <input className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full" type="text" placeholder="Lastname" required />
+                  </label>
+                </div>
+              )}
+              <label className="relative">
+                <input className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full my-4" type="email" placeholder="Email" required />
               </label>
-              {/* Lastname Input */}
-              <label className="relative flex-1">
-                <input className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full" type="text" placeholder="Lastname" required />
+              <label className="relative">
+                <input className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full mb-4" type="password" placeholder="Password" required />
               </label>
-            </div>
-            {/* Email Input */}
-            <label className="relative">
-              <input className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full my-4" type="email" placeholder="Email" required />
-            </label>
-            {/* Password Input */}
-            <label className="relative">
-              <input className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full mb-4" type="password" placeholder="Password" required />
-            </label>
-            {/* Confirm Password Input */}
-            <label className="relative">
-              <input className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full mb-1" type="password" placeholder="Confirm password" required />
-            </label>
-            {/* Submit Button */}
-            <div className="flex justify-center">
-              <button className="submit-button submit">
-                <img src={planeIcon} alt="Plane" className="mr-2" style={{ width: '64px', height: '24px' }} />
-                <span>Submit</span>
+              {!isLogin && (
+                <label className="relative">
+                  <input className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full mb-1" type="password" placeholder="Confirm password" required />
+                </label>
+              )}
+              <div className="flex justify-center">
+                <button className="submit-button submit">
+                    <img src={planeIcon} alt="Plane" className="mr-2" style={{ width: '24px', height: '24px' }} />
+                    <span>{isLogin ? 'Sign-In' : 'Submit'}</span>
+                </button>
+              </div>
+            </form>
+            <p className="mt-6 text-xs text-gray-600 text-center">
+                I agree to abide by Prop Pilot's Terms of Service and its Privacy Policy
+            </p>
+            <p className="mt-4 text-sm text-gray-500">
+              {isLogin ? "Don't have an account?" : "Already have an account?"} 
+              <button onClick={toggleForm} className="text-blue-600 font-bold">
+                {isLogin ? 'Create One Here' : 'Sign in'}
               </button>
-            </div>
-          </form>
+            </p>
+          </div>
+        </div>
 
-          {/* Shared Social Login Buttons */}
-         <div className="social-account-container mt-4 text-center">
-        <span className="title block text-sm text-gray-500">Or Sign up with</span>
-        <div className="social-accounts flex justify-center gap-4 mt-2">
-          <button className="social-button bg-white border border-white p-2 rounded-full shadow-md hover:scale-110 hover:shadow-lg transition duration-300">
-            <img src={GoogleIcon} alt="Google" className="w-6 h-6" />
-          </button>
-          <button className="social-button bg-white border border-white p-2 rounded-full shadow-md hover:scale-110 hover:shadow-lg transition duration-300">
-            <img src={FacebookIcon} alt="Facebook" className="w-6 h-6" />
-          </button>
-          <button className="social-button bg-white border border-white p-2 rounded-full shadow-md hover:scale-110 hover:shadow-lg transition duration-300">
-            <img src={GitHubIcon} alt="GitHub" className="w-6 h-6" />
-          </button>
+        {/* Image Container */}
+        <div className="flex-1 bg-indigo-100 text-center hidden lg:flex">
+          <div 
+            className="w-full bg-contain bg-center bg-no-repeat" 
+            style={{ backgroundImage: `url(${AuthFormImage})` }}>
+          </div>
         </div>
       </div>
-          <p className="signin text-center mt-4 text-sm text-gray-500">Already have an account? <button onClick={() => setIsLogin(true)} className="text-blue-600">Sign in</button></p>
-        </div>
-      )}
-
-      <span className="agreement block text-center text-xs text-blue-500 mt-4"><a href="#">User Licence Agreement</a></span>
     </div>
   );
 };

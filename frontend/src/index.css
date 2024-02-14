@@ -37,7 +37,7 @@
 
 .custom-button:hover span,
 .submit-button:hover span{
-    transform: translateX(15em);
+    transform: translateX(6.5em);
 }
 
 .custom-button:active,
