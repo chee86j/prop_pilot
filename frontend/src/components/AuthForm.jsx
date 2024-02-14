@@ -7,7 +7,6 @@ import planeIcon from '../assets/icons/plane.svg';
 import LogoIcon from '../assets/icons/logo.svg';
 import AuthFormImage from '../assets/images/authform02.jpeg';
 
-
 const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
 
@@ -29,6 +28,22 @@ const AuthForm = () => {
             <h1 className="text-2xl xl:text-3xl font-extrabold">
               {isLogin ? 'Login to Prop Pilot' : 'Sign up for Prop Pilot'}
             </h1>
+
+            {/* Social Media Sign-In */}
+            <div className="social-account-container mt-4 text-center">
+              <span className="title block text-sm text-gray-600">Or Sign in with</span>
+              <div className="social-accounts flex justify-center gap-4 mt-2">
+                <button className="social-button bg-white border border-white p-2 rounded-full shadow-md hover:scale-110 hover:shadow-lg transition duration-300">
+                  <img src={GoogleIcon} alt="Google" className="w-6 h-6" />
+                </button>
+                <button className="social-button bg-white border border-white p-2 rounded-full shadow-md hover:scale-110 hover:shadow-lg transition duration-300">
+                  <img src={FacebookIcon} alt="Facebook" className="w-6 h-6" />
+                </button>
+                <button className="social-button bg-white border border-white p-2 rounded-full shadow-md hover:scale-110 hover:shadow-lg transition duration-300">
+                  <img src={GitHubIcon} alt="GitHub" className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
 
             {/* Form */}
             <form action="" className="form mt-8 max-w-md mx-auto space-y-4">
@@ -54,7 +69,7 @@ const AuthForm = () => {
                 </label>
               )}
               <div className="flex justify-center">
-                <button className="submit-button submit">
+                <button className="submit-button submit bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out">
                     <img src={planeIcon} alt="Plane" className="mr-2" style={{ width: '24px', height: '24px' }} />
                     <span>{isLogin ? 'Sign-In' : 'Submit'}</span>
                 </button>
@@ -63,9 +78,9 @@ const AuthForm = () => {
             <p className="mt-6 text-xs text-gray-600 text-center">
                 I agree to abide by Prop Pilot's Terms of Service and its Privacy Policy
             </p>
-            <p className="mt-4 text-sm text-gray-500">
+            <p className=" mt-4 text-sm text-gray-500">
               {isLogin ? "Don't have an account?" : "Already have an account?"} 
-              <button onClick={toggleForm} className="text-blue-600 font-bold">
+              <button onClick={toggleForm} className="ml-1 text-blue-600 font-bold">
                 {isLogin ? 'Create One Here' : 'Sign in'}
               </button>
             </p>
