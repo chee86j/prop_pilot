@@ -63,21 +63,23 @@ const AuthForm = () => {
       return;
     }
     try {
-      // API call to backend registration endpoint
       const response = await fetch("http://localhost:5000/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ firstName, lastName, email, password }),
+        body: JSON.stringify({
+          first_name: firstName,
+          last_name: lastName,
+          email,
+          password,
+        }),
       });
       const data = await response.json();
       if (response.ok) {
-        // Handle successful registration
+        // Handle successful registration here
       } else {
-        // Handle registration errors
         setErrorMessage(data.message || "Registration failed.");
       }
     } catch (error) {
-      // Handle unexpected errors
       setErrorMessage("An error occurred during registration.");
     }
   };
@@ -128,6 +130,7 @@ const AuthForm = () => {
                       required
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
+                      autoComplete="given-name"
                     />
                   </label>
                   <label className="relative flex-1">
@@ -138,6 +141,7 @@ const AuthForm = () => {
                       required
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
+                      autoComplete="family-name"
                     />
                   </label>
                 </div>

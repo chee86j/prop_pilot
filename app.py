@@ -1,43 +1,36 @@
-# This file is the entry point of the app where it is created and configured.
-# It also contains the main route of the app and runs the app in debug mode.
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_jwt_extended import JWTManager
+from flask_cors import CORS
+from dotenv import load_dotenv
+import os
 
-from flask import Flask  # Flask is a Python web framework to build web applications.
-from flask_sqlalchemy import SQLAlchemy  # Flask-SQLAlchemy is an extension for Flask that adds support for SQLAlchemy.
-from flask_jwt_extended import JWTManager  # Flask-JWT-Extended adds support for JSON Web Tokens.
-from flask_cors import CORS  # Flask-CORS handles Cross-Origin Resource Sharing (CORS) for cross-origin requests.
-from dotenv import load_dotenv  # python-dotenv reads key-value pairs from a .env file and adds them to the environment.
-import os  # os module provides a way of using operating system dependent functionality.
-from models import db, User  # Importing the database models.
-from routes import api  # Importing the API blueprint from routes.py.
+from models import db
+from routes import api
 
-# Load environment variables from the .env file.
+# Load environment variables from .env file
 load_dotenv()
 
-# Creating an instance of the Flask class.
+# Create an instance of Flask
 app = Flask(__name__)
 
-# Configuring the database.
+# Configure the database
 app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{os.getenv("DB_USERNAME")}:{os.getenv("DB_PASSWORD")}@localhost/{os.getenv("DB_NAME")}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Configuring JWT.
-app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
+# Initialize SQLAlchemy
+db.init_app(app)
 
-# Creating instances of SQLAlchemy and JWTManager.
-db = SQLAlchemy(app)
+# Configure JWT
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 jwt = JWTManager(app)
 
-# Enabling CORS for the API routes from the frontend origin.
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
+# Enable CORS for all domains on all routes
+CORS(app)
 
-# Registering the API blueprint with a URL prefix.
+# Register API blueprint
 app.register_blueprint(api, url_prefix='/api')
 
-# A simple test route.
-@app.route('/')
-def hello_world():
-    return 'Hello, World!'
-
-# Running the app in debug mode if this script is the main program.
+# Run the app in debug mode
 if __name__ == '__main__':
     app.run(debug=True)

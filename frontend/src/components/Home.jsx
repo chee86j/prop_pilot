@@ -183,11 +183,7 @@ const Home = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {/* Property 1 */}
           <div className="property bg-gray-50 p-4 rounded-lg shadow-md">
-            <img
-              src="/images/property1.jpg"
-              alt="Property 1"
-              className="mb-3"
-            />
+            <img src="{LogoIcon}" alt="Property 1" className="mb-3" />
             <h3 className="text-lg font-semibold">Modern Apartment</h3>
             <p>City Center, 2BHK</p>
           </div>

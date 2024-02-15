@@ -1,16 +1,15 @@
-# this is file is used to define the database schema and models of app
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
-db = SQLAlchemy() # create instance of SQLAlchemy class & pass app as arg
+# Initialize SQLAlchemy with no settings
+db = SQLAlchemy()
 
-# User model
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(120), nullable=False)
-    last_name = db.Column(db.String(120), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128))
+    first_name = db.Column(db.String(512), nullable=False)
+    last_name = db.Column(db.String(512), nullable=False)
+    email = db.Column(db.String(512), unique=True, nullable=False)
+    password_hash = db.Column(db.String(512))
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

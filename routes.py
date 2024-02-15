@@ -2,14 +2,12 @@
 # it contains routes for user registration & login
 # it also contains route to generate & verify JWT token
 
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify
 from models import db, User
 from flask_jwt_extended import create_access_token
 
 api = Blueprint('api', __name__)
-# create instance of Blueprint class & pass 'api' & __name__ as args
 
-# User registration route
 @api.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -23,7 +21,6 @@ def register():
     db.session.commit()
     return jsonify({"message": "User created successfully"}), 201
 
-# User login route
 @api.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
