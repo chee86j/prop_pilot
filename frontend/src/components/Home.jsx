@@ -1,31 +1,59 @@
+/* eslint-disable react/prop-types */
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Testimonials from "./Testimonials";
 import planeIcon from "../assets/icons/plane.svg";
 import LogoIcon from "../assets/icons/logo.svg";
 
 const Home = () => {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    // Fetch user profile after successful authentication
+    const fetchUserProfile = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/profile", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
+        } else {
+          // Handle error if unable to fetch user profile
+          console.error("Failed to fetch user profile");
+        }
+      } catch (error) {
+        console.error("An error occurred while fetching user profile:", error);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
   return (
     <div className="home-container">
       {/* Hero Section */}
       <div className="hero-section bg-white shadow-lg rounded-lg text-center p-6 md:p-10 mb-6 md:mb-10">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-700 mb-0">
-          Welcome to{" "}
+          Welcome {user ? `${user.first_name} ${user.last_name}` : ""} to Prop
+          Pilot
           <img
             src={LogoIcon}
             alt="Logo"
             className="inline-block align-middle mr-2"
             style={{ width: "68px", height: "68px" }}
-          />{" "}
-          Prop Pilot
-        </h1>
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-700 mb-6">
+          />
+          <br />
           REI Property Management System
         </h1>
-        <p className="text-gray-600 text-lg mb-8">
+        <p className="text-gray-600 text-lg my-5">
           Streamline your property management with our advanced tools and
           services.
         </p>
-        <Link to="/register" className="custom-button">
+        <Link to="/authform" className="custom-button">
           <img
             src={planeIcon}
             alt="Plane"

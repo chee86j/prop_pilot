@@ -3,62 +3,66 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom CSS for 'Get Started' Button*/
+/* Custom CSS for 'Get Started' & Submit Button*/
 .custom-button,
 .submit-button {
-    @apply inline-flex items-center bg-blue-500 text-white font-bold py-2 px-4 rounded cursor-pointer transition-all duration-200;
+  @apply inline-flex items-center bg-blue-500 text-white font-bold py-2 px-4 rounded cursor-pointer transition-all duration-200;
 }
 
 .custom-button span,
-.submit-button span{
-    margin-left: 0.3em;
-    transition: transform 0.3s ease-in-out;
+.submit-button span {
+  margin-left: 0.3em;
+  transition: transform 0.3s ease-in-out;
+}
+
+.submit-button span {
+  transform: translateX(-3em);
 }
 
 .custom-button svg,
 .submit-button svg {
-    transition: transform 0.3s ease-in-out;
+  transition: transform 0.3s ease-in-out;
 }
 
 .custom-button:hover,
 .submit-button:hover {
-    background-color: #3B82F6;
+  background-color: #3b82f6;
 }
 
-.custom-button:hover img{
-    transform: translateX(3em) rotate(45deg) scale(1.1);
-    animation: fly-1 .3s ease-in-out infinite alternate;
+.custom-button:hover img {
+  transform: translateX(3em) rotate(45deg) scale(1.1);
+  animation: fly-1 0.3s ease-in-out infinite alternate;
 }
 
 .submit-button:hover img {
-    transform: translateX(3em) rotate(45deg) scale(1.1);
-    animation: fly-2 .3s ease-in-out infinite alternate;
+  transform: translateX(3em) rotate(45deg) scale(1.1);
+  animation: fly-2 1.8s ease-in-out infinite alternate;
 }
 
 .custom-button:hover span,
-.submit-button:hover span{
-    transform: translateX(6.5em);
+.submit-button:hover span {
+  transform: translateX(6.5em);
 }
 
 .custom-button:active,
 .submit-button:active {
-    transform: scale(0.95);
+  transform: scale(0.95);
 }
 
 @keyframes fly-1 {
-    from {
-        transform: translateY(0.2em) translateX(3em) rotate(45deg);
-    }
-    to {
-        transform: translateY(-0.2em) translateX(3em) rotate(45deg);
-    }
+  from {
+    transform: translateY(0.2em) translateX(3em) rotate(45deg);
+  }
+  to {
+    transform: translateY(-0.2em) translateX(3em) rotate(45deg);
+  }
 }
 
 @keyframes fly-2 {
-    from {
-        transform: translateY(0.2em) translateX(2.5em) rotate(45deg);
-    }
-    to {
-        transform: translateY(-0.2em) translateX(2.5em) rotate(45deg);
-    }
+  from {
+    transform: translateY(0.2em) translateX(2.5em) rotate(45deg);
+  }
+  to {
+    transform: translateY(-0.2em) translateX(2.5em) rotate(45deg);
+  }
 }

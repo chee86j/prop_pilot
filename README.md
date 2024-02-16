@@ -57,19 +57,33 @@ JWT_SECRET_KEY=yourjwtsecretkey
 2. Open a new terminal and run `psql` to open the PostgreSQL shell.
 3. Create a new database:
 
-- Run `CREATE DATABASE prop_pilot;`
-- _(Optional)_ If you want a specific user to have access to the database:
-  - Run `CREATE USER yourusername WITH PASSWORD 'yourpassword';`
-  - Run `GRANT ALL PRIVILEGES ON DATABASE prop_pilot TO yourusername;`
+CREATE DATABASE prop_pilot;
+
+_(Optional)_ If you want a specific user to have access to the database:
+
+CREATE USER yourusername WITH PASSWORD 'yourpassword';
+GRANT ALL PRIVILEGES ON DATABASE prop_pilot TO yourusername;
 
 4. Update your Flask app to connect to the database:
 
 - Open the file `app.py`.
-- Update the SQLAlchemy database URI: `app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://yourusername:yourpassword@localhost/prop_pilot'`
+- Update the SQLAlchemy database URI:
+  ```
+  app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://yourusername:yourpassword@localhost/prop_pilot'
+  ```
 
 5. Connect to the database in the PostgreSQL shell:
 
-- Run `\c prop_pilot`
+`\c prop_pilot`
+
+### Configure Database Permissions
+
+1. Ensure that the database user has sufficient privileges for operations
+   such as creating tables, sequences, and handling data. This typically
+   involves granting privileges on tables and sequences, like:
+
+`GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO your_db_user;`
+`GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO your_db_user;`
 
 ### Setup Database Tables
 
