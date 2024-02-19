@@ -79,6 +79,14 @@ const Navbar = () => {
                 Property Form
               </Link>
             )}
+            {isAuthenticated && (
+              <Link
+                to="/singleproperty"
+                className="my-1 text-sm text-gray-700 leading-5 hover:text-blue-600 md:mx-4 md:my-0"
+              >
+                Add Property
+              </Link>
+            )}
             <Link
               to="/lender"
               className="my-1 text-sm text-gray-700 leading-5 hover:text-blue-600 md:mx-4 md:my-0"

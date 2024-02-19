@@ -1,15 +1,17 @@
 # this file contains api routes of this app
-# it contains routes for user registration & login
+# it contains routes for user registration, login, profile, properties
 # it also contains route to generate & verify JWT token
 
 from flask import Blueprint, request, jsonify
-from models import db, User
+from models import db, User, Property
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from werkzeug.security import check_password_hash
 from datetime import timedelta
 
 api = Blueprint('api', __name__)
 
+# -----USER LOGIN & REGISTRATION ROUTES-----
+# User registration route
 @api.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -23,6 +25,7 @@ def register():
     db.session.commit()
     return jsonify({"message": "User created successfully"}), 201
 
+# User login route
 @api.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -32,6 +35,8 @@ def login():
         return jsonify(access_token=access_token), 200
     return jsonify({"message": "Invalid credentials"}), 401
 
+# -----USER PROFILE ROUTES-----
+# Get user profile route
 @api.route('/profile', methods=['GET'])
 @jwt_required()
 def profile():
@@ -42,16 +47,7 @@ def profile():
     else:
         return jsonify({"message": "User not found"}), 404
 
-@api.route('/profile', methods=['GET'])
-@jwt_required()
-def get_profile():
-    current_user_email = get_jwt_identity()
-    user = User.query.filter_by(email=current_user_email).first()
-    if user:
-        return jsonify(email=user.email, first_name=user.first_name, last_name=user.last_name), 200
-    else:
-        return jsonify({"message": "User not found"}), 404
-
+# Update user profile route
 @api.route('/profile', methods=['PUT'])
 @jwt_required()
 def update_profile():
@@ -64,5 +60,197 @@ def update_profile():
         user.email = data.get('email', user.email)
         db.session.commit()
         return jsonify({"message": "Profile updated successfully"}), 200
+    else:
+        return jsonify({"message": "User not found"}), 404
+
+# -----PROPERTY ROUTES-----
+# Get all properties of the current user
+@api.route('/properties', methods=['GET'])
+@jwt_required()
+def get_properties():
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        properties = Property.query.filter_by(user_id=user.id).all()
+        return jsonify([{
+            'id': prop.id,
+            'propertyName': prop.propertyName,
+            'address': prop.address,
+            'city': prop.city,
+            'state': prop.state,
+            'zipCode': prop.zipCode,
+            'county': prop.county,
+            'municipalBuildingAddress': prop.municipalBuildingAddress,
+            'buildingDepartmentContact': prop.buildingDepartmentContact,
+            'electricDepartmentContact': prop.electricDepartmentContact,
+            'plumbingDepartmentContact': prop.plumbingDepartmentContact,
+            'fireDepartmentContact': prop.fireDepartmentContact,
+            'environmentalDepartmentContact': prop.environmentalDepartmentContact,
+            'purchaseCost': prop.purchaseCost,
+            'refinanceCosts': prop.refinanceCosts,
+            'totalRehabCost': prop.totalRehabCost,
+            'kickStartFunds': prop.kickStartFunds,
+            'lenderConstructionDrawsReceived': prop.lenderConstructionDrawsReceived,
+            'utilitiesCost': prop.utilitiesCost,
+            'yearlyPropertyTaxes': prop.yearlyPropertyTaxes,
+            'mortgagePaid': prop.mortgagePaid,
+            'homeownersInsurance': prop.homeownersInsurance,
+            'expectedYearlyRent': prop.expectedYearlyRent,
+            'rentalIncomeReceived': prop.rentalIncomeReceived,
+            'vacancyLoss': prop.vacancyLoss,
+            'managementFees': prop.managementFees,
+            'maintenanceCosts': prop.maintenanceCosts,
+            'totalEquity': prop.totalEquity,
+            'arvSalePrice': prop.arvSalePrice,
+            'realtorFees': prop.realtorFees,
+            'propTaxtillEndOfYear': prop.propTaxtillEndOfYear,
+            'lenderLoanBalance': prop.lenderLoanBalance,
+            'payOffStatement': prop.payOffStatement,
+            'attorneyFees': prop.attorneyFees,
+            'miscFees': prop.miscFees,
+            'utilities': prop.utilities,
+            'cash2closeFromPurchase': prop.cash2closeFromPurchase,
+            'cash2closeFromRefinance': prop.cash2closeFromRefinance,
+            'totalRehabCosts': prop.totalRehabCosts,
+            'expectedRemainingRentEndToYear': prop.expectedRemainingRentEndToYear,
+            'totalExpenses': prop.totalExpenses,
+            'totalConstructionDrawsReceived': prop.totalConstructionDrawsReceived,
+            'projectNetProfitIfSold': prop.projectNetProfitIfSold
+        } for prop in properties]), 200
+    else:
+        return jsonify({"message": "User not found"}), 404
+
+# Add a new property for the current user
+@api.route('/properties', methods=['POST'])
+@jwt_required()
+def add_property():
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        data = request.get_json()
+        new_property = Property(
+            user_id=user.id,
+            propertyName=data['propertyName'],
+            address=data['address'],
+            city=data['city'],
+            state=data['state'],
+            zipCode=data['zipCode'],
+            county=data['county'],
+            municipalBuildingAddress=data['municipalBuildingAddress'],
+            buildingDepartmentContact=data['buildingDepartmentContact'],
+            electricDepartmentContact=data['electricDepartmentContact'],
+            plumbingDepartmentContact=data['plumbingDepartmentContact'],
+            fireDepartmentContact=data['fireDepartmentContact'],
+            environmentalDepartmentContact=data['environmentalDepartmentContact'],
+            purchaseCost=data['purchaseCost'],
+            refinanceCosts=data['refinanceCosts'],
+            totalRehabCost=data['totalRehabCost'],
+            kickStartFunds=data['kickStartFunds'],
+            lenderConstructionDrawsReceived=data['lenderConstructionDrawsReceived'],
+            utilitiesCost=data['utilitiesCost'],
+            yearlyPropertyTaxes=data['yearlyPropertyTaxes'],
+            mortgagePaid=data['mortgagePaid'],
+            homeownersInsurance=data['homeownersInsurance'],
+            expectedYearlyRent=data['expectedYearlyRent'],
+            rentalIncomeReceived=data['rentalIncomeReceived'],
+            vacancyLoss=data['vacancyLoss'],
+            managementFees=data['managementFees'],
+            maintenanceCosts=data['maintenanceCosts'],
+            totalEquity=data['totalEquity'],
+            arvSalePrice=data['arvSalePrice'],
+            realtorFees=data['realtorFees'],
+            propTaxtillEndOfYear=data['propTaxtillEndOfYear'],
+            lenderLoanBalance=data['lenderLoanBalance'],
+            payOffStatement=data['payOffStatement'],
+            attorneyFees=data['attorneyFees'],
+            miscFees=data['miscFees'],
+            utilities=data['utilities'],
+            cash2closeFromPurchase=data['cash2closeFromPurchase'],
+            cash2closeFromRefinance=data['cash2closeFromRefinance'],
+            totalRehabCosts=data['totalRehabCosts'],
+            expectedRemainingRentEndToYear=data['expectedRemainingRentEndToYear'],
+            totalExpenses=data['totalExpenses'],
+            totalConstructionDrawsReceived=data['totalConstructionDrawsReceived'],
+            projectNetProfitIfSold=data['projectNetProfitIfSold']
+        )
+        db.session.add(new_property)
+        db.session.commit()
+        return jsonify({"message": "Property created successfully", "id": new_property.id}), 201
+    else:
+        return jsonify({"message": "User not found"}), 404
+
+# Update a property of the current user
+@api.route('/properties/<int:property_id>', methods=['PUT'])
+@jwt_required()
+def update_property(property_id):
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        property_to_update = Property.query.filter_by(id=property_id, user_id=user.id).first()
+        if property_to_update:
+            data = request.get_json()
+            property_to_update.propertyName = data.get('propertyName', property_to_update.propertyName)
+            property_to_update.address = data.get('address', property_to_update.address)
+            property_to_update.city = data.get('city', property_to_update.city)
+            property_to_update.state = data.get('state', property_to_update.state)
+            property_to_update.zipCode = data.get('zipCode', property_to_update.zipCode)
+            property_to_update.county = data.get('county', property_to_update.county)
+            property_to_update.municipalBuildingAddress = data.get('municipalBuildingAddress', property_to_update.municipalBuildingAddress)
+            property_to_update.buildingDepartmentContact = data.get('buildingDepartmentContact', property_to_update.buildingDepartmentContact)
+            property_to_update.electricDepartmentContact = data.get('electricDepartmentContact', property_to_update.electricDepartmentContact)
+            property_to_update.plumbingDepartmentContact = data.get('plumbingDepartmentContact', property_to_update.plumbingDepartmentContact)
+            property_to_update.fireDepartmentContact = data.get('fireDepartmentContact', property_to_update.fireDepartmentContact)
+            property_to_update.environmentalDepartmentContact = data.get('environmentalDepartmentContact', property_to_update.environmentalDepartmentContact)
+            property_to_update.purchaseCost = data.get('purchaseCost', property_to_update.purchaseCost)
+            property_to_update.refinanceCosts = data.get('refinanceCosts', property_to_update.refinanceCosts)
+            property_to_update.totalRehabCost = data.get('totalRehabCost', property_to_update.totalRehabCost)
+            property_to_update.kickStartFunds = data.get('kickStartFunds', property_to_update.kickStartFunds)
+            property_to_update.lenderConstructionDrawsReceived = data.get('lenderConstructionDrawsReceived', property_to_update.lenderConstructionDrawsReceived)
+            property_to_update.utilitiesCost = data.get('utilitiesCost', property_to_update.utilitiesCost)
+            property_to_update.yearlyPropertyTaxes = data.get('yearlyPropertyTaxes', property_to_update.yearlyPropertyTaxes)
+            property_to_update.mortgagePaid = data.get('mortgagePaid', property_to_update.mortgagePaid)
+            property_to_update.homeownersInsurance = data.get('homeownersInsurance', property_to_update.homeownersInsurance)
+            property_to_update.expectedYearlyRent = data.get('expectedYearlyRent', property_to_update.expectedYearlyRent)
+            property_to_update.rentalIncomeReceived = data.get('rentalIncomeReceived', property_to_update.rentalIncomeReceived)
+            property_to_update.vacancyLoss = data.get('vacancyLoss', property_to_update.vacancyLoss)
+            property_to_update.managementFees = data.get('managementFees', property_to_update.managementFees)
+            property_to_update.maintenanceCosts = data.get('maintenanceCosts', property_to_update.maintenanceCosts)
+            property_to_update.totalEquity = data.get('totalEquity', property_to_update.totalEquity)
+            property_to_update.arvSalePrice = data.get('arvSalePrice', property_to_update.arvSalePrice)
+            property_to_update.realtorFees = data.get('realtorFees', property_to_update.realtorFees)
+            property_to_update.propTaxtillEndOfYear = data.get('propTaxtillEndOfYear', property_to_update.propTaxtillEndOfYear)
+            property_to_update.lenderLoanBalance = data.get('lenderLoanBalance', property_to_update.lenderLoanBalance)
+            property_to_update.payOffStatement = data.get('payOffStatement', property_to_update.payOffStatement)
+            property_to_update.attorneyFees = data.get('attorneyFees', property_to_update.attorneyFees)
+            property_to_update.miscFees = data.get('miscFees', property_to_update.miscFees)
+            property_to_update.utilities = data.get('utilities', property_to_update.utilities)
+            property_to_update.cash2closeFromPurchase = data.get('cash2closeFromPurchase', property_to_update.cash2closeFromPurchase)
+            property_to_update.cash2closeFromRefinance = data.get('cash2closeFromRefinance', property_to_update.cash2closeFromRefinance)
+            property_to_update.totalRehabCosts = data.get('totalRehabCosts', property_to_update.totalRehabCosts)
+            property_to_update.expectedRemainingRentEndToYear = data.get('expectedRemainingRentEndToYear', property_to_update.expectedRemainingRentEndToYear)
+            property_to_update.totalExpenses = data.get('totalExpenses', property_to_update.totalExpenses)
+            property_to_update.totalConstructionDrawsReceived = data.get('totalConstructionDrawsReceived', property_to_update.totalConstructionDrawsReceived)
+            property_to_update.projectNetProfitIfSold = data.get('projectNetProfitIfSold', property_to_update.projectNetProfitIfSold)
+            db.session.commit()
+            return jsonify({"message": "Property updated successfully"}), 200
+        else:
+            return jsonify({"message": "Property not found or access denied"}), 403
+    else:
+        return jsonify({"message": "User not found"}), 404
+
+# Delete a property of the current user
+@api.route('/properties/<int:property_id>', methods=['DELETE'])
+@jwt_required()
+def delete_property(property_id):
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        property_to_delete = Property.query.filter_by(id=property_id, user_id=user.id).first()
+        if property_to_delete:
+            db.session.delete(property_to_delete)
+            db.session.commit()
+            return jsonify({"message": "Property deleted successfully"}), 200
+        else:
+            return jsonify({"message": "Property not found or access denied"}), 403
     else:
         return jsonify({"message": "User not found"}), 404

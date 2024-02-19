@@ -31,6 +31,14 @@ CORS(app)
 # Register API blueprint
 app.register_blueprint(api, url_prefix='/api')
 
+# This block can be removed for production. It's for testing purposes.
+# Run setup code to rebuild the database based on the models
+# with app.app_context():
+#     db.drop_all()
+#     db.create_all()
+    # Drop all existing tables
+    # Create new tables based on models
+
 # Run the app in debug mode
 if __name__ == '__main__':
     app.run(debug=True)
