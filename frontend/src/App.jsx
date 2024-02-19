@@ -15,7 +15,8 @@ import Contact from "./components/Contact";
 import Faq from "./components/Faq";
 import Lender from "./components/Lender";
 import Profile from "./components/Profile";
-import SingleProperty from "./components/SingleProperty";
+import PropertyList from "./components/PropertyList";
+import AddProperty from "./components/AddProperty";
 
 function App() {
   const [auth, setAuth] = useState({
@@ -61,10 +62,8 @@ function App() {
         <Route path="/" element={<Navigate to="/home" />} />
         <Route path="/home" element={<Home />} />
         <Route path="/profile" element={<Profile auth={auth} />} />
-        <Route
-          path="/singleproperty"
-          element={<SingleProperty auth={auth} />}
-        />
+        <Route path="/propertylist" element={<PropertyList auth={auth} />} />
+        <Route path="/addproperty" element={<AddProperty auth={auth} />} />
         <Route path="/propertyform" element={<PropertyForm auth={auth} />} />
         <Route path="/testimonials" element={<Testimonials />} />
         <Route path="/about" element={<About />} />

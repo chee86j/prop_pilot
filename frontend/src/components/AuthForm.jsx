@@ -42,7 +42,7 @@ const AuthForm = () => {
         const expiryTime = currentTime + 1 * 24 * 60 * 60 * 1000; // token expires after 1 day locally
         localStorage.setItem("accessToken", data.access_token);
         localStorage.setItem("expiryTime", expiryTime);
-        navigate("/home");
+        navigate("/propertylist");
       } else {
         setErrorMessage(data.message || "Login failed.");
       }

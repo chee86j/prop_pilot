@@ -1,7 +1,7 @@
 /* this component allows auth user to create a new single property */
 import { useState } from "react";
 
-const SingleProperty = () => {
+const AddProperty = () => {
   const [property, setProperty] = useState({
     propertyName: "",
     address: "",
@@ -554,4 +554,4 @@ const SingleProperty = () => {
   );
 };
 
-export default SingleProperty;
+export default AddProperty;

@@ -81,7 +81,15 @@ const Navbar = () => {
             )}
             {isAuthenticated && (
               <Link
-                to="/singleproperty"
+                to="/propertylist"
+                className="my-1 text-sm text-gray-700 leading-5 hover:text-blue-600 md:mx-4 md:my-0"
+              >
+                Property List
+              </Link>
+            )}
+            {isAuthenticated && (
+              <Link
+                to="/addproperty"
                 className="my-1 text-sm text-gray-700 leading-5 hover:text-blue-600 md:mx-4 md:my-0"
               >
                 Add Property
