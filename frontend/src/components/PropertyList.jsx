@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const PropertyList = () => {
   const [properties, setProperties] = useState([]);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -27,8 +30,11 @@ const PropertyList = () => {
   }, []);
 
   const handleDetails = (propertyId) => {
-    // Navigate to details page or maybe open a details modal
-    console.log("Details for property:", propertyId);
+    if (propertyId) {
+      navigate(`/property/${propertyId}`);
+    } else {
+      console.error("PropertyId is undefined");
+    }
   };
 
   const handleDelete = async (propertyId) => {
@@ -62,14 +68,24 @@ const PropertyList = () => {
     }
   };
 
+  const goToAddPropertyPage = () => {
+    navigate("/addproperty");
+  };
+
   return (
     <div className="container mx-auto px-4 sm:px-8">
       <div className="py-8">
-        <div className="flex flex-row mb-1 sm:mb-0 justify-between w-full">
-          <h2 className="text-2xl leading-tight">Properties</h2>
+        <div className="flex flex-col md:flex-row mb-4 md:mb-6 justify-between items-center">
+          <h2 className="text-2xl font-semibold leading-tight">Properties</h2>
+          <button
+            onClick={goToAddPropertyPage}
+            className="mt-4 md:mt-0 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out"
+          >
+            Add New Property
+          </button>
         </div>
-        <div className="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
-          <div className="inline-block min-w-full shadow rounded-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <div className="align-middle inline-block min-w-full shadow rounded-lg overflow-hidden">
             <table className="min-w-full leading-normal">
               <thead>
                 <tr>
@@ -130,6 +146,7 @@ const PropertyList = () => {
                       >
                         Details
                       </button>
+
                       <button
                         onClick={() => handleDelete(property.id)}
                         className="text-red-600 hover:text-red-900 px-4 py-2 rounded"

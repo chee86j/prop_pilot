@@ -64,6 +64,66 @@ def update_profile():
         return jsonify({"message": "User not found"}), 404
 
 # -----PROPERTY ROUTES-----
+# Fetch a single property by its ID
+@api.route('/properties/<int:property_id>', methods=['GET'])
+@jwt_required()
+def get_property(property_id):
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        property = Property.query.filter_by(id=property_id, user_id=user.id).first()
+        if property:
+            return jsonify({
+                'id': property.id,
+                'propertyName': property.propertyName,
+                'address': property.address,
+                'city': property.city,
+                'state': property.state,
+                'zipCode': property.zipCode,
+                'county': property.county,
+                'municipalBuildingAddress': property.municipalBuildingAddress,
+                'buildingDepartmentContact': property.buildingDepartmentContact,
+                'electricDepartmentContact': property.electricDepartmentContact,
+                'plumbingDepartmentContact': property.plumbingDepartmentContact,
+                'fireDepartmentContact': property.fireDepartmentContact,
+                'environmentalDepartmentContact': property.environmentalDepartmentContact,
+                'purchaseCost': property.purchaseCost,
+                'refinanceCosts': property.refinanceCosts,
+                'totalRehabCost': property.totalRehabCost,
+                'kickStartFunds': property.kickStartFunds,
+                'lenderConstructionDrawsReceived': property.lenderConstructionDrawsReceived,
+                'utilitiesCost': property.utilitiesCost,
+                'yearlyPropertyTaxes': property.yearlyPropertyTaxes,
+                'mortgagePaid': property.mortgagePaid,
+                'homeownersInsurance': property.homeownersInsurance,
+                'expectedYearlyRent': property.expectedYearlyRent,
+                'rentalIncomeReceived': property.rentalIncomeReceived,
+                'vacancyLoss': property.vacancyLoss,
+                'managementFees': property.managementFees,
+                'maintenanceCosts': property.maintenanceCosts,
+                'totalEquity': property.totalEquity,
+                'arvSalePrice': property.arvSalePrice,
+                'realtorFees': property.realtorFees,
+                'propTaxtillEndOfYear': property.propTaxtillEndOfYear,
+                'lenderLoanBalance': property.lenderLoanBalance,
+                'payOffStatement': property.payOffStatement,
+                'attorneyFees': property.attorneyFees,
+                'miscFees': property.miscFees,
+                'utilities': property.utilities,
+                'cash2closeFromPurchase': property.cash2closeFromPurchase,
+                'cash2closeFromRefinance': property.cash2closeFromRefinance,
+                'totalRehabCosts': property.totalRehabCosts,
+                'expectedRemainingRentEndToYear': property.expectedRemainingRentEndToYear,
+                'totalExpenses': property.totalExpenses,
+                'totalConstructionDrawsReceived': property.totalConstructionDrawsReceived,
+                'projectNetProfitIfSold': property.projectNetProfitIfSold
+            }), 200
+        else:
+            return jsonify({"message": "Property not found or access denied"}), 403
+    else:
+        return jsonify({"message": "User not found"}), 404
+
+
 # Get all properties of the current user
 @api.route('/properties', methods=['GET'])
 @jwt_required()

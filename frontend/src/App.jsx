@@ -3,10 +3,11 @@ import {
   Routes,
   Route,
   Navigate,
+  useParams,
 } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
-import PropertyForm from "./components/PropertyForm";
+import PropertyDetails from "./components/PropertyDetails";
 import Home from "./components/Home";
 import Testimonials from "./components/Testimonials";
 import About from "./components/About";
@@ -23,6 +24,11 @@ function App() {
     isAuthenticated: false,
     user: null,
   });
+
+  const PropertyDetailsWrapper = () => {
+    const { propertyId } = useParams(); // Access propertyId from the URL
+    return <PropertyDetails propertyId={propertyId} auth={auth} />;
+  };
 
   const fetchUserProfile = async () => {
     try {
@@ -64,7 +70,11 @@ function App() {
         <Route path="/profile" element={<Profile auth={auth} />} />
         <Route path="/propertylist" element={<PropertyList auth={auth} />} />
         <Route path="/addproperty" element={<AddProperty auth={auth} />} />
-        <Route path="/propertyform" element={<PropertyForm auth={auth} />} />
+        <Route
+          path="/property/:propertyId"
+          element={<PropertyDetailsWrapper />}
+        />
+
         <Route path="/testimonials" element={<Testimonials />} />
         <Route path="/about" element={<About />} />
         <Route path="/authform" element={<AuthForm />} />
