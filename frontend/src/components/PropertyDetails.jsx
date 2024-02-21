@@ -22,8 +22,8 @@ const PropertyDetails = ({ propertyId }) => {
 
         const data = await response.json();
         setPropertyDetails(data);
-      } catch (err) {
-        console.error("Error fetching property details:", err);
+      } catch (error) {
+        console.error("Error fetching property details:", error);
       }
     };
 
@@ -35,76 +35,205 @@ const PropertyDetails = ({ propertyId }) => {
   }
 
   return (
-    <div>
-      <h2>Property Details</h2>
-      <p>Property Name: {propertyDetails.propertyName}</p>
-      <p>Address: {propertyDetails.address}</p>
-      <p>City: {propertyDetails.city}</p>
-      <p>State: {propertyDetails.state}</p>
-      <p>Zip Code: {propertyDetails.zipCode}</p>
-      <p>County: {propertyDetails.county}</p>
-      <p>
-        Municipal Building Address: {propertyDetails.municipalBuildingAddress}
-      </p>
-      <p>
-        Building Department Contact: {propertyDetails.buildingDepartmentContact}
-      </p>
-      <p>
-        Electric Department Contact: {propertyDetails.electricDepartmentContact}
-      </p>
-      <p>
-        Plumbing Department Contact: {propertyDetails.plumbingDepartmentContact}
-      </p>
-      <p>Fire Department Contact: {propertyDetails.fireDepartmentContact}</p>
-      <p>
-        Environmental Department Contact:{" "}
-        {propertyDetails.environmentalDepartmentContact}
-      </p>
-      <p>Purchase Cost: {propertyDetails.purchaseCost}</p>
-      <p>Refinance Costs: {propertyDetails.refinanceCosts}</p>
-      <p>Total Rehab Cost: {propertyDetails.totalRehabCost}</p>
-      <p>Kick Start Funds: {propertyDetails.kickStartFunds}</p>
-      <p>
-        Lender Construction Draws Received:{" "}
-        {propertyDetails.lenderConstructionDrawsReceived}
-      </p>
-      <p>Utilities Cost: {propertyDetails.utilitiesCost}</p>
-      <p>Yearly Property Taxes: {propertyDetails.yearlyPropertyTaxes}</p>
-      <p>Mortgage Paid: {propertyDetails.mortgagePaid}</p>
-      <p>Homeowners Insurance: {propertyDetails.homeownersInsurance}</p>
-      <p>Expected Yearly Rent: {propertyDetails.expectedYearlyRent}</p>
-      <p>Rental Income Received: {propertyDetails.rentalIncomeReceived}</p>
-      <p>Vacancy Loss: {propertyDetails.vacancyLoss}</p>
-      <p>Management Fees: {propertyDetails.managementFees}</p>
-      <p>Maintenance Costs: {propertyDetails.maintenanceCosts}</p>
-      <p>Total Equity: {propertyDetails.totalEquity}</p>
-      <p>ARV Sale Price: {propertyDetails.arvSalePrice}</p>
-      <p>Realtor Fees: {propertyDetails.realtorFees}</p>
-      <p>Prop Tax till End of Year: {propertyDetails.propTaxtillEndOfYear}</p>
-      <p>Lender Loan Balance: {propertyDetails.lenderLoanBalance}</p>
-      <p>Pay Off Statement: {propertyDetails.payOffStatement}</p>
-      <p>Attorney Fees: {propertyDetails.attorneyFees}</p>
-      <p>Misc Fees: {propertyDetails.miscFees}</p>
-      <p>Utilities: {propertyDetails.utilities}</p>
-      <p>
-        Cash to Close From Purchase: {propertyDetails.cash2closeFromPurchase}
-      </p>
-      <p>
-        Cash to Close From Refinance: {propertyDetails.cash2closeFromRefinance}
-      </p>
-      <p>Total Rehab Costs: {propertyDetails.totalRehabCosts}</p>
-      <p>
-        Expected Remaining Rent End to Year:{" "}
-        {propertyDetails.expectedRemainingRentEndToYear}
-      </p>
-      <p>Total Expenses: {propertyDetails.totalExpenses}</p>
-      <p>
-        Total Construction Draws Received:{" "}
-        {propertyDetails.totalConstructionDrawsReceived}
-      </p>
-      <p>
-        Project Net Profit If Sold: {propertyDetails.projectNetProfitIfSold}
-      </p>
+    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg text-sm">
+      <h1 className="text-xl md:text-2xl font-bold text-gray-700 mb-6">
+        Property Details
+      </h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="propHeader bg-gray-50 p-4 shadow-sm rounded-md">
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">Location</h2>
+          <div>
+            <strong>Property Name:</strong>
+            <p>{propertyDetails.propertyName}</p>
+          </div>
+          <div>
+            <strong>Address:</strong>
+            <p>{propertyDetails.address}</p>
+          </div>
+          <div>
+            <strong>City:</strong>
+            <p>{propertyDetails.city}</p>
+          </div>
+          <div>
+            <strong>State:</strong>
+            <p>{propertyDetails.state}</p>
+          </div>
+          <div>
+            <strong>Zip:</strong>
+            <p>{propertyDetails.zip}</p>
+          </div>
+          <div>
+            <strong>County:</strong>
+            <p>{propertyDetails.county}</p>
+          </div>
+        </div>
+
+        <div className="propDepartments bg-gray-50 p-4 shadow-sm rounded-md">
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">
+            Departments
+          </h2>
+          <div>
+            <strong>Municipal Building Address:</strong>
+            <p>{propertyDetails.municipalBuildingAddress}</p>
+          </div>
+          <div>
+            <strong>Building Dept:</strong>
+            <p>{propertyDetails.buildingDepartmentContact}</p>
+          </div>
+          <div>
+            <strong>Electric Dept:</strong>
+            <p>{propertyDetails.electricDepartmentContact}</p>
+          </div>
+          <div>
+            <strong>Plumbing Dept:</strong>
+            <p>{propertyDetails.plumbingDepartmentContact}</p>
+          </div>
+          <div>
+            <strong>Fire Dept:</strong>
+            <p>{propertyDetails.fireDepartmentContact}</p>
+          </div>
+          <div>
+            <strong>Environmental Dept:</strong>
+            <p>{propertyDetails.environmentalDepartmentContact}</p>
+          </div>
+        </div>
+
+        <div className="totalOutlayToDate bg-gray-50 p-4 shadow-sm rounded-md">
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">
+            Total Outlay To Date
+          </h2>
+          <div>
+            <strong>Purchase Cost:</strong>
+            <p>${propertyDetails.purchaseCost}</p>
+          </div>
+          <div>
+            <strong>Refinance Cost:</strong>
+            <p>${propertyDetails.refinanceCost}</p>
+          </div>
+          <div>
+            <strong>Total Rehab Cost:</strong>
+            <p>${propertyDetails.totalRehabCost}</p>
+          </div>
+          <div>
+            <strong>Kick Start Funds:</strong>
+            <p>${propertyDetails.kickStartFunds}</p>
+          </div>
+          <div>
+            <strong>Lender Construction Draws Received:</strong>
+            <p>${propertyDetails.lenderConstructionDrawsReceived}</p>
+          </div>
+          <div>
+            <strong>Utilities Cost:</strong>
+            <p>${propertyDetails.utilitiesCost}</p>
+          </div>
+          <div>
+            <strong>Yearly Property Taxes:</strong>
+            <p>${propertyDetails.yearlyPropertyTaxes}</p>
+          </div>
+          <div>
+            <strong>Mortgage Paid:</strong>
+            <p>${propertyDetails.mortgagePaid}</p>
+          </div>
+          <div>
+            <strong>Homeowners Insurance:</strong>
+            <p>${propertyDetails.homeownersInsurance}</p>
+          </div>
+          <div>
+            <strong>Expected Yearly Rent:</strong>
+            <p>${propertyDetails.expectedYearlyRent}</p>
+          </div>
+          <div>
+            <strong>Rental Income Received:</strong>
+            <p>${propertyDetails.rentalIncomeReceived}</p>
+          </div>
+          <div>
+            <strong>Vacancy Loss:</strong>
+            <p>${propertyDetails.vacancyLoss}</p>
+          </div>
+          <div>
+            <strong>Management Fees:</strong>
+            <p>${propertyDetails.managementFees}</p>
+          </div>
+          <div>
+            <strong>Maintenance Costs:</strong>
+            <p>${propertyDetails.maintenanceCosts}</p>
+          </div>
+          <div>
+            <strong>Total Equity:</strong>
+            <p>${propertyDetails.totalEquity}</p>
+          </div>
+        </div>
+
+        <div className="saleProjection bg-gray-50 p-4 shadow-sm rounded-md">
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">
+            Sale Projection
+          </h2>
+          <div>
+            <strong>ARV Sale Price:</strong>
+            <p>${propertyDetails.arvSalePrice}</p>
+          </div>
+          <div>
+            <strong>Realtor Fees:</strong>
+            <p>${propertyDetails.realtorFees}</p>
+          </div>
+          <div>
+            <strong>Prop Tax till End of Year:</strong>
+            <p>${propertyDetails.propTaxTillEndOfYear}</p>
+          </div>
+          <div>
+            <strong>Lender Loan Balance:</strong>
+            <p>${propertyDetails.lenderLoanBalance}</p>
+          </div>
+          <div>
+            <strong>Pay Off Statement:</strong>
+            <p>${propertyDetails.payOffStatement}</p>
+          </div>
+          <div>
+            <strong>Attorney Fees:</strong>
+            <p>${propertyDetails.attorneyFees}</p>
+          </div>
+          <div>
+            <strong>Misc Fees:</strong>
+            <p>${propertyDetails.miscFees}</p>
+          </div>
+          <div>
+            <strong>Utilities:</strong>
+            <p>${propertyDetails.utilities}</p>
+          </div>
+          <div>
+            <strong>Cash 2 Close from Purchase:</strong>
+            <p>${propertyDetails.cash2closeFromPurchase}</p>
+          </div>
+          <div>
+            <strong>Cash 2 Close from Refinance:</strong>
+            <p>${propertyDetails.cash2closeFromRefinance}</p>
+          </div>
+          <div>
+            <strong>Total Rehab Costs:</strong>
+            <p>${propertyDetails.totalRehabCost}</p>
+          </div>
+          <div>
+            <strong>Expected Remaining Rent End To Year:</strong>
+            <p>${propertyDetails.expectedRemainingRentEndToYear}</p>
+          </div>
+          <div>
+            <strong>Mortgage Paid:</strong>
+            <p>${propertyDetails.mortgagePaid}</p>
+          </div>
+          <div>
+            <strong>Total Expenses:</strong>
+            <p>${propertyDetails.totalExpenses}</p>
+          </div>
+          <div>
+            <strong>Total Construction Draws In:</strong>
+            <p>${propertyDetails.totalConstructionDrawsReceived}</p>
+          </div>
+          <div>
+            <strong>Project Net Profit If Sold:</strong>
+            <p>${propertyDetails.projectNetProfitIfSold}</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
