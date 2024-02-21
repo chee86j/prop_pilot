@@ -7,31 +7,29 @@ const PropertyDetails = ({ propertyId }) => {
   const [editedDetails, setEditedDetails] = useState({});
 
   useEffect(() => {
-    const fetchPropertyDetails = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:5000/api/properties/${propertyId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Error fetching property details");
-        }
-
-        const data = await response.json();
-        setPropertyDetails(data);
-        setEditedDetails(data);
-      } catch (error) {
-        console.error("Error fetching property details:", error);
-      }
-    };
-
     fetchPropertyDetails();
   }, [propertyId]);
+
+  const fetchPropertyDetails = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/properties/${propertyId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Error fetching property details");
+      }
+      const data = await response.json();
+      setPropertyDetails(data);
+      setEditedDetails(data);
+    } catch (error) {
+      console.error("Error fetching property details:", error);
+    }
+  };
 
   const handleEditChange = (e) => {
     setEditedDetails({ ...editedDetails, [e.target.name]: e.target.value });
@@ -46,7 +44,7 @@ const PropertyDetails = ({ propertyId }) => {
       const response = await fetch(
         `http://localhost:5000/api/properties/${propertyId}`,
         {
-          method: "PUT", // Assuming the API uses PUT for updates
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -54,17 +52,34 @@ const PropertyDetails = ({ propertyId }) => {
           body: JSON.stringify(editedDetails),
         }
       );
-
       if (!response.ok) {
         throw new Error("Error saving property details");
       }
-
       const data = await response.json();
       setPropertyDetails(data);
       toggleEditMode();
     } catch (error) {
       console.error("Error saving property details:", error);
     }
+  };
+
+  const renderEditableField = (label, name, value, type = "text") => {
+    return (
+      <div>
+        <strong>{label}:</strong>
+        {editMode ? (
+          <input
+            type={type}
+            name={name}
+            value={value}
+            onChange={handleEditChange}
+            className="border rounded px-2 py-1"
+          />
+        ) : (
+          <p>{value}</p>
+        )}
+      </div>
+    );
   };
 
   if (!propertyDetails) {
@@ -80,90 +95,16 @@ const PropertyDetails = ({ propertyId }) => {
         {/* Location Section */}
         <div className="propHeader bg-gray-50 p-4 shadow-sm rounded-md">
           <h2 className="text-lg font-semibold text-gray-700 mb-4">Location</h2>
-          {/* Property Name */}
-          <div>
-            <strong>Property Name:</strong>
-            {editMode ? (
-              <input
-                type="text"
-                name="propertyName"
-                value={editedDetails.propertyName}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>{propertyDetails.propertyName}</p>
-            )}
-          </div>
-          {/* Address */}
-          <div>
-            <strong>Address:</strong>
-            {editMode ? (
-              <input
-                type="text"
-                name="address"
-                value={editedDetails.address}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>{propertyDetails.address}</p>
-            )}
-          </div>
-          {/* City */}
-          <div>
-            <strong>City:</strong>
-            {editMode ? (
-              <input
-                type="text"
-                name="city"
-                value={editedDetails.city}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>{propertyDetails.city}</p>
-            )}
-          </div>
-          {/* State */}
-          <div>
-            <strong>State:</strong>
-            {editMode ? (
-              <input
-                type="text"
-                name="state"
-                value={editedDetails.state}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>{propertyDetails.state}</p>
-            )}
-          </div>
-          {/* Zip */}
-          <div>
-            <strong>Zip:</strong>
-            {editMode ? (
-              <input
-                type="text"
-                name="zip"
-                value={editedDetails.zip}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>{propertyDetails.zip}</p>
-            )}
-          </div>
-          {/* County */}
-          <div>
-            <strong>County:</strong>
-            {editMode ? (
-              <input
-                type="text"
-                name="county"
-                value={editedDetails.county}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>{propertyDetails.county}</p>
-            )}
-          </div>
+          {renderEditableField(
+            "Property Name",
+            "propertyName",
+            editedDetails.propertyName
+          )}
+          {renderEditableField("Address", "address", editedDetails.address)}
+          {renderEditableField("City", "city", editedDetails.city)}
+          {renderEditableField("State", "state", editedDetails.state)}
+          {renderEditableField("Zip", "zip", editedDetails.zip, "number")}
+          {renderEditableField("County", "county", editedDetails.county)}
         </div>
 
         {/* Departments Section */}
@@ -171,90 +112,36 @@ const PropertyDetails = ({ propertyId }) => {
           <h2 className="text-lg font-semibold text-gray-700 mb-4">
             Departments
           </h2>
-          {/* Municipal Building Address */}
-          <div>
-            <strong>Municipal Building Address:</strong>
-            {editMode ? (
-              <input
-                type="text"
-                name="municipalBuildingAddress"
-                value={editedDetails.municipalBuildingAddress}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>{propertyDetails.municipalBuildingAddress}</p>
-            )}
-          </div>
-          {/* Building Dept */}
-          <div>
-            <strong>Building Dept:</strong>
-            {editMode ? (
-              <input
-                type="text"
-                name="buildingDepartmentContact"
-                value={editedDetails.buildingDepartmentContact}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>{propertyDetails.buildingDepartmentContact}</p>
-            )}
-          </div>
-          {/* Electric Dept */}
-          <div>
-            <strong>Electric Dept:</strong>
-            {editMode ? (
-              <input
-                type="text"
-                name="electricDepartmentContact"
-                value={editedDetails.electricDepartmentContact}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>{propertyDetails.electricDepartmentContact}</p>
-            )}
-          </div>
-          {/* Plumbing Dept */}
-          <div>
-            <strong>Plumbing Dept:</strong>
-            {editMode ? (
-              <input
-                type="text"
-                name="plumbingDepartmentContact"
-                value={editedDetails.plumbingDepartmentContact}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>{propertyDetails.plumbingDepartmentContact}</p>
-            )}
-          </div>
-          {/* Fire Dept */}
-          <div>
-            <strong>Fire Dept:</strong>
-            {editMode ? (
-              <input
-                type="text"
-                name="fireDepartmentContact"
-                value={editedDetails.fireDepartmentContact}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>{propertyDetails.fireDepartmentContact}</p>
-            )}
-          </div>
-          {/* Environmental Dept */}
-          <div>
-            <strong>Environmental Dept:</strong>
-            {editMode ? (
-              <input
-                type="text"
-                name="environmentalDepartmentContact"
-                value={editedDetails.environmentalDepartmentContact}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>{propertyDetails.environmentalDepartmentContact}</p>
-            )}
-          </div>
+          {renderEditableField(
+            "Municipal Building Address",
+            "municipalBuildingAddress",
+            editedDetails.municipalBuildingAddress
+          )}
+          {renderEditableField(
+            "Building Dept",
+            "buildingDepartmentContact",
+            editedDetails.buildingDepartmentContact
+          )}
+          {renderEditableField(
+            "Electric Dept",
+            "electricDepartmentContact",
+            editedDetails.electricDepartmentContact
+          )}
+          {renderEditableField(
+            "Plumbing Dept",
+            "plumbingDepartmentContact",
+            editedDetails.plumbingDepartmentContact
+          )}
+          {renderEditableField(
+            "Fire Dept",
+            "fireDepartmentContact",
+            editedDetails.fireDepartmentContact
+          )}
+          {renderEditableField(
+            "Environmental Dept",
+            "environmentalDepartmentContact",
+            editedDetails.environmentalDepartmentContact
+          )}
         </div>
 
         {/* Total Outlay To Date Section */}
@@ -262,216 +149,96 @@ const PropertyDetails = ({ propertyId }) => {
           <h2 className="text-lg font-semibold text-gray-700 mb-4">
             Total Outlay To Date
           </h2>
-          {/* Purchase Cost */}
-          <div>
-            <strong>Purchase Cost:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="purchaseCost"
-                value={editedDetails.purchaseCost}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.purchaseCost}</p>
-            )}
-          </div>
-          {/* Refinance Cost */}
-          <div>
-            <strong>Refinance Cost:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="refinanceCost"
-                value={editedDetails.refinanceCost}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.refinanceCost}</p>
-            )}
-          </div>
-          {/* Total Rehab Cost */}
-          <div>
-            <strong>Total Rehab Cost:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="totalRehabCost"
-                value={editedDetails.totalRehabCost}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.totalRehabCost}</p>
-            )}
-          </div>
-          {/* Kick Start Funds */}
-          <div>
-            <strong>Kick Start Funds:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="kickStartFunds"
-                value={editedDetails.kickStartFunds}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.kickStartFunds}</p>
-            )}
-          </div>
-          {/* Lender Construction Draws Received */}
-          <div>
-            <strong>Lender Construction Draws Received:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="lenderConstructionDrawsReceived"
-                value={editedDetails.lenderConstructionDrawsReceived}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.lenderConstructionDrawsReceived}</p>
-            )}
-          </div>
-          {/* Utilities Cost */}
-          <div>
-            <strong>Utilities Cost:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="utilitiesCost"
-                value={editedDetails.utilitiesCost}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.utilitiesCost}</p>
-            )}
-          </div>
-          {/* Yearly Property Taxes */}
-          <div>
-            <strong>Yearly Property Taxes:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="yearlyPropertyTaxes"
-                value={editedDetails.yearlyPropertyTaxes}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.yearlyPropertyTaxes}</p>
-            )}
-          </div>
-          {/* Mortgage Paid */}
-          <div>
-            <strong>Mortgage Paid:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="mortgagePaid"
-                value={editedDetails.mortgagePaid}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.mortgagePaid}</p>
-            )}
-          </div>
-          {/* Homeowners Insurance */}
-          <div>
-            <strong>Homeowners Insurance:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="homeownersInsurance"
-                value={editedDetails.homeownersInsurance}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.homeownersInsurance}</p>
-            )}
-          </div>
-          {/* Expected Yearly Rent */}
-          <div>
-            <strong>Expected Yearly Rent:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="expectedYearlyRent"
-                value={editedDetails.expectedYearlyRent}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.expectedYearlyRent}</p>
-            )}
-          </div>
-          {/* Rental Income Received */}
-          <div>
-            <strong>Rental Income Received:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="rentalIncomeReceived"
-                value={editedDetails.rentalIncomeReceived}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.rentalIncomeReceived}</p>
-            )}
-          </div>
-          {/* Vacancy Loss */}
-          <div>
-            <strong>Vacancy Loss:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="vacancyLoss"
-                value={editedDetails.vacancyLoss}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.vacancyLoss}</p>
-            )}
-          </div>
-          {/* Management Fees */}
-          <div>
-            <strong>Management Fees:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="managementFees"
-                value={editedDetails.managementFees}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.managementFees}</p>
-            )}
-          </div>
-          {/* Maintenance Costs */}
-          <div>
-            <strong>Maintenance Costs:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="maintenanceCosts"
-                value={editedDetails.maintenanceCosts}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.maintenanceCosts}</p>
-            )}
-          </div>
-          {/* Total Equity */}
-          <div>
-            <strong>Total Equity:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="totalEquity"
-                value={editedDetails.totalEquity}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.totalEquity}</p>
-            )}
-          </div>
+          {renderEditableField(
+            "Purchase Cost",
+            "purchaseCost",
+            editedDetails.purchaseCost,
+            "number"
+          )}
+          {renderEditableField(
+            "Refinance Cost",
+            "refinanceCost",
+            editedDetails.refinanceCost,
+            "number"
+          )}
+          {renderEditableField(
+            "Total Rehab Cost",
+            "totalRehabCost",
+            editedDetails.totalRehabCost,
+            "number"
+          )}
+          {renderEditableField(
+            "Kick Start Funds",
+            "kickStartFunds",
+            editedDetails.kickStartFunds,
+            "number"
+          )}
+          {renderEditableField(
+            "Lender Construction Draws Received",
+            "lenderConstructionDrawsReceived",
+            editedDetails.lenderConstructionDrawsReceived,
+            "number"
+          )}
+          {renderEditableField(
+            "Utilities Cost",
+            "utilitiesCost",
+            editedDetails.utilitiesCost,
+            "number"
+          )}
+          {renderEditableField(
+            "Yearly Property Taxes",
+            "yearlyPropertyTaxes",
+            editedDetails.yearlyPropertyTaxes,
+            "number"
+          )}
+          {renderEditableField(
+            "Mortgage Paid",
+            "mortgagePaid",
+            editedDetails.mortgagePaid,
+            "number"
+          )}
+          {renderEditableField(
+            "Homeowners Insurance",
+            "homeownersInsurance",
+            editedDetails.homeownersInsurance,
+            "number"
+          )}
+          {renderEditableField(
+            "Expected Yearly Rent",
+            "expectedYearlyRent",
+            editedDetails.expectedYearlyRent,
+            "number"
+          )}
+          {renderEditableField(
+            "Rental Income Received",
+            "rentalIncomeReceived",
+            editedDetails.rentalIncomeReceived,
+            "number"
+          )}
+          {renderEditableField(
+            "Vacancy Loss",
+            "vacancyLoss",
+            editedDetails.vacancyLoss,
+            "number"
+          )}
+          {renderEditableField(
+            "Management Fees",
+            "managementFees",
+            editedDetails.managementFees,
+            "number"
+          )}
+          {renderEditableField(
+            "Maintenance Costs",
+            "maintenanceCosts",
+            editedDetails.maintenanceCosts,
+            "number"
+          )}
+          {renderEditableField(
+            "Total Equity",
+            "totalEquity",
+            editedDetails.totalEquity,
+            "number"
+          )}
         </div>
 
         {/* Sale Projection Section */}
@@ -479,233 +246,104 @@ const PropertyDetails = ({ propertyId }) => {
           <h2 className="text-lg font-semibold text-gray-700 mb-4">
             Sale Projection
           </h2>
-          {/* ARV Sale Price */}
-          <div>
-            <strong>ARV Sale Price:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="arvSalePrice"
-                value={editedDetails.arvSalePrice}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.arvSalePrice}</p>
-            )}
-          </div>
-          {/* Realtor Fees */}
-          <div>
-            <strong>Realtor Fees:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="realtorFees"
-                value={editedDetails.realtorFees}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.realtorFees}</p>
-            )}
-          </div>
-          {/* Prop Tax till End of Year */}
-          <div>
-            <strong>Prop Tax till End of Year:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="propTaxTillEndOfYear"
-                value={editedDetails.propTaxTillEndOfYear}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.propTaxTillEndOfYear}</p>
-            )}
-          </div>
-          {/* Lender Loan Balance */}
-          <div>
-            <strong>Lender Loan Balance:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="lenderLoanBalance"
-                value={editedDetails.lenderLoanBalance}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.lenderLoanBalance}</p>
-            )}
-          </div>
-          {/* Pay Off Statement */}
-          <div>
-            <strong>Pay Off Statement:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="payOffStatement"
-                value={editedDetails.payOffStatement}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.payOffStatement}</p>
-            )}
-          </div>
-          {/* Attorney Fees */}
-          <div>
-            <strong>Attorney Fees:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="attorneyFees"
-                value={editedDetails.attorneyFees}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.attorneyFees}</p>
-            )}
-          </div>
-          {/* Misc Fees */}
-          <div>
-            <strong>Misc Fees:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="miscFees"
-                value={editedDetails.miscFees}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.miscFees}</p>
-            )}
-          </div>
-          {/* Utilities */}
-          <div>
-            <strong>Utilities:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="utilities"
-                value={editedDetails.utilities}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.utilities}</p>
-            )}
-          </div>
-          {/* Cash 2 Close from Purchase */}
-          <div>
-            <strong>Cash 2 Close from Purchase:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="cash2closeFromPurchase"
-                value={editedDetails.cash2closeFromPurchase}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.cash2closeFromPurchase}</p>
-            )}
-          </div>
-          {/* Cash 2 Close from Refinance */}
-          <div>
-            <strong>Cash 2 Close from Refinance:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="cash2closeFromRefinance"
-                value={editedDetails.cash2closeFromRefinance}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.cash2closeFromRefinance}</p>
-            )}
-          </div>
-          {/* Total Rehab Costs */}
-          <div>
-            <strong>Total Rehab Costs:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="totalRehabCosts"
-                value={editedDetails.totalRehabCosts}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.totalRehabCosts}</p>
-            )}
-          </div>
-          {/* Expected Remaining Rent End To Year */}
-          <div>
-            <strong>Expected Remaining Rent End To Year:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="expectedRemainingRentEndToYear"
-                value={editedDetails.expectedRemainingRentEndToYear}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.expectedRemainingRentEndToYear}</p>
-            )}
-          </div>
-          {/* Mortgage Paid */}
-          <div>
-            <strong>Mortgage Paid:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="mortgagePaid"
-                value={editedDetails.mortgagePaid}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.mortgagePaid}</p>
-            )}
-          </div>
-          {/* Total Expenses */}
-          <div>
-            <strong>Total Expenses:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="totalExpenses"
-                value={editedDetails.totalExpenses}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.totalExpenses}</p>
-            )}
-          </div>
-          {/* Total Construction Draws In */}
-          <div>
-            <strong>Total Construction Draws In:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="totalConstructionDrawsReceived"
-                value={editedDetails.totalConstructionDrawsReceived}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.totalConstructionDrawsReceived}</p>
-            )}
-          </div>
-          {/* Project Net Profit If Sold */}
-          <div>
-            <strong>Project Net Profit If Sold:</strong>
-            {editMode ? (
-              <input
-                type="number"
-                name="projectNetProfitIfSold"
-                value={editedDetails.projectNetProfitIfSold}
-                onChange={handleEditChange}
-              />
-            ) : (
-              <p>${propertyDetails.projectNetProfitIfSold}</p>
-            )}
-          </div>
+          {renderEditableField(
+            "ARV Sale Price",
+            "arvSalePrice",
+            editedDetails.arvSalePrice,
+            "number"
+          )}
+          {renderEditableField(
+            "Realtor Fees",
+            "realtorFees",
+            editedDetails.realtorFees,
+            "number"
+          )}
+          {renderEditableField(
+            "Prop Tax till End of Year",
+            "propTaxTillEndOfYear",
+            editedDetails.propTaxTillEndOfYear,
+            "number"
+          )}
+          {renderEditableField(
+            "Lender Loan Balance",
+            "lenderLoanBalance",
+            editedDetails.lenderLoanBalance,
+            "number"
+          )}
+          {renderEditableField(
+            "Pay Off Statement",
+            "payOffStatement",
+            editedDetails.payOffStatement,
+            "number"
+          )}
+          {renderEditableField(
+            "Attorney Fees",
+            "attorneyFees",
+            editedDetails.attorneyFees,
+            "number"
+          )}
+          {renderEditableField(
+            "Misc Fees",
+            "miscFees",
+            editedDetails.miscFees,
+            "number"
+          )}
+          {renderEditableField(
+            "Utilities",
+            "utilities",
+            editedDetails.utilities,
+            "number"
+          )}
+          {renderEditableField(
+            "Cash 2 Close from Purchase",
+            "cash2closeFromPurchase",
+            editedDetails.cash2closeFromPurchase,
+            "number"
+          )}
+          {renderEditableField(
+            "Cash 2 Close from Refinance",
+            "cash2closeFromRefinance",
+            editedDetails.cash2closeFromRefinance,
+            "number"
+          )}
+          {renderEditableField(
+            "Total Rehab Costs",
+            "totalRehabCosts",
+            editedDetails.totalRehabCosts,
+            "number"
+          )}
+          {renderEditableField(
+            "Expected Remaining Rent End To Year",
+            "expectedRemainingRentEndToYear",
+            editedDetails.expectedRemainingRentEndToYear,
+            "number"
+          )}
+          {renderEditableField(
+            "Mortgage Paid",
+            "mortgagePaid",
+            editedDetails.mortgagePaid,
+            "number"
+          )}
+          {renderEditableField(
+            "Total Expenses",
+            "totalExpenses",
+            editedDetails.totalExpenses,
+            "number"
+          )}
+          {renderEditableField(
+            "Total Construction Draws In",
+            "totalConstructionDrawsReceived",
+            editedDetails.totalConstructionDrawsReceived,
+            "number"
+          )}
+          {renderEditableField(
+            "Project Net Profit If Sold",
+            "projectNetProfitIfSold",
+            editedDetails.projectNetProfitIfSold,
+            "number"
+          )}
         </div>
       </div>
-      {/* Edit and Save Buttons */}
       {editMode ? (
         <button
           onClick={saveChanges}
