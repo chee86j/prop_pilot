@@ -308,13 +308,13 @@ const PropertyDetails = ({ propertyId }) => {
             "number"
           )}
           {renderEditableField(
-            "Cash 2 Close from Purchase",
+            "Cash to Close from Purchase",
             "cash2closeFromPurchase",
             editedDetails.cash2closeFromPurchase || "",
             "number"
           )}
           {renderEditableField(
-            "Cash 2 Close from Refinance",
+            "Cash to Close from Refinance",
             "cash2closeFromRefinance",
             editedDetails.cash2closeFromRefinance || "",
             "number"
