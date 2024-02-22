@@ -7,29 +7,31 @@ const PropertyDetails = ({ propertyId }) => {
   const [editedDetails, setEditedDetails] = useState({});
 
   useEffect(() => {
+    const fetchPropertyDetails = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/properties/${propertyId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Error fetching property details");
+        }
+
+        const data = await response.json();
+        setPropertyDetails(data);
+        setEditedDetails(data);
+      } catch (error) {
+        console.error("Error fetching property details:", error);
+      }
+    };
+
     fetchPropertyDetails();
   }, [propertyId]);
-
-  const fetchPropertyDetails = async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:5000/api/properties/${propertyId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        }
-      );
-      if (!response.ok) {
-        throw new Error("Error fetching property details");
-      }
-      const data = await response.json();
-      setPropertyDetails(data);
-      setEditedDetails(data);
-    } catch (error) {
-      console.error("Error fetching property details:", error);
-    }
-  };
 
   const handleEditChange = (e) => {
     setEditedDetails({ ...editedDetails, [e.target.name]: e.target.value });
@@ -52,9 +54,11 @@ const PropertyDetails = ({ propertyId }) => {
           body: JSON.stringify(editedDetails),
         }
       );
+
       if (!response.ok) {
         throw new Error("Error saving property details");
       }
+
       const data = await response.json();
       setPropertyDetails(data);
       toggleEditMode();
@@ -65,7 +69,7 @@ const PropertyDetails = ({ propertyId }) => {
 
   const renderEditableField = (label, name, value, type = "text") => {
     return (
-      <div>
+      <div className="flex justify-between items-center mb-2">
         <strong>{label}:</strong>
         {editMode ? (
           <input
@@ -76,7 +80,7 @@ const PropertyDetails = ({ propertyId }) => {
             className="border rounded px-2 py-1"
           />
         ) : (
-          <p>{value}</p>
+          <span>{value}</span>
         )}
       </div>
     );
@@ -98,13 +102,22 @@ const PropertyDetails = ({ propertyId }) => {
           {renderEditableField(
             "Property Name",
             "propertyName",
-            editedDetails.propertyName
+            editedDetails.propertyName || ""
           )}
-          {renderEditableField("Address", "address", editedDetails.address)}
-          {renderEditableField("City", "city", editedDetails.city)}
-          {renderEditableField("State", "state", editedDetails.state)}
-          {renderEditableField("Zip", "zip", editedDetails.zip, "number")}
-          {renderEditableField("County", "county", editedDetails.county)}
+          {renderEditableField(
+            "Address",
+            "address",
+            editedDetails.address || ""
+          )}
+          {renderEditableField("City", "city", editedDetails.city || "")}
+          {renderEditableField("State", "state", editedDetails.state || "")}
+          {renderEditableField(
+            "Zip Code",
+            "zipCode",
+            editedDetails.zipCode || "",
+            "number"
+          )}
+          {renderEditableField("County", "county", editedDetails.county || "")}
         </div>
 
         {/* Departments Section */}
@@ -115,32 +128,32 @@ const PropertyDetails = ({ propertyId }) => {
           {renderEditableField(
             "Municipal Building Address",
             "municipalBuildingAddress",
-            editedDetails.municipalBuildingAddress
+            editedDetails.municipalBuildingAddress || ""
           )}
           {renderEditableField(
             "Building Dept",
             "buildingDepartmentContact",
-            editedDetails.buildingDepartmentContact
+            editedDetails.buildingDepartmentContact || ""
           )}
           {renderEditableField(
             "Electric Dept",
             "electricDepartmentContact",
-            editedDetails.electricDepartmentContact
+            editedDetails.electricDepartmentContact || ""
           )}
           {renderEditableField(
             "Plumbing Dept",
             "plumbingDepartmentContact",
-            editedDetails.plumbingDepartmentContact
+            editedDetails.plumbingDepartmentContact || ""
           )}
           {renderEditableField(
             "Fire Dept",
             "fireDepartmentContact",
-            editedDetails.fireDepartmentContact
+            editedDetails.fireDepartmentContact || ""
           )}
           {renderEditableField(
             "Environmental Dept",
             "environmentalDepartmentContact",
-            editedDetails.environmentalDepartmentContact
+            editedDetails.environmentalDepartmentContact || ""
           )}
         </div>
 
@@ -152,91 +165,91 @@ const PropertyDetails = ({ propertyId }) => {
           {renderEditableField(
             "Purchase Cost",
             "purchaseCost",
-            editedDetails.purchaseCost,
+            editedDetails.purchaseCost || "",
             "number"
           )}
           {renderEditableField(
             "Refinance Cost",
             "refinanceCost",
-            editedDetails.refinanceCost,
+            editedDetails.refinanceCost || "",
             "number"
           )}
           {renderEditableField(
             "Total Rehab Cost",
             "totalRehabCost",
-            editedDetails.totalRehabCost,
+            editedDetails.totalRehabCost || "",
             "number"
           )}
           {renderEditableField(
             "Kick Start Funds",
             "kickStartFunds",
-            editedDetails.kickStartFunds,
+            editedDetails.kickStartFunds || "",
             "number"
           )}
           {renderEditableField(
             "Lender Construction Draws Received",
             "lenderConstructionDrawsReceived",
-            editedDetails.lenderConstructionDrawsReceived,
+            editedDetails.lenderConstructionDrawsReceived || "",
             "number"
           )}
           {renderEditableField(
             "Utilities Cost",
             "utilitiesCost",
-            editedDetails.utilitiesCost,
+            editedDetails.utilitiesCost || "",
             "number"
           )}
           {renderEditableField(
             "Yearly Property Taxes",
             "yearlyPropertyTaxes",
-            editedDetails.yearlyPropertyTaxes,
+            editedDetails.yearlyPropertyTaxes || "",
             "number"
           )}
           {renderEditableField(
             "Mortgage Paid",
             "mortgagePaid",
-            editedDetails.mortgagePaid,
+            editedDetails.mortgagePaid || "",
             "number"
           )}
           {renderEditableField(
             "Homeowners Insurance",
             "homeownersInsurance",
-            editedDetails.homeownersInsurance,
+            editedDetails.homeownersInsurance || "",
             "number"
           )}
           {renderEditableField(
             "Expected Yearly Rent",
             "expectedYearlyRent",
-            editedDetails.expectedYearlyRent,
+            editedDetails.expectedYearlyRent || "",
             "number"
           )}
           {renderEditableField(
             "Rental Income Received",
             "rentalIncomeReceived",
-            editedDetails.rentalIncomeReceived,
+            editedDetails.rentalIncomeReceived || "",
             "number"
           )}
           {renderEditableField(
             "Vacancy Loss",
             "vacancyLoss",
-            editedDetails.vacancyLoss,
+            editedDetails.vacancyLoss || "",
             "number"
           )}
           {renderEditableField(
             "Management Fees",
             "managementFees",
-            editedDetails.managementFees,
+            editedDetails.managementFees || "",
             "number"
           )}
           {renderEditableField(
             "Maintenance Costs",
             "maintenanceCosts",
-            editedDetails.maintenanceCosts,
+            editedDetails.maintenanceCosts || "",
             "number"
           )}
           {renderEditableField(
             "Total Equity",
             "totalEquity",
-            editedDetails.totalEquity,
+            editedDetails.totalEquity || "",
             "number"
           )}
         </div>
@@ -249,101 +262,102 @@ const PropertyDetails = ({ propertyId }) => {
           {renderEditableField(
             "ARV Sale Price",
             "arvSalePrice",
-            editedDetails.arvSalePrice,
+            editedDetails.arvSalePrice || "",
             "number"
           )}
           {renderEditableField(
             "Realtor Fees",
             "realtorFees",
-            editedDetails.realtorFees,
+            editedDetails.realtorFees || "",
             "number"
           )}
           {renderEditableField(
             "Prop Tax till End of Year",
             "propTaxTillEndOfYear",
-            editedDetails.propTaxTillEndOfYear,
+            editedDetails.propTaxTillEndOfYear || "",
             "number"
           )}
           {renderEditableField(
             "Lender Loan Balance",
             "lenderLoanBalance",
-            editedDetails.lenderLoanBalance,
+            editedDetails.lenderLoanBalance || "",
             "number"
           )}
           {renderEditableField(
             "Pay Off Statement",
             "payOffStatement",
-            editedDetails.payOffStatement,
+            editedDetails.payOffStatement || "",
             "number"
           )}
           {renderEditableField(
             "Attorney Fees",
             "attorneyFees",
-            editedDetails.attorneyFees,
+            editedDetails.attorneyFees || "",
             "number"
           )}
           {renderEditableField(
             "Misc Fees",
             "miscFees",
-            editedDetails.miscFees,
+            editedDetails.miscFees || "",
             "number"
           )}
           {renderEditableField(
             "Utilities",
             "utilities",
-            editedDetails.utilities,
+            editedDetails.utilities || "",
             "number"
           )}
           {renderEditableField(
             "Cash 2 Close from Purchase",
             "cash2closeFromPurchase",
-            editedDetails.cash2closeFromPurchase,
+            editedDetails.cash2closeFromPurchase || "",
             "number"
           )}
           {renderEditableField(
             "Cash 2 Close from Refinance",
             "cash2closeFromRefinance",
-            editedDetails.cash2closeFromRefinance,
+            editedDetails.cash2closeFromRefinance || "",
             "number"
           )}
           {renderEditableField(
             "Total Rehab Costs",
             "totalRehabCosts",
-            editedDetails.totalRehabCosts,
+            editedDetails.totalRehabCosts || "",
             "number"
           )}
           {renderEditableField(
             "Expected Remaining Rent End To Year",
             "expectedRemainingRentEndToYear",
-            editedDetails.expectedRemainingRentEndToYear,
+            editedDetails.expectedRemainingRentEndToYear || "",
             "number"
           )}
           {renderEditableField(
             "Mortgage Paid",
             "mortgagePaid",
-            editedDetails.mortgagePaid,
+            editedDetails.mortgagePaid || "",
             "number"
           )}
           {renderEditableField(
             "Total Expenses",
             "totalExpenses",
-            editedDetails.totalExpenses,
+            editedDetails.totalExpenses || "",
             "number"
           )}
           {renderEditableField(
             "Total Construction Draws In",
             "totalConstructionDrawsReceived",
-            editedDetails.totalConstructionDrawsReceived,
+            editedDetails.totalConstructionDrawsReceived || "",
             "number"
           )}
           {renderEditableField(
             "Project Net Profit If Sold",
             "projectNetProfitIfSold",
-            editedDetails.projectNetProfitIfSold,
+            editedDetails.projectNetProfitIfSold || "",
             "number"
           )}
         </div>
       </div>
+      {/* Edit and Save Buttons */}
       {editMode ? (
         <button
           onClick={saveChanges}
