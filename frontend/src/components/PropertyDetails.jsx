@@ -67,7 +67,24 @@ const PropertyDetails = ({ propertyId }) => {
     }
   };
 
-  const renderEditableField = (label, name, value, type = "text") => {
+  const formatCurrency = (value) => {
+    if (!value || isNaN(value)) return "";
+    return parseFloat(value).toLocaleString("en-US", {
+      style: "currency",
+      currency: "USD",
+    });
+  };
+
+  const renderEditableField = (
+    label,
+    name,
+    value,
+    type = "text",
+    isCurrency = false
+  ) => {
+    const displayValue =
+      isCurrency && !editMode ? formatCurrency(value) : value;
+
     return (
       <div className="flex justify-between items-center mb-2">
         <strong>{label}:</strong>
@@ -75,12 +92,12 @@ const PropertyDetails = ({ propertyId }) => {
           <input
             type={type}
             name={name}
-            value={value}
+            value={displayValue}
             onChange={handleEditChange}
             className="border rounded px-2 py-1"
           />
         ) : (
-          <span>{value}</span>
+          <span>{displayValue}</span>
         )}
       </div>
     );
@@ -166,91 +183,106 @@ const PropertyDetails = ({ propertyId }) => {
             "Purchase Cost",
             "purchaseCost",
             editedDetails.purchaseCost || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Refinance Cost",
             "refinanceCost",
             editedDetails.refinanceCost || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Total Rehab Cost",
             "totalRehabCost",
             editedDetails.totalRehabCost || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Kick Start Funds",
             "kickStartFunds",
             editedDetails.kickStartFunds || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Lender Construction Draws Received",
             "lenderConstructionDrawsReceived",
             editedDetails.lenderConstructionDrawsReceived || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Utilities Cost",
             "utilitiesCost",
             editedDetails.utilitiesCost || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Yearly Property Taxes",
             "yearlyPropertyTaxes",
             editedDetails.yearlyPropertyTaxes || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Mortgage Paid",
             "mortgagePaid",
             editedDetails.mortgagePaid || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Homeowners Insurance",
             "homeownersInsurance",
             editedDetails.homeownersInsurance || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Expected Yearly Rent",
             "expectedYearlyRent",
             editedDetails.expectedYearlyRent || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Rental Income Received",
             "rentalIncomeReceived",
             editedDetails.rentalIncomeReceived || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Vacancy Loss",
             "vacancyLoss",
             editedDetails.vacancyLoss || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Management Fees",
             "managementFees",
             editedDetails.managementFees || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Maintenance Costs",
             "maintenanceCosts",
             editedDetails.maintenanceCosts || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Total Equity",
             "totalEquity",
             editedDetails.totalEquity || "",
-            "number"
+            "number",
+            true
           )}
         </div>
 
@@ -263,97 +295,113 @@ const PropertyDetails = ({ propertyId }) => {
             "ARV Sale Price",
             "arvSalePrice",
             editedDetails.arvSalePrice || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Realtor Fees",
             "realtorFees",
             editedDetails.realtorFees || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Prop Tax till End of Year",
             "propTaxTillEndOfYear",
             editedDetails.propTaxTillEndOfYear || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Lender Loan Balance",
             "lenderLoanBalance",
             editedDetails.lenderLoanBalance || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Pay Off Statement",
             "payOffStatement",
             editedDetails.payOffStatement || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Attorney Fees",
             "attorneyFees",
             editedDetails.attorneyFees || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Misc Fees",
             "miscFees",
             editedDetails.miscFees || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Utilities",
             "utilities",
             editedDetails.utilities || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Cash to Close from Purchase",
             "cash2closeFromPurchase",
             editedDetails.cash2closeFromPurchase || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Cash to Close from Refinance",
             "cash2closeFromRefinance",
             editedDetails.cash2closeFromRefinance || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Total Rehab Costs",
             "totalRehabCosts",
             editedDetails.totalRehabCosts || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Expected Remaining Rent End To Year",
             "expectedRemainingRentEndToYear",
             editedDetails.expectedRemainingRentEndToYear || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Mortgage Paid",
             "mortgagePaid",
             editedDetails.mortgagePaid || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Total Expenses",
             "totalExpenses",
             editedDetails.totalExpenses || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Total Construction Draws In",
             "totalConstructionDrawsReceived",
             editedDetails.totalConstructionDrawsReceived || "",
-            "number"
+            "number",
+            true
           )}
           {renderEditableField(
             "Project Net Profit If Sold",
             "projectNetProfitIfSold",
             editedDetails.projectNetProfitIfSold || "",
-            "number"
+            "number",
+            true
           )}
         </div>
       </div>
