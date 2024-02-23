@@ -67,6 +67,11 @@ const PropertyDetails = ({ propertyId }) => {
     }
   };
 
+  const cancelChanges = () => {
+    setEditedDetails(propertyDetails);
+    toggleEditMode();
+  };
+
   const formatCurrency = (value) => {
     if (!value || isNaN(value)) return "";
     return parseFloat(value).toLocaleString("en-US", {
@@ -405,14 +410,22 @@ const PropertyDetails = ({ propertyId }) => {
           )}
         </div>
       </div>
-      {/* Edit and Save Buttons */}
+      {/* Edit, Save, and Cancel Buttons */}
       {editMode ? (
-        <button
-          onClick={saveChanges}
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Save
-        </button>
+        <div className="flex justify-between">
+          <button
+            onClick={cancelChanges}
+            className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={saveChanges}
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Save
+          </button>
+        </div>
       ) : (
         <button
           onClick={toggleEditMode}
