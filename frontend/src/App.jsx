@@ -13,7 +13,7 @@ import Testimonials from "./components/Testimonials";
 import About from "./components/About";
 import AuthForm from "./components/AuthForm";
 import Contact from "./components/Contact";
-import Faq from "./components/Faq";
+import Faq from "./components/FAQ";
 import Lender from "./components/Lender";
 import Profile from "./components/Profile";
 import PropertyList from "./components/PropertyList";

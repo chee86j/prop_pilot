@@ -11,7 +11,7 @@ Pilot includes features that make it easy to track and coordinate with contracto
 ensuring that renovations and repairs are completed efficiently and up to standard.
 
 Designed with both desktop and mobile users in mind, our platform guarantees a
-seamless experience, no matter where you are. It's time to take your property
+smooth experience, no matter where you are. It's time to take your property
 business to the next level with Prop Pilot – not just a tool, but a game changer
 in the world of REI property management.
 
@@ -51,10 +51,16 @@ JWT_SECRET_KEY=yourjwtsecretkey
 3. Ensure that the `.env` file is added to the `.gitignore` file to prevent it from
    being tracked by version control.
 
-### Setup PostgreSQL Database
+### Setup PostgreSQL Database 
+
+   MacOs - `Postico 2` as your db management tool 
+   Windows - `pgAdmin` or `DBeaver` or `HeidiSQL`as your db management tool
 
 1. Download and install PostgreSQL from [https://www.postgresql.org/download/].
-2. Open a new terminal and run `psql` to open the PostgreSQL shell.
+2. MacOs -     Open a new terminal & run `psql` to open the PostgreSQL shell. 
+   Windows -   Open a new terminal & run `psql -U postgres -d prop_pilot_db -h localhost -p 5432`
+               & enter your password plus 
+               a. add the bin path in your `Advanced System Settings`-->`Environment Variables`-->`System Variables`-->Select `Edit` for your path and add the path to your PostgreSQL /bin folder
 3. Create a new database:
 
 CREATE DATABASE prop_pilot;
@@ -100,9 +106,17 @@ db.create_all()
 
 ### Running the Application
 
-1. To run the frontend, navigate to the `/frontend` directory and execute
-   `npm start` or `vite`. The frontend will typically be accessible at
+1. To run the frontend, navigate to the `/frontend` directory 
+   Execute
+   MacOs -     `npm start` or `vite` 
+   Windows -   `npm run dev` 
+   
+   The frontend will typically be accessible at
    `http://localhost:3000` or `http://localhost:5173`.
 
-2. To run the backend, execute `python3 app.py` or `flask run` in the root
-   directory. The backend server will be accessible at `http://localhost:5000`.
+2. To run the backend, 
+   Execute 
+   MacOs -     `python3 app.py` or `flask run` 
+   Windows -   `python app.py` in the root directory. 
+   
+   The backend server will be accessible at `http://localhost:5000`.
