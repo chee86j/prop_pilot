@@ -1,9 +1,11 @@
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+import enum
 
 # Initialize SQLAlchemy with no settings
 db = SQLAlchemy()
 
+# User Model
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(512), nullable=False)
@@ -18,6 +20,7 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+# Property Model
 class Property(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id')) # Many to one relationship w/User
@@ -63,3 +66,23 @@ class Property(db.Model):
     totalExpenses = db.Column(db.Float)
     totalConstructionDrawsReceived = db.Column(db.Float)
     projectNetProfitIfSold = db.Column(db.Float)
+    construction_draws = db.relationship('ConstructionDraw', backref='property', lazy='dynamic')
+
+# Construct Draw Model
+class ConstructionDraw(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    property_id = db.Column(db.Integer, db.ForeignKey('property.id')) # Many to one relationship w/Property
+    release_date = db.Column(db.Date, nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    bank_account_number = db.Column(db.String(256), nullable=False)
+    is_approved = db.Column(db.Boolean, default=False, nullable=False)
+    receipts = db.relationship('Receipt', backref='construction_draw', lazy='dynamic')
+
+# Receipt Model
+class Receipt(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    construction_draw_id = db.Column(db.Integer, db.ForeignKey('construction_draw.id')) # Many to one relationship w/ConstructionDraw
+    date = db.Column(db.Date, nullable=False)
+    vendor = db.Column(db.String(512), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    description = db.Column(db.Text, nullable=True)
