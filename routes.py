@@ -1,5 +1,5 @@
 # this file contains api routes of this app
-# it contains routes for user registration, login, profile, properties
+# it contains routes for user registration, login, profile, properties, construction draws, and receipts
 # it also contains route to generate & verify JWT token
 
 from flask import Blueprint, request, jsonify
@@ -314,3 +314,123 @@ def delete_property(property_id):
             return jsonify({"message": "Property not found or access denied"}), 403
     else:
         return jsonify({"message": "User not found"}), 404
+    
+# -----CONSTRUCTION DRAW ROUTES-----
+# Add a new construction draw for current user
+@api.route('/construction-draws', methods=['POST'])
+@jwt_required()
+def add_construction_draw():
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        data = request.get_json()
+        new_draw = ConstructionDraw(
+            property_id=data['property_id'],
+            release_date=data['release_date'],
+            amount=data['amount'],
+            bank_account_number=data['bank_account_number']
+        )
+        db.session.add(new_draw)
+        db.session.commit()
+        return jsonify({"message": "Construction draw created successfully", "id": new_draw.id}), 201
+    else:
+        return jsonify({"message": "User not found"}), 404
+
+# Update a construction draw of current user 
+@api.route('/construction-draws/<int:draw_id>', methods=['PUT'])
+@jwt_required()
+def update_construction_draw(draw_id):
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        draw_to_update = ConstructionDraw.query.filter_by(id=draw_id).first()
+        if draw_to_update:
+            data = request.get_json()
+            draw_to_update.is_approved = data.get('is_approved', draw_to_update.is_approved)
+            db.session.commit()
+            return jsonify({"message": "Construction draw updated successfully"}), 200
+        else:
+            return jsonify({"message": "Construction draw not found or access denied"}), 403
+    else:
+        return jsonify({"message": "User not found"}), 404
+    
+# Delete a construction draw of current user
+@api.route('/construction-draws/<int:draw_id>', methods=['DELETE'])
+@jwt_required()
+def delete_construction_draw(draw_id):
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        draw_to_delete = ConstructionDraw.query.filter_by(id=draw_id).first()
+        if draw_to_delete:
+            db.session.delete(draw_to_delete)
+            db.session.commit()
+            return jsonify({"message": "Construction draw deleted successfully"}), 200
+        else:
+            return jsonify({"message": "Construction draw not found or access denied"}), 403
+    else:
+        return jsonify({"message": "User not found"}), 404
+    
+# -----RECEIPT ROUTES-----
+# Add a new receipt for current user
+@api.route('/receipts', methods=['POST'])
+@jwt_required()
+def add_receipt():
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        data = request.get_json()
+        new_receipt = Receipt(
+            construction_draw_id=data['construction_draw_id'],
+            date=data['date'],
+            vendor=data['vendor'],
+            amount=data['amount'],
+            description=data['description']
+        )
+        db.session.add(new_receipt)
+        db.session.commit()
+        return jsonify({"message": "Receipt added successfully", "id": new_receipt.id}), 201
+    else:
+        return jsonify({"message": "User not found"}), 404
+    
+# Update a receipt of current user
+@api.route('/receipts/<int:receipt_id>', methods=['PUT'])
+@jwt_required()
+def update_receipt(receipt_id):
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        receipt_to_update = Receipt.query.filter_by(id=receipt_id).first()
+        if receipt_to_update:
+            data = request.get_json()
+            receipt_to_update.date = data.get('date', receipt_to_update.date)
+            receipt_to_update.vendor = data.get('vendor', receipt_to_update.vendor)
+            receipt_to_update.amount = data.get('amount', receipt_to_update.amount)
+            receipt_to_update.description = data.get('description', receipt_to_update.description)
+            db.session.commit()
+            return jsonify({"message": "Receipt updated successfully"}), 200
+        else:
+            return jsonify({"message": "Receipt not found or access denied"}), 403
+    else:
+        return jsonify({"message": "User not found"}), 404
+    
+# Delete a receipt of current user
+@api.route('/receipts/<int:receipt_id>', methods=['DELETE'])
+@jwt_required()
+def delete_receipt(receipt_id):
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        receipt_to_delete = Receipt.query.filter_by(id=receipt_id).first()
+        if receipt_to_delete:
+            db.session.delete(receipt_to_delete)
+            db.session.commit()
+            return jsonify({"message": "Receipt deleted successfully"}), 200
+        else:
+            return jsonify({"message": "Receipt not found or access denied"}), 403
+    else:
+        return jsonify({"message": "User not found"}), 404
+
+if __name__ == '__main__':
+    app.run(debug=True)
+    
