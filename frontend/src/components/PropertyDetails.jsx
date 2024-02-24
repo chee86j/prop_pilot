@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
+import ConstructionDraw from "./ConstructionDraw";
 
 const PropertyDetails = ({ propertyId }) => {
   const [propertyDetails, setPropertyDetails] = useState(null);
@@ -114,6 +115,7 @@ const PropertyDetails = ({ propertyId }) => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg text-sm">
+      <ConstructionDraw propertyId={propertyId} />
       <h1 className="text-xl md:text-2xl font-bold text-gray-700 mb-6">
         Property Details
       </h1>
