@@ -18,6 +18,7 @@ import Lender from "./components/Lender";
 import Profile from "./components/Profile";
 import PropertyList from "./components/PropertyList";
 import AddProperty from "./components/AddProperty";
+import ConstructionDraw from "./components/ConstructionDraw";
 
 function App() {
   const [auth, setAuth] = useState({
@@ -28,6 +29,11 @@ function App() {
   const PropertyDetailsWrapper = () => {
     const { propertyId } = useParams(); // Access propertyId from the URL
     return <PropertyDetails propertyId={propertyId} auth={auth} />;
+  };
+
+  const ConstructionDrawWrapper = () => {
+    const { propertyId } = useParams();
+    return <ConstructionDraw propertyId={propertyId} auth={auth} />;
   };
 
   const fetchUserProfile = async () => {
@@ -72,9 +78,12 @@ function App() {
         <Route path="/addproperty" element={<AddProperty auth={auth} />} />
         <Route
           path="/property/:propertyId"
-          element={<PropertyDetailsWrapper />}
+          element={<PropertyDetailsWrapper auth={auth} />}
         />
-
+        <Route
+          path="/constructiondraw/:propertyId"
+          element={<ConstructionDrawWrapper />}
+        />
         <Route path="/testimonials" element={<Testimonials />} />
         <Route path="/about" element={<About />} />
         <Route path="/authform" element={<AuthForm />} />

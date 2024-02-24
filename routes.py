@@ -3,7 +3,7 @@
 # it also contains route to generate & verify JWT token
 
 from flask import Blueprint, request, jsonify
-from models import db, User, Property
+from models import ConstructionDraw, db, User, Property
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from werkzeug.security import check_password_hash
 from datetime import timedelta
@@ -316,6 +316,25 @@ def delete_property(property_id):
         return jsonify({"message": "User not found"}), 404
     
 # -----CONSTRUCTION DRAW ROUTES-----
+# Fetch a single construction draw by its ID
+@api.route('/construction-draws/<int:property_id>', methods=['GET'])
+@jwt_required()
+def get_construction_draws(property_id):
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        draws = ConstructionDraw.query.filter_by(property_id=property_id).all()
+        draws_data = [{
+            'id': draw.id,
+            'release_date': draw.release_date,
+            'amount': draw.amount,
+            'bank_account_number': draw.bank_account_number,
+            'is_approved': draw.is_approved
+        } for draw in draws]
+        return jsonify(draws_data), 200
+    else:
+        return jsonify({"message": "User not found"}), 404
+
 # Add a new construction draw for current user
 @api.route('/construction-draws', methods=['POST'])
 @jwt_required()
