@@ -19,6 +19,7 @@ import Profile from "./components/Profile";
 import PropertyList from "./components/PropertyList";
 import AddProperty from "./components/AddProperty";
 import ConstructionDraw from "./components/ConstructionDraw";
+import Receipt from "./components/Receipt";
 
 function App() {
   const [auth, setAuth] = useState({
@@ -34,6 +35,11 @@ function App() {
   const ConstructionDrawWrapper = () => {
     const { propertyId } = useParams();
     return <ConstructionDraw propertyId={propertyId} auth={auth} />;
+  };
+
+  const ReceiptsWrapper = () => {
+    const { drawId } = useParams();
+    return <Receipt drawId={drawId} auth={auth} />;
   };
 
   const fetchUserProfile = async () => {
@@ -84,6 +90,7 @@ function App() {
           path="/constructiondraw/:propertyId"
           element={<ConstructionDrawWrapper />}
         />
+        <Route path="/receipts/:drawId" element={<ReceiptsWrapper />} />
         <Route path="/testimonials" element={<Testimonials />} />
         <Route path="/about" element={<About />} />
         <Route path="/authform" element={<AuthForm />} />

@@ -3,7 +3,7 @@
 # it also contains route to generate & verify JWT token
 
 from flask import Blueprint, request, jsonify
-from models import ConstructionDraw, db, User, Property
+from models import ConstructionDraw, Receipt, db, User, Property
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from werkzeug.security import check_password_hash
 from datetime import timedelta
@@ -391,6 +391,26 @@ def delete_construction_draw(draw_id):
         return jsonify({"message": "User not found"}), 404
     
 # -----RECEIPT ROUTES-----
+
+# Fetch a single receipt by its ID
+@api.route('/receipts/<int:draw_id>', methods=['GET'])
+@jwt_required()
+def get_receipts(draw_id):
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        receipts = Receipt.query.filter_by(construction_draw_id=draw_id).all()
+        receipts_data = [{
+            'id': receipt.id,
+            'date': receipt.date,
+            'vendor': receipt.vendor,
+            'amount': receipt.amount,
+            'description': receipt.description
+        } for receipt in receipts]
+        return jsonify(receipts_data), 200
+    else:
+        return jsonify({"message": "User not found"}), 404
+    
 # Add a new receipt for current user
 @api.route('/receipts', methods=['POST'])
 @jwt_required()
