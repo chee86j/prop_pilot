@@ -47,6 +47,13 @@ const ConstructionDraw = ({ propertyId }) => {
     });
   };
 
+  // to avoid timezone display issues
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const userTimezoneOffset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() + userTimezoneOffset).toLocaleDateString();
+  };
+
   const startEdit = (draw) => {
     setEditDrawId(draw.id);
     setEditedDraw({ ...draw });
@@ -86,6 +93,7 @@ const ConstructionDraw = ({ propertyId }) => {
       );
       setEditDrawId(null);
       setEditedDraw({});
+      window.location.reload();
     } catch (error) {
       setError(error.message);
     }
@@ -240,34 +248,39 @@ const ConstructionDraw = ({ propertyId }) => {
               </form>
             ) : (
               <>
-                <h3 className="text-xl font-bold text-gray-700 underline mb-1">
-                  Draw #{index + 1}
-                </h3>
-                <p className="text-gray-700">
-                  Release Date:{" "}
-                  {new Date(draw.release_date).toLocaleDateString()}
-                </p>
-                <p className="text-gray-700">
-                  Amount: {formatCurrency(draw.amount)}
-                </p>
-                <p className="text-gray-700">
-                  Bank Account: {draw.bank_account_number}
-                </p>
-                <p className="text-gray-700">
-                  Approved: {draw.is_approved ? "Yes" : "No"}
-                </p>
-                <button
-                  onClick={() => startEdit(draw)}
-                  className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded mr-2"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDeleteDraw(draw.id)}
-                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
-                >
-                  Delete
-                </button>
+                <div className="draw-card bg-gray-50 p-4 rounded-md mb-4 shadow-sm">
+                  <h3 className="text-xl font-bold text-gray-700 mb-3">
+                    Draw #{index + 1}
+                  </h3>
+                  <div className="draw-details indent-2 text-gray-700 mb-4">
+                    <p className="mb-2">
+                      Release Date: {formatDate(draw.release_date)}
+                    </p>
+                    <p className="mb-2">
+                      Amount: {formatCurrency(draw.amount)}
+                    </p>
+                    <p className="mb-2">
+                      Bank Account: {draw.bank_account_number}
+                    </p>
+                    <p className="mb-2">
+                      Approved: {draw.is_approved ? "Yes" : "No"}
+                    </p>
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <button
+                      onClick={() => startEdit(draw)}
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 rounded transition duration-300 ease-in-out"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteDraw(draw.id)}
+                      className="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded transition duration-300 ease-in-out"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
               </>
             )}
           </div>
