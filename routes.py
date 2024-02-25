@@ -344,16 +344,18 @@ def add_construction_draw():
     if user:
         data = request.get_json()
         new_draw = ConstructionDraw(
-            property_id=data['property_id'],
-            release_date=data['release_date'],
-            amount=data['amount'],
-            bank_account_number=data['bank_account_number']
+            property_id=data.get('property_id'),
+            release_date=data.get('release_date'),
+            amount=data.get('amount'),
+            bank_account_number=data.get('bank_account_number'),
+            is_approved=data.get('is_approved', False)
         )
         db.session.add(new_draw)
         db.session.commit()
         return jsonify({"message": "Construction draw created successfully", "id": new_draw.id}), 201
     else:
         return jsonify({"message": "User not found"}), 404
+
 
 # Update a construction draw of current user 
 @api.route('/construction-draws/<int:draw_id>', methods=['PUT'])
@@ -365,6 +367,9 @@ def update_construction_draw(draw_id):
         draw_to_update = ConstructionDraw.query.filter_by(id=draw_id).first()
         if draw_to_update:
             data = request.get_json()
+            draw_to_update.release_date = data.get('release_date', draw_to_update.release_date)
+            draw_to_update.amount = data.get('amount', draw_to_update.amount)
+            draw_to_update.bank_account_number = data.get('bank_account_number', draw_to_update.bank_account_number)
             draw_to_update.is_approved = data.get('is_approved', draw_to_update.is_approved)
             db.session.commit()
             return jsonify({"message": "Construction draw updated successfully"}), 200
@@ -389,9 +394,9 @@ def delete_construction_draw(draw_id):
             return jsonify({"message": "Construction draw not found or access denied"}), 403
     else:
         return jsonify({"message": "User not found"}), 404
+
     
 # -----RECEIPT ROUTES-----
-
 # Fetch a single receipt by its ID
 @api.route('/receipts/<int:draw_id>', methods=['GET'])
 @jwt_required()

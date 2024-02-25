@@ -4,10 +4,13 @@ import { useState, useEffect } from "react";
 const ConstructionDraw = ({ propertyId }) => {
   const [draws, setDraws] = useState([]);
   const [error, setError] = useState(null);
+  const [editDrawId, setEditDrawId] = useState(null);
+  const [editedDraw, setEditedDraw] = useState({});
   const [newDraw, setNewDraw] = useState({
     release_date: "",
     amount: "",
     bank_account_number: "",
+    is_approved: false,
   });
 
   useEffect(() => {
@@ -44,8 +47,61 @@ const ConstructionDraw = ({ propertyId }) => {
     });
   };
 
-  const handleAddDraw = (e) => {
-    setNewDraw({ ...newDraw, [e.target.name]: e.target.value });
+  const startEdit = (draw) => {
+    setEditDrawId(draw.id);
+    setEditedDraw({ ...draw });
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setEditedDraw({
+      ...editedDraw,
+      [name]: type === "checkbox" ? checked : value,
+    });
+  };
+
+  const saveEdit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/construction-draws/${editDrawId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          body: JSON.stringify(editedDraw),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update draw");
+      }
+
+      const updatedDraw = await response.json();
+      setDraws(
+        draws.map((draw) => (draw.id === editDrawId ? updatedDraw : draw))
+      );
+      setEditDrawId(null);
+      setEditedDraw({});
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditDrawId(null);
+    setEditedDraw({});
+  };
+
+  const handleAddDrawChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setNewDraw({
+      ...newDraw,
+      [name]: type === "checkbox" ? checked : value,
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -70,6 +126,12 @@ const ConstructionDraw = ({ propertyId }) => {
 
       const addedDraw = await response.json();
       setDraws([...draws, addedDraw]);
+      setNewDraw({
+        release_date: "",
+        amount: "",
+        bank_account_number: "",
+        is_approved: false,
+      });
     } catch (err) {
       setError(err.message);
     }
@@ -98,7 +160,7 @@ const ConstructionDraw = ({ propertyId }) => {
   };
 
   if (error) {
-    return <div className="text-red-500">{error}</div>;
+    return <div className="text-red-500">Error: {error}</div>;
   }
 
   return (
@@ -113,27 +175,101 @@ const ConstructionDraw = ({ propertyId }) => {
             key={draw.id}
             className="mb-4 bg-gray-50 p-4 shadow-sm rounded-md"
           >
-            <h3 className="text-xl font-bold text-gray-700 underline mb-1">
-              Draw #{index + 1}
-            </h3>
-            <p className="text-gray-700">
-              Release Date: {new Date(draw.release_date).toLocaleDateString()}
-            </p>
-            <p className="text-gray-700">
-              Amount: {formatCurrency(draw.amount)}
-            </p>
-            <p className="text-gray-700">
-              Bank Account: {draw.bank_account_number}
-            </p>
-            <p className="text-gray-700">
-              Approved: {draw.is_approved ? "Yes" : "No"}
-            </p>
-            <button
-              onClick={() => handleDeleteDraw(draw.id)}
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
-            >
-              Delete
-            </button>
+            {editDrawId === draw.id ? (
+              <form onSubmit={saveEdit}>
+                <div className="mb-2">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    Release Date
+                  </label>
+                  <input
+                    type="date"
+                    name="release_date"
+                    value={editedDraw.release_date}
+                    onChange={handleEditChange}
+                    className="border rounded px-2 py-1 w-full"
+                  />
+                </div>
+                <div className="mb-2">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    Amount
+                  </label>
+                  <input
+                    type="number"
+                    name="amount"
+                    value={editedDraw.amount}
+                    onChange={handleEditChange}
+                    className="border rounded px-2 py-1 w-full"
+                  />
+                </div>
+                <div className="mb-2">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    Bank Account Number
+                  </label>
+                  <input
+                    type="text"
+                    name="bank_account_number"
+                    value={editedDraw.bank_account_number}
+                    onChange={handleEditChange}
+                    className="border rounded px-2 py-1 w-full"
+                  />
+                </div>
+                <div className="mb-2">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    Approval Status
+                  </label>
+                  <input
+                    type="checkbox"
+                    name="is_approved"
+                    checked={editedDraw.is_approved}
+                    onChange={handleEditChange}
+                    className="mt-1"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
+                >
+                  Save Changes
+                </button>
+                <button
+                  onClick={cancelEdit}
+                  className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                >
+                  Cancel
+                </button>
+              </form>
+            ) : (
+              <>
+                <h3 className="text-xl font-bold text-gray-700 underline mb-1">
+                  Draw #{index + 1}
+                </h3>
+                <p className="text-gray-700">
+                  Release Date:{" "}
+                  {new Date(draw.release_date).toLocaleDateString()}
+                </p>
+                <p className="text-gray-700">
+                  Amount: {formatCurrency(draw.amount)}
+                </p>
+                <p className="text-gray-700">
+                  Bank Account: {draw.bank_account_number}
+                </p>
+                <p className="text-gray-700">
+                  Approved: {draw.is_approved ? "Yes" : "No"}
+                </p>
+                <button
+                  onClick={() => startEdit(draw)}
+                  className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded mr-2"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDeleteDraw(draw.id)}
+                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
+                >
+                  Delete
+                </button>
+              </>
+            )}
           </div>
         ))
       ) : (
@@ -153,7 +289,7 @@ const ConstructionDraw = ({ propertyId }) => {
               type="date"
               name="release_date"
               value={newDraw.release_date}
-              onChange={handleAddDraw}
+              onChange={handleAddDrawChange}
               className="border rounded px-2 py-1 w-full"
               required
             />
@@ -167,7 +303,7 @@ const ConstructionDraw = ({ propertyId }) => {
               name="amount"
               placeholder="Enter amount"
               value={newDraw.amount}
-              onChange={handleAddDraw}
+              onChange={handleAddDrawChange}
               className="border rounded px-2 py-1 w-full"
               required
             />
@@ -181,7 +317,7 @@ const ConstructionDraw = ({ propertyId }) => {
               name="bank_account_number"
               placeholder="XXXX"
               value={newDraw.bank_account_number}
-              onChange={handleAddDraw}
+              onChange={handleAddDrawChange}
               className="border rounded px-2 py-1 w-full"
               required
             />
@@ -194,10 +330,9 @@ const ConstructionDraw = ({ propertyId }) => {
               type="checkbox"
               name="is_approved"
               checked={newDraw.is_approved}
-              onChange={handleAddDraw}
+              onChange={handleAddDrawChange}
               className="mt-1"
             />
-            <span className="ml-2 text-gray-700 text-sm">Approved</span>
           </div>
         </div>
         <button
