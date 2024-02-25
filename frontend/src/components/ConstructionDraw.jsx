@@ -36,6 +36,14 @@ const ConstructionDraw = ({ propertyId }) => {
     fetchDraws();
   }, [propertyId]);
 
+  const formatCurrency = (value) => {
+    if (!value || isNaN(value)) return "";
+    return parseFloat(value).toLocaleString("en-US", {
+      style: "currency",
+      currency: "USD",
+    });
+  };
+
   const handleAddDraw = (e) => {
     setNewDraw({ ...newDraw, [e.target.name]: e.target.value });
   };
@@ -68,7 +76,7 @@ const ConstructionDraw = ({ propertyId }) => {
   };
 
   if (error) {
-    return <div className="text-red-500">{error}</div>; // Adjust error styling
+    return <div className="text-red-500">{error}</div>;
   }
 
   return (
@@ -78,15 +86,20 @@ const ConstructionDraw = ({ propertyId }) => {
       </h2>
 
       {draws.length > 0 ? (
-        draws.map((draw) => (
+        draws.map((draw, index) => (
           <div
             key={draw.id}
             className="mb-4 bg-gray-50 p-4 shadow-sm rounded-md"
           >
+            <h3 className="text-xl font-bold text-gray-700 underline mb-1">
+              Draw #{index + 1}
+            </h3>
             <p className="text-gray-700">
               Release Date: {new Date(draw.release_date).toLocaleDateString()}
             </p>
-            <p className="text-gray-700">Amount: ${draw.amount}</p>
+            <p className="text-gray-700">
+              Amount: {formatCurrency(draw.amount)}
+            </p>
             <p className="text-gray-700">
               Bank Account: {draw.bank_account_number}
             </p>
