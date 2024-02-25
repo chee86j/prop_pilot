@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
+import Receipt from "./Receipt";
 
 const ConstructionDraw = ({ propertyId }) => {
   const [draws, setDraws] = useState([]);
@@ -259,14 +260,12 @@ const ConstructionDraw = ({ propertyId }) => {
                     <p className="mb-2">
                       Amount: {formatCurrency(draw.amount)}
                     </p>
-                    <p className="mb-2">
-                      Bank Account: {draw.bank_account_number}
-                    </p>
+                    <p className="mb-2">Account: x{draw.bank_account_number}</p>
                     <p className="mb-2">
                       Approved: {draw.is_approved ? "Yes" : "No"}
                     </p>
                   </div>
-                  <div className="flex justify-end space-x-2">
+                  <div className="flex justify-end space-x-2 mb-2">
                     <button
                       onClick={() => startEdit(draw)}
                       className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 rounded transition duration-300 ease-in-out"
@@ -280,6 +279,7 @@ const ConstructionDraw = ({ propertyId }) => {
                       Delete
                     </button>
                   </div>
+                  <Receipt drawId={draw.id} />
                 </div>
               </>
             )}
