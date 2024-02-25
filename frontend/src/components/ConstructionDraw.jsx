@@ -75,6 +75,28 @@ const ConstructionDraw = ({ propertyId }) => {
     }
   };
 
+  const handleDeleteDraw = async (drawId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/construction-draws/${drawId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete construction draw");
+      }
+
+      setDraws(draws.filter((draw) => draw.id !== drawId));
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   if (error) {
     return <div className="text-red-500">{error}</div>;
   }
@@ -106,6 +128,12 @@ const ConstructionDraw = ({ propertyId }) => {
             <p className="text-gray-700">
               Approved: {draw.is_approved ? "Yes" : "No"}
             </p>
+            <button
+              onClick={() => handleDeleteDraw(draw.id)}
+              className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
+            >
+              Delete
+            </button>
           </div>
         ))
       ) : (
