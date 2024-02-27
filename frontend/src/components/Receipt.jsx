@@ -31,7 +31,11 @@ const Receipt = ({ drawId }) => {
         }
 
         const data = await response.json();
-        setReceipts(data);
+        // Sort receipts by date in ascending order
+        const sortedReceipts = data.sort(
+          (a, b) => new Date(a.date) - new Date(b.date)
+        );
+        setReceipts(sortedReceipts);
       } catch (err) {
         setError(err.message);
       }
@@ -116,6 +120,7 @@ const Receipt = ({ drawId }) => {
       setReceipts([...receipts, addedReceipt]);
       setNewReceipt({ date: "", vendor: "", amount: "", description: "" });
       setShowAddForm(false);
+      window.location.reload();
     } catch (err) {
       setError(err.message);
     }
@@ -141,6 +146,14 @@ const Receipt = ({ drawId }) => {
     } catch (err) {
       setError(err.message);
     }
+  };
+
+  const calcSubtotal = () => {
+    let subtotal = 0;
+    receipts.forEach((receipt) => {
+      subtotal += parseFloat(receipt.amount);
+    });
+    return subtotal.toFixed(2); // Format subtotal to two decimal places
   };
 
   return (
@@ -193,16 +206,41 @@ const Receipt = ({ drawId }) => {
             </tbody>
           </table>
         ) : (
-          <p className="text-red-500">No Receipts Found.</p>
+          <p className="indent-2 text-red-500">No Receipts Found.</p>
         )}
+        {/* Display subtotal */}
+        <div className="mb-4">
+          <p className="indent-2 font-semibold text-gray-700">
+            Subtotal: {formatCurrency(calcSubtotal())}
+          </p>
+        </div>
       </div>
 
       {/* Button to toggle visibility of add receipt form */}
       <button
         onClick={() => setShowAddForm(!showAddForm)}
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
+        className="rounded-lg relative w-32 h-10 cursor-pointer flex items-center border border-blue-500 bg-blue-500 group hover:bg-blue-500 active:bg-blue-500 active:border-blue-500"
       >
-        + New Receipt
+        <span className="text-gray-200 font-semibold ml-5 transform group-hover:translate-x-10 transition-all duration-300">
+          Receipt
+        </span>
+        <span className="absolute right-0 h-full w-12 rounded-lg bg-blue-500 flex items-center justify-center transform group-hover:translate-x-0 group-hover:w-full transition-all duration-300">
+          <svg
+            className="svg w-8 text-white"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <line x1="12" x2="12" y1="5" y2="19"></line>
+            <line x1="5" x2="19" y1="12" y2="12"></line>
+          </svg>
+        </span>
       </button>
 
       {/* Add receipt form */}

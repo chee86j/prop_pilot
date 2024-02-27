@@ -186,9 +186,28 @@ const ConstructionDraw = ({ propertyId }) => {
 
       <button
         onClick={() => setShowAddDrawForm(!showAddDrawForm)}
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4"
+        className="rounded-lg relative w-28 h-10 cursor-pointer flex items-center border border-green-500 bg-green-500 group hover:bg-green-500 active:bg-green-500 active:border-green-500"
       >
-        + New Draw
+        <span className="text-gray-200 font-semibold ml-6 transform group-hover:translate-x-10 transition-all duration-300">
+          Draw
+        </span>
+        <span className="absolute right-0 h-full w-12 rounded-lg bg-green-500 flex items-center justify-center transform group-hover:translate-x-0 group-hover:w-full transition-all duration-300">
+          <svg
+            className="svg w-8 text-white"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <line x1="12" x2="12" y1="5" y2="19"></line>
+            <line x1="5" x2="19" y1="12" y2="12"></line>
+          </svg>
+        </span>
       </button>
 
       {showAddDrawForm && (
@@ -252,7 +271,7 @@ const ConstructionDraw = ({ propertyId }) => {
             type="submit"
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
           >
-            Add Draw
+            Submit New Draw
           </button>
         </form>
       )}
@@ -329,7 +348,7 @@ const ConstructionDraw = ({ propertyId }) => {
               </form>
             ) : (
               <>
-                <div className="draw-card bg-gray-50 p-4 rounded-md mb-4 shadow-sm">
+                <div className="draw-card bg-gray-50 p-6 rounded-md mb-4 shadow-sm">
                   <h3 className="text-xl font-extrabold text-gray-700 mb-3">
                     Draw # {index + 1}
                   </h3>
@@ -391,7 +410,7 @@ const ConstructionDraw = ({ propertyId }) => {
           </div>
         ))
       ) : (
-        <p className="text-red-500">No Construction Draws Found.</p>
+        <p className="indent-2 text-red-500">No Construction Draws Found.</p>
       )}
     </div>
   );
