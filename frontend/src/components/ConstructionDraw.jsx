@@ -13,6 +13,7 @@ const ConstructionDraw = ({ propertyId }) => {
     bank_account_number: "",
     is_approved: false,
   });
+  const [showAddDrawForm, setShowAddDrawForm] = useState(false);
 
   useEffect(() => {
     const fetchDraws = async () => {
@@ -32,8 +33,8 @@ const ConstructionDraw = ({ propertyId }) => {
 
         const data = await response.json();
         setDraws(data);
-      } catch (err) {
-        setError(err.message);
+      } catch (error) {
+        setError(error.message);
       }
     };
 
@@ -48,7 +49,6 @@ const ConstructionDraw = ({ propertyId }) => {
     });
   };
 
-  // to avoid timezone display issues
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const userTimezoneOffset = date.getTimezoneOffset() * 60000;
@@ -113,7 +113,7 @@ const ConstructionDraw = ({ propertyId }) => {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleAddDraw = async (e) => {
     e.preventDefault();
 
     try {
@@ -141,8 +141,10 @@ const ConstructionDraw = ({ propertyId }) => {
         bank_account_number: "",
         is_approved: false,
       });
-    } catch (err) {
-      setError(err.message);
+      setShowAddDrawForm(false);
+      window.location.reload();
+    } catch (error) {
+      setError(error.message);
     }
   };
 
@@ -163,8 +165,8 @@ const ConstructionDraw = ({ propertyId }) => {
       }
 
       setDraws(draws.filter((draw) => draw.id !== drawId));
-    } catch (err) {
-      setError(err.message);
+    } catch (error) {
+      setError(error.message);
     }
   };
 
@@ -178,12 +180,86 @@ const ConstructionDraw = ({ propertyId }) => {
         Construction Draws
       </h2>
 
+      <button
+        onClick={() => setShowAddDrawForm(!showAddDrawForm)}
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4"
+      >
+        + New Draw
+      </button>
+
+      {showAddDrawForm && (
+        <form onSubmit={handleAddDraw} className="mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                Date Draw Released
+              </label>
+              <input
+                type="date"
+                name="release_date"
+                value={newDraw.release_date}
+                onChange={handleAddDrawChange}
+                className="border rounded px-2 py-1 w-full"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                Amount of Released Funds
+              </label>
+              <input
+                type="number"
+                name="amount"
+                placeholder="Enter amount"
+                value={newDraw.amount}
+                onChange={handleAddDrawChange}
+                className="border rounded px-2 py-1 w-full"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                Bank Account Number (Last 4 Digits)
+              </label>
+              <input
+                type="text"
+                name="bank_account_number"
+                placeholder="XXXX"
+                value={newDraw.bank_account_number}
+                onChange={handleAddDrawChange}
+                className="border rounded px-2 py-1 w-full"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                Approval Status
+              </label>
+              <input
+                type="checkbox"
+                name="is_approved"
+                checked={newDraw.is_approved}
+                onChange={handleAddDrawChange}
+                className="mt-1"
+              />
+            </div>
+          </div>
+          <button
+            type="submit"
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
+          >
+            Add Draw
+          </button>
+        </form>
+      )}
+
       {draws.length > 0 ? (
         draws.map((draw, index) => (
           <div
             key={draw.id}
             className="mb-4 bg-gray-50 p-4 shadow-sm rounded-md"
           >
+            {/* Draw display logic */}
             {editDrawId === draw.id ? (
               <form onSubmit={saveEdit}>
                 <div className="mb-2">
@@ -250,7 +326,7 @@ const ConstructionDraw = ({ propertyId }) => {
             ) : (
               <>
                 <div className="draw-card bg-gray-50 p-4 rounded-md mb-4 shadow-sm">
-                  <h3 className="text-xl font-bold text-gray-700 mb-3">
+                  <h3 className="text-xl font-extrabold text-gray-700 mb-3">
                     Draw #{index + 1}
                   </h3>
                   <div className="draw-details indent-2 text-gray-700 mb-4">
@@ -300,7 +376,7 @@ const ConstructionDraw = ({ propertyId }) => {
                         onClick={() => handleDeleteDraw(draw.id)}
                         className="mb-2 bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded transition duration-300 ease-in-out"
                       >
-                        Delete
+                        X
                       </button>
                     </div>
                   </div>
@@ -311,75 +387,8 @@ const ConstructionDraw = ({ propertyId }) => {
           </div>
         ))
       ) : (
-        <p className="text-gray-700">No Construction Draws Found.</p>
+        <p className="text-red-500">No Construction Draws Found.</p>
       )}
-
-      <form onSubmit={handleSubmit} className="mt-6">
-        <h3 className="text-lg font-semibold text-gray-700 mb-4">
-          Add a Construction Draw
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Date Draw Released
-            </label>
-            <input
-              type="date"
-              name="release_date"
-              value={newDraw.release_date}
-              onChange={handleAddDrawChange}
-              className="border rounded px-2 py-1 w-full"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Amount of Released Funds
-            </label>
-            <input
-              type="number"
-              name="amount"
-              placeholder="Enter amount"
-              value={newDraw.amount}
-              onChange={handleAddDrawChange}
-              className="border rounded px-2 py-1 w-full"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Bank Acct. Number (Last 4 Digits)
-            </label>
-            <input
-              type="text"
-              name="bank_account_number"
-              placeholder="XXXX"
-              value={newDraw.bank_account_number}
-              onChange={handleAddDrawChange}
-              className="border rounded px-2 py-1 w-full"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Approval Status
-            </label>
-            <input
-              type="checkbox"
-              name="is_approved"
-              checked={newDraw.is_approved}
-              onChange={handleAddDrawChange}
-              className="mt-1"
-            />
-          </div>
-        </div>
-        <button
-          type="submit"
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
-        >
-          Add Draw
-        </button>
-      </form>
     </div>
   );
 };
