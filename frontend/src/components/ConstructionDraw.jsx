@@ -173,7 +173,7 @@ const ConstructionDraw = ({ propertyId }) => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg text-sm">
+    <div className="max-w-4xl mx-auto p-3 bg-white shadow-lg rounded-lg text-sm">
       <h2 className="text-xl md:text-2xl font-bold text-gray-700 mb-6">
         Construction Draws
       </h2>
@@ -254,30 +254,55 @@ const ConstructionDraw = ({ propertyId }) => {
                     Draw #{index + 1}
                   </h3>
                   <div className="draw-details indent-2 text-gray-700 mb-4">
-                    <p className="mb-2">
-                      Release Date: {formatDate(draw.release_date)}
-                    </p>
-                    <p className="mb-2">
-                      Amount: {formatCurrency(draw.amount)}
-                    </p>
-                    <p className="mb-2">Account: x{draw.bank_account_number}</p>
-                    <p className="mb-2">
-                      Approved: {draw.is_approved ? "Yes" : "No"}
-                    </p>
-                  </div>
-                  <div className="flex justify-end space-x-2 mb-2">
-                    <button
-                      onClick={() => startEdit(draw)}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 rounded transition duration-300 ease-in-out"
+                    <div
+                      style={{ display: "inline-block", marginRight: "20px" }}
                     >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteDraw(draw.id)}
-                      className="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded transition duration-300 ease-in-out"
+                      <p className="mb-2">
+                        Release Date: {formatDate(draw.release_date)}
+                      </p>
+                    </div>
+                    <div
+                      style={{ display: "inline-block", marginRight: "20px" }}
                     >
-                      Delete
-                    </button>
+                      <p className="mb-2">
+                        Amount: {formatCurrency(draw.amount)}
+                      </p>
+                    </div>
+                    <div
+                      style={{ display: "inline-block", marginRight: "20px" }}
+                    >
+                      <p className="mb-2">
+                        Account: x{draw.bank_account_number}
+                      </p>
+                    </div>
+                    <div
+                      style={{ display: "inline-block", marginRight: "20px" }}
+                    >
+                      <p className="mb-2">
+                        Approved: {draw.is_approved ? "Yes" : "No"}
+                      </p>
+                    </div>
+                    {/* </div> */}
+
+                    {/* <div className="flex justify-end space-x-2 mb-2"> */}
+
+                    <div style={{ display: "inline-block", marginRight: "px" }}>
+                      <button
+                        onClick={() => startEdit(draw)}
+                        className="mb-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 rounded transition duration-300 ease-in-out"
+                      >
+                        Edit
+                      </button>
+                    </div>
+
+                    <div style={{ display: "inline-block" }}>
+                      <button
+                        onClick={() => handleDeleteDraw(draw.id)}
+                        className="mb-2 bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded transition duration-300 ease-in-out"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                   <Receipt drawId={draw.id} />
                 </div>

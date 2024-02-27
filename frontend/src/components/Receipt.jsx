@@ -133,110 +133,139 @@ const Receipt = ({ drawId }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg text-sm">
-      <h1 className="text-xl md:text-2xl font-bold text-gray-700 mb-6">
+    <div className="max-w-4xl mx-auto p-3 bg-transparent rounded-lg text-sm">
+      <h1 className="text-xl md:text-xl font-bold text-gray-700 mb-6">
         Receipts
       </h1>
       {error && <div className="text-red-600">Error: {error}</div>}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="flex justify-center gap-6">
         {receipts.length > 0 ? (
           receipts.map((receipt) => (
             <div
               key={receipt.id}
               className="receipt bg-gray-50 p-4 shadow-sm rounded-md"
+              style={{ width: "100%" }}
             >
               {editReceiptId === receipt.id ? (
-                <form onSubmit={saveEdit}>
-                  <div className="mb-2">
-                    <label className="block text-gray-700 text-sm font-bold mb-2">
-                      Date
-                    </label>
-                    <input
-                      type="date"
-                      name="date"
-                      value={editedReceipt.date}
-                      onChange={handleEditChange}
-                      className="border rounded px-2 py-1 w-full"
-                    />
+                <form onSubmit={saveEdit} className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap w-full">
+                    <div className="flex flex-wrap w-1/2">
+                      <label className="block text-gray-700 text-sm font-bold mb-2">
+                        Date
+                      </label>
+                      <input
+                        type="date"
+                        name="date"
+                        value={editedReceipt.date}
+                        onChange={handleEditChange}
+                        className="border rounded px-2 py-1 w-full"
+                      />
+                    </div>
+                    <div className="flex flex-wrap w-1/2">
+                      <label className="block text-gray-700 text-sm font-bold mb-2">
+                        Vendor
+                      </label>
+                      <input
+                        type="text"
+                        name="vendor"
+                        value={editedReceipt.vendor}
+                        onChange={handleEditChange}
+                        className="border rounded px-2 py-1 w-full"
+                      />
+                    </div>
+                    <div className="flex flex-wrap w-full">
+                      <label className="block text-gray-700 text-sm font-bold mb-2">
+                        Amount
+                      </label>
+                      <input
+                        type="number"
+                        name="amount"
+                        value={editedReceipt.amount}
+                        onChange={handleEditChange}
+                        className="border rounded px-2 py-1 w-full"
+                      />
+                    </div>
+                    <div className="flex flex-wrap w-full">
+                      <label className="block text-gray-700 text-sm font-bold mb-2">
+                        Description
+                      </label>
+                      <textarea
+                        name="description"
+                        value={editedReceipt.description}
+                        onChange={handleEditChange}
+                        className="border rounded px-2 py-1 w-full"
+                      />
+                    </div>
                   </div>
-                  <div className="mb-2">
-                    <label className="block text-gray-700 text-sm font-bold mb-2">
-                      Vendor
-                    </label>
-                    <input
-                      type="text"
-                      name="vendor"
-                      value={editedReceipt.vendor}
-                      onChange={handleEditChange}
-                      className="border rounded px-2 py-1 w-full"
-                    />
+                  <div className="flex justify-end w-full">
+                    <button
+                      type="submit"
+                      className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={cancelEdit}
+                      className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                    >
+                      Cancel
+                    </button>
                   </div>
-                  <div className="mb-2">
-                    <label className="block text-gray-700 text-sm font-bold mb-2">
-                      Amount
-                    </label>
-                    <input
-                      type="number"
-                      name="amount"
-                      value={editedReceipt.amount}
-                      onChange={handleEditChange}
-                      className="border rounded px-2 py-1 w-full"
-                    />
-                  </div>
-                  <div className="mb-2">
-                    <label className="block text-gray-700 text-sm font-bold mb-2">
-                      Description
-                    </label>
-                    <textarea
-                      name="description"
-                      value={editedReceipt.description}
-                      onChange={handleEditChange}
-                      className="border rounded px-2 py-1 w-full"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={cancelEdit}
-                    className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-                  >
-                    Cancel
-                  </button>
                 </form>
               ) : (
-                <>
-                  <p>
-                    <strong>Date:</strong>{" "}
-                    {new Date(receipt.date).toLocaleDateString()}
-                  </p>
-                  <p>
-                    <strong>Vendor:</strong> {receipt.vendor}
-                  </p>
-                  <p>
-                    <strong>Amount:</strong> ${receipt.amount}
-                  </p>
-                  <p>
-                    <strong>Description:</strong> {receipt.description}
-                  </p>
-                  <div className="flex justify-between">
-                    <button
-                      onClick={() => startEdit(receipt)}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 rounded"
+                <div className="flex flex-wrap w-full">
+                  <div className="flex flex-wrap">
+                    <div
+                      style={{ display: "inline-block", marginRight: "20px" }}
                     >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteReceipt(receipt.id)}
-                      className="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded"
+                      <p className="mb-2">
+                        <strong>Date:</strong>{" "}
+                        {new Date(receipt.date).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div
+                      style={{ display: "inline-block", marginRight: "20px" }}
                     >
-                      Delete
-                    </button>
+                      <p className="mb-2">
+                        <strong>Vendor:</strong> {receipt.vendor}
+                      </p>
+                    </div>
+                    <div
+                      style={{ display: "inline-block", marginRight: "20px" }}
+                    >
+                      <p className="mb-2">
+                        <strong>Amount:</strong> ${receipt.amount}
+                      </p>
+                    </div>
+                    <div
+                      style={{ display: "inline-block", marginRight: "20px" }}
+                    >
+                      <p className="mb-2">
+                        <strong>Description:</strong> {receipt.description}
+                      </p>
+                    </div>
+
+                    <div
+                      style={{ display: "inline-block", marginRight: "10px" }}
+                    >
+                      <button
+                        onClick={() => startEdit(receipt)}
+                        className="mb-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 rounded transition duration-300 ease-in-out"
+                      >
+                        Edit
+                      </button>
+                    </div>
+
+                    <div style={{ display: "inline-block" }}>
+                      <button
+                        onClick={() => handleDeleteReceipt(receipt.id)}
+                        className="mb-2 bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded transition duration-300 ease-in-out"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
-                </>
+                </div>
               )}
             </div>
           ))
@@ -244,6 +273,7 @@ const Receipt = ({ drawId }) => {
           <p>No Receipts Found.</p>
         )}
       </div>
+
       <form onSubmit={handleAddReceipt} className="mt-6">
         <h3 className="text-lg font-semibold text-gray-700 mb-4">
           Add a Receipt
