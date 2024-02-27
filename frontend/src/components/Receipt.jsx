@@ -11,6 +11,8 @@ const Receipt = ({ drawId }) => {
     vendor: "",
     amount: "",
     description: "",
+    pointofcontact: "",
+    ccnumber: "",
   });
   const [showAddForm, setShowAddForm] = useState(false);
 
@@ -171,6 +173,8 @@ const Receipt = ({ drawId }) => {
                 <th className="px-4 py-2">Vendor</th>
                 <th className="px-4 py-2">Amount</th>
                 <th className="px-4 py-2">Description</th>
+                <th className="px-4 py-2">POC</th>
+                <th className="px-4 py-2">Card Used</th>
                 <th className="px-4 py-2">Actions</th>
               </tr>
             </thead>
@@ -187,6 +191,8 @@ const Receipt = ({ drawId }) => {
                     {formatCurrency(receipt.amount)}
                   </td>
                   <td className="border px-4 py-2">{receipt.description}</td>
+                  <td className="border px-4 py-2">{receipt.pointofcontact}</td>
+                  <td className="border px-4 py-2">x{receipt.ccnumber}</td>
                   <td className="border px-4 py-2">
                     <button
                       onClick={() => startEdit(receipt)}
@@ -307,6 +313,34 @@ const Receipt = ({ drawId }) => {
               required
             ></textarea>
           </div>
+          <div>
+            <label className="block text-gray-700 text-sm font-bold mb-2">
+              Point of Contact
+            </label>
+            <textarea
+              name="pointofcontact"
+              value={newReceipt.pointofcontact}
+              onChange={(e) =>
+                setNewReceipt({ ...newReceipt, description: e.target.value })
+              }
+              className="border rounded px-2 py-1 w-full"
+              required
+            ></textarea>
+          </div>
+          <div>
+            <label className="block text-gray-700 text-sm font-bold mb-2">
+              Credit Card Used
+            </label>
+            <textarea
+              name="ccnumber"
+              value={newReceipt.ccnumber}
+              onChange={(e) =>
+                setNewReceipt({ ...newReceipt, description: e.target.value })
+              }
+              className="border rounded px-2 py-1 w-full"
+              required
+            ></textarea>
+          </div>
           <button
             type="submit"
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
@@ -370,6 +404,30 @@ const Receipt = ({ drawId }) => {
               <textarea
                 name="description"
                 value={editedReceipt.description}
+                onChange={handleEditChange}
+                className="border rounded px-2 py-1 w-full"
+                required
+              ></textarea>
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                Point of Contact
+              </label>
+              <textarea
+                name="pointofcontact"
+                value={editedReceipt.pointofcontact}
+                onChange={handleEditChange}
+                className="border rounded px-2 py-1 w-full"
+                required
+              ></textarea>
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                Credit Card Used
+              </label>
+              <textarea
+                name="description"
+                value={editedReceipt.ccnumber}
                 onChange={handleEditChange}
                 className="border rounded px-2 py-1 w-full"
                 required

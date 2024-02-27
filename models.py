@@ -86,3 +86,5 @@ class Receipt(db.Model):
     vendor = db.Column(db.String(512), nullable=False)
     amount = db.Column(db.Float, nullable=False)
     description = db.Column(db.Text, nullable=True)
+    pointofcontact = db.Column(db.String(512), nullable=True)
+    ccnumber = db.Column(db.String(4), nullable=True)

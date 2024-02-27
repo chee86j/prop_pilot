@@ -410,15 +410,15 @@ def get_receipts(draw_id):
             'date': receipt.date,
             'vendor': receipt.vendor,
             'amount': receipt.amount,
-            'description': receipt.description
+            'description': receipt.description,
+            'pointofcontact': receipt.pointofcontact,
+            'ccnumber': receipt.ccnumber
         } for receipt in receipts]
         return jsonify(receipts_data), 200
     else:
         return jsonify({"message": "User not found"}), 404
     
 # Add a new receipt for current user
-@api.route('/receipts', methods=['POST'])
-@jwt_required()
 def add_receipt():
     current_user_email = get_jwt_identity()
     user = User.query.filter_by(email=current_user_email).first()
@@ -429,7 +429,9 @@ def add_receipt():
             date=data['date'],
             vendor=data['vendor'],
             amount=data['amount'],
-            description=data['description']
+            description=data['description'],
+            pointofcontact=data['pointofcontact'],
+            ccnumber=data['ccnumber']
         )
         db.session.add(new_receipt)
         db.session.commit()
@@ -451,6 +453,8 @@ def update_receipt(receipt_id):
             receipt_to_update.vendor = data.get('vendor', receipt_to_update.vendor)
             receipt_to_update.amount = data.get('amount', receipt_to_update.amount)
             receipt_to_update.description = data.get('description', receipt_to_update.description)
+            receipt_to_update.pointofcontact = data.get('pointofcontact', receipt_to_update.pointofcontact)
+            receipt_to_update.ccnumber = data.get('ccnumber', receipt_to_update.ccnumber)
             db.session.commit()
             return jsonify({"message": "Receipt updated successfully"}), 200
         else:
