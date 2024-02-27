@@ -32,7 +32,11 @@ const ConstructionDraw = ({ propertyId }) => {
         }
 
         const data = await response.json();
-        setDraws(data);
+        // Sort draws by release date in ascending order
+        const sortedDraws = data.sort(
+          (a, b) => new Date(a.release_date) - new Date(b.release_date)
+        );
+        setDraws(sortedDraws);
       } catch (error) {
         setError(error.message);
       }
@@ -327,7 +331,7 @@ const ConstructionDraw = ({ propertyId }) => {
               <>
                 <div className="draw-card bg-gray-50 p-4 rounded-md mb-4 shadow-sm">
                   <h3 className="text-xl font-extrabold text-gray-700 mb-3">
-                    Draw #{index + 1}
+                    Draw # {index + 1}
                   </h3>
                   <div className="draw-details indent-2 text-gray-700 mb-4">
                     <div
