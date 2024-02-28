@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
+import { Settings, ChevronsLeft, ChevronsRight } from "lucide-react";
 
 const Receipt = ({ drawId }) => {
   const [receipts, setReceipts] = useState([]);
@@ -15,6 +16,7 @@ const Receipt = ({ drawId }) => {
     ccnumber: "",
   });
   const [showAddForm, setShowAddForm] = useState(false);
+  const [expandedDescriptions, setExpandedDescriptions] = useState(new Set());
 
   useEffect(() => {
     const fetchReceipts = async () => {
@@ -158,6 +160,18 @@ const Receipt = ({ drawId }) => {
     return subtotal.toFixed(2); // Format subtotal to two decimal places
   };
 
+  const toggleDescriptionExpansion = (receiptId) => {
+    setExpandedDescriptions((prevExpanded) => {
+      const newExpanded = new Set(prevExpanded);
+      if (newExpanded.has(receiptId)) {
+        newExpanded.delete(receiptId);
+      } else {
+        newExpanded.add(receiptId);
+      }
+      return newExpanded;
+    });
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-2 bg-transparent rounded-lg text-sm">
       <h1 className="text-lg md:text-md font-bold text-gray-700 mb-2">
@@ -169,13 +183,27 @@ const Receipt = ({ drawId }) => {
           <table className="w-full table-auto mb-4">
             <thead>
               <tr>
-                <th className="px-4 py-2">Date</th>
-                <th className="px-4 py-2">Vendor</th>
-                <th className="px-4 py-2">Amount</th>
-                <th className="px-4 py-2">Description</th>
-                <th className="px-4 py-2">POC</th>
-                <th className="px-4 py-2">Card Used</th>
-                <th className="px-4 py-2">Actions</th>
+                <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Date
+                </th>
+                <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Vendor
+                </th>
+                <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Amount
+                </th>
+                <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Description
+                </th>
+                <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  POC
+                </th>
+                <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Card Used
+                </th>
+                <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -190,7 +218,35 @@ const Receipt = ({ drawId }) => {
                   <td className="border px-4 py-2">
                     {formatCurrency(receipt.amount)}
                   </td>
-                  <td className="border px-4 py-2">{receipt.description}</td>
+                  <td className="border px-4 py-2">
+                    {expandedDescriptions.has(receipt.id) ? (
+                      <span>{receipt.description}</span>
+                    ) : (
+                      <span>
+                        {receipt.description.length > 10
+                          ? receipt.description.substring(0, 10) + "..."
+                          : receipt.description}
+                      </span>
+                    )}
+                    {receipt.description.length > 10 && (
+                      <button
+                        onClick={() => toggleDescriptionExpansion(receipt.id)}
+                        className="text-blue-500 hover:underline focus:outline-none ml-2"
+                      >
+                        {expandedDescriptions.has(receipt.id) ? (
+                          <>
+                            <ChevronsLeft size={20} />
+                            {/* <span>Read Less</span> */}
+                          </>
+                        ) : (
+                          <>
+                            {/* <span>Read More</span> */}
+                            <ChevronsRight size={20} />
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </td>
                   <td className="border px-4 py-2">{receipt.pointofcontact}</td>
                   <td className="border px-4 py-2">x{receipt.ccnumber}</td>
                   <td className="border px-4 py-2">
@@ -198,7 +254,7 @@ const Receipt = ({ drawId }) => {
                       onClick={() => startEdit(receipt)}
                       className="mr-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-2 rounded transition duration-300 ease-in-out"
                     >
-                      Edit
+                      <Settings size={24} className="text-black" />
                     </button>
                     <button
                       onClick={() => handleDeleteReceipt(receipt.id)}

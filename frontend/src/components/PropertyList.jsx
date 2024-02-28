@@ -29,6 +29,14 @@ const PropertyList = () => {
     fetchProperties();
   }, []);
 
+  const formatCurrency = (value) => {
+    if (!value || isNaN(value)) return "";
+    return parseFloat(value).toLocaleString("en-US", {
+      style: "currency",
+      currency: "USD",
+    });
+  };
+
   const handleDetails = (propertyId) => {
     if (propertyId) {
       navigate(`/property/${propertyId}`);
@@ -127,17 +135,18 @@ const PropertyList = () => {
                     <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                       {property.city}
                     </td>
+
                     <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                       {property.state}
                     </td>
                     <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      ${property.purchaseCost.toFixed(2)}
+                      {formatCurrency(property.purchaseCost.toFixed(2))}
                     </td>
                     <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      ${property.totalRehabCost.toFixed(2)}
+                      {formatCurrency(property.totalRehabCost.toFixed(2))}
                     </td>
                     <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      ${property.arvSalePrice.toFixed(2)}
+                      {formatCurrency(property.arvSalePrice.toFixed(2))}
                     </td>
                     <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm flex justify-around">
                       <button

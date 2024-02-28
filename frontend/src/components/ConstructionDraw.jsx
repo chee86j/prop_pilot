@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import Receipt from "./Receipt";
+import { Settings } from "lucide-react";
 
 const ConstructionDraw = ({ propertyId }) => {
   const [draws, setDraws] = useState([]);
@@ -357,28 +358,30 @@ const ConstructionDraw = ({ propertyId }) => {
                       style={{ display: "inline-block", marginRight: "20px" }}
                     >
                       <p className="mb-2">
-                        Release Date: {formatDate(draw.release_date)}
+                        <strong>Release Date:</strong>{" "}
+                        {formatDate(draw.release_date)}
                       </p>
                     </div>
                     <div
                       style={{ display: "inline-block", marginRight: "20px" }}
                     >
                       <p className="mb-2">
-                        Amount: {formatCurrency(draw.amount)}
+                        <strong>Amount:</strong> {formatCurrency(draw.amount)}
                       </p>
                     </div>
                     <div
                       style={{ display: "inline-block", marginRight: "20px" }}
                     >
                       <p className="mb-2">
-                        Account: x{draw.bank_account_number}
+                        <strong>Account:</strong> x{draw.bank_account_number}
                       </p>
                     </div>
                     <div
                       style={{ display: "inline-block", marginRight: "20px" }}
                     >
                       <p className="mb-2">
-                        Approved: {draw.is_approved ? "Yes" : "No"}
+                        <strong>Approved:</strong>{" "}
+                        {draw.is_approved ? "Yes" : "No"}
                       </p>
                     </div>
                     {/* </div> */}
@@ -390,7 +393,7 @@ const ConstructionDraw = ({ propertyId }) => {
                         onClick={() => startEdit(draw)}
                         className="mb-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 rounded transition duration-300 ease-in-out"
                       >
-                        Edit
+                        <Settings size={24} className="text-black" />
                       </button>
                     </div>
 
