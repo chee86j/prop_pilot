@@ -1,7 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import Receipt from "./Receipt";
-import { Settings } from "lucide-react";
 
 const ConstructionDraw = ({ propertyId }) => {
   const [draws, setDraws] = useState([]);
@@ -189,7 +188,7 @@ const ConstructionDraw = ({ propertyId }) => {
         onClick={() => setShowAddDrawForm(!showAddDrawForm)}
         className="rounded-lg relative w-28 h-10 cursor-pointer flex items-center border border-green-500 bg-green-500 group hover:bg-green-500 active:bg-green-500 active:border-green-500"
       >
-        <span className="text-gray-200 font-semibold ml-6 transform group-hover:translate-x-10 transition-all duration-300">
+        <span className="text-white font-semibold ml-6 transform group-hover:translate-x-10 transition-all duration-300">
           Draw
         </span>
         <span className="absolute right-0 h-full w-12 rounded-lg bg-green-500 flex items-center justify-center transform group-hover:translate-x-0 group-hover:w-full transition-all duration-300">
@@ -353,59 +352,88 @@ const ConstructionDraw = ({ propertyId }) => {
                   <h3 className="text-xl font-extrabold text-gray-700 mb-3">
                     Draw # {index + 1}
                   </h3>
-                  <div className="draw-details indent-2 text-gray-700 mb-4">
-                    <div
-                      style={{ display: "inline-block", marginRight: "20px" }}
-                    >
-                      <p className="mb-2">
-                        <strong>Release Date:</strong>{" "}
-                        {formatDate(draw.release_date)}
-                      </p>
-                    </div>
-                    <div
-                      style={{ display: "inline-block", marginRight: "20px" }}
-                    >
-                      <p className="mb-2">
-                        <strong>Amount:</strong> {formatCurrency(draw.amount)}
-                      </p>
-                    </div>
-                    <div
-                      style={{ display: "inline-block", marginRight: "20px" }}
-                    >
-                      <p className="mb-2">
-                        <strong>Account:</strong> x{draw.bank_account_number}
-                      </p>
-                    </div>
-                    <div
-                      style={{ display: "inline-block", marginRight: "20px" }}
-                    >
-                      <p className="mb-2">
-                        <strong>Approved:</strong>{" "}
-                        {draw.is_approved ? "Yes" : "No"}
-                      </p>
-                    </div>
-                    {/* </div> */}
+                  <table className="w-full table-auto mb-4">
+                    <thead>
+                      <tr>
+                        <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                          Release Date
+                        </th>
+                        <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                          Amount
+                        </th>
+                        <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                          Account
+                        </th>
+                        <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                          Approved
+                        </th>
+                        <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="text-gray-700">
+                        <td className="border px-4 py-2 text-center">
+                          {formatDate(draw.release_date)}
+                        </td>
+                        <td className="border px-4 py-2 text-center">
+                          {formatCurrency(draw.amount)}
+                        </td>
+                        <td className="border px-4 py-2 text-center">
+                          x{draw.bank_account_number}
+                        </td>
+                        <td className="border px-4 py-2 text-center">
+                          {draw.is_approved ? "Yes" : "No"}
+                        </td>
+                        <td className="px-4 py-2 border text-center">
+                          <span className="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
+                            <button
+                              onClick={() => startEdit(draw)}
+                              className="inline-block px-3 py-2 border text-gray-700 hover:bg-gray-100 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                              title="Edit Product"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth="1.5"
+                                stroke="currentColor"
+                                className="h-4 w-4"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+                                />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => handleDeleteDraw(draw.id)}
+                              className="inline-block px-3 py-2 border text-gray-700 hover:bg-gray-100 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                              title="Delete Product"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth="1.5"
+                                stroke="currentColor"
+                                className="h-4 w-4"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                                />
+                              </svg>
+                            </button>
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-                    {/* <div className="flex justify-end space-x-2 mb-2"> */}
-
-                    <div style={{ display: "inline-block", marginRight: "px" }}>
-                      <button
-                        onClick={() => startEdit(draw)}
-                        className="mb-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 rounded transition duration-300 ease-in-out"
-                      >
-                        <Settings size={24} className="text-black" />
-                      </button>
-                    </div>
-
-                    <div style={{ display: "inline-block" }}>
-                      <button
-                        onClick={() => handleDeleteDraw(draw.id)}
-                        className="mb-2 bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded transition duration-300 ease-in-out"
-                      >
-                        X
-                      </button>
-                    </div>
-                  </div>
                   <Receipt drawId={draw.id} />
                 </div>
               </>
