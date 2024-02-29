@@ -221,6 +221,7 @@ const PropertyDetails = ({ propertyId }) => {
             "number",
             true
           )}
+          <div className="border-t-2 border-black border-solid my-4"></div>
           {renderEditableField(
             "Utilities Cost",
             "utilitiesCost",
@@ -284,6 +285,7 @@ const PropertyDetails = ({ propertyId }) => {
             "number",
             true
           )}
+          <div className="border-t-2 border-black border-solid my-4"></div>
           {renderEditableField(
             "Total Equity",
             "totalEquity",
@@ -305,6 +307,7 @@ const PropertyDetails = ({ propertyId }) => {
             "number",
             true
           )}
+          <div className="border-t-2 border-black border-solid my-4"></div>
           {renderEditableField(
             "Realtor Fees",
             "realtorFees",
@@ -389,6 +392,8 @@ const PropertyDetails = ({ propertyId }) => {
             "number",
             true
           )}
+          <div className="border-t-2 border-black border-solid my-4"></div>
+
           {renderEditableField(
             "Total Expenses",
             "totalExpenses",
@@ -397,12 +402,13 @@ const PropertyDetails = ({ propertyId }) => {
             true
           )}
           {renderEditableField(
-            "Total Construction Draws In",
+            "Draws In",
             "totalConstructionDrawsReceived",
             editedDetails.totalConstructionDrawsReceived || "",
             "number",
             true
           )}
+          <div className="border-t-2 border-black border-solid my-4"></div>
           {renderEditableField(
             "Project Net Profit If Sold",
             "projectNetProfitIfSold",

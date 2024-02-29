@@ -31,7 +31,18 @@ const PropertyList = () => {
 
   const formatCurrency = (value) => {
     if (!value || isNaN(value)) return "";
-    return parseFloat(value).toLocaleString("en-US", {
+    // Val to number
+    const numericValue = parseFloat(value);
+    // Thousands range
+    if (numericValue >= 1000 && numericValue < 1000000) {
+      return `$${(numericValue / 1000).toFixed(0)}K`;
+    }
+    // Millions range
+    if (numericValue >= 1000000) {
+      return `$${(numericValue / 1000000).toFixed(1)}M`;
+    }
+    // Default format
+    return numericValue.toLocaleString("en-US", {
       style: "currency",
       currency: "USD",
     });
@@ -97,25 +108,25 @@ const PropertyList = () => {
             <table className="min-w-full leading-normal">
               <thead>
                 <tr>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-5 py-3 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Property Name
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-5 py-3 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Address
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-5 py-3 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     City
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-5 py-3 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Purchase Cost
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-5 py-3 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Rehab Cost
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-5 py-3 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Sale Price
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-5 py-3 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -123,25 +134,25 @@ const PropertyList = () => {
               <tbody>
                 {properties.map((property) => (
                   <tr key={property.id}>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                    <td className="px-5 py-5 text-center border-b border-gray-200 bg-white text-sm">
                       {property.propertyName}
                     </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                    <td className="px-5 py-5 text-center border-b border-gray-200 bg-white text-sm">
                       {property.address}
                     </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                    <td className="px-5 py-5 text-center border-b border-gray-200 bg-white text-sm">
                       {property.city}
                     </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                    <td className="px-5 py-5 text-center border-b border-gray-200 bg-white text-sm">
                       {formatCurrency(property.purchaseCost.toFixed(2))}
                     </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                    <td className="px-5 py-5 text-center border-b border-gray-200 bg-white text-sm">
                       {formatCurrency(property.totalRehabCost.toFixed(2))}
                     </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                    <td className="px-5 py-5 text-center border-b border-gray-200 bg-white text-sm">
                       {formatCurrency(property.arvSalePrice.toFixed(2))}
                     </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm flex justify-around">
+                    <td className="px-5 py-5 text-center border-b border-gray-200 bg-white text-sm flex justify-around">
                       <span className="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
                         <button
                           onClick={() => handleDetails(property.id)}
