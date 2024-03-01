@@ -316,7 +316,7 @@ const PropertyDetails = ({ propertyId }) => {
             true
           )}
           {renderEditableField(
-            "Prop Tax till End of Year",
+            "Remaining Property Tax",
             "propTaxTillEndOfYear",
             editedDetails.propTaxTillEndOfYear || "",
             "number",
@@ -374,7 +374,7 @@ const PropertyDetails = ({ propertyId }) => {
           {renderEditableField(
             "Total Rehab Costs",
             "totalRehabCosts",
-            editedDetails.totalRehabCosts || "",
+            editedDetails.totalRehabCost || "",
             "number",
             true
           )}
@@ -402,7 +402,7 @@ const PropertyDetails = ({ propertyId }) => {
             true
           )}
           {renderEditableField(
-            "Draws In",
+            "Total Expected Draws In",
             "totalConstructionDrawsReceived",
             editedDetails.totalConstructionDrawsReceived || "",
             "number",
