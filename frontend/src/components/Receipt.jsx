@@ -319,7 +319,7 @@ const Receipt = ({ drawId }) => {
         onClick={() => setShowAddForm(!showAddForm)}
         className="rounded-lg relative w-32 h-10 cursor-pointer flex items-center border border-blue-500 bg-blue-500 group hover:bg-blue-500 active:bg-blue-500 active:border-blue-500"
       >
-        <span className="text-white font-semibold ml-5 transform group-hover:translate-x-10 transition-all duration-300">
+        <span className="text-gray-200 font-semibold ml-5 transform group-hover:translate-x-10 transition-all duration-300">
           Receipt
         </span>
         <span className="absolute right-0 h-full w-12 rounded-lg bg-blue-500 flex items-center justify-center transform group-hover:translate-x-0 group-hover:w-full transition-all duration-300">

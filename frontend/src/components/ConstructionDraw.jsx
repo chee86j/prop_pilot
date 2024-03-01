@@ -107,6 +107,7 @@ const ConstructionDraw = ({ propertyId }) => {
   const cancelEdit = () => {
     setEditDrawId(null);
     setEditedDraw({});
+    window.location.reload();
   };
 
   const handleAddDrawChange = (e) => {
@@ -177,6 +178,12 @@ const ConstructionDraw = ({ propertyId }) => {
   if (error) {
     return <div className="text-red-500">Error: {error}</div>;
   }
+
+  // Calculate subtotal for Released Draws
+  const subtotaldraws = draws.reduce(
+    (acc, draw) => acc + parseFloat(draw.amount),
+    0
+  );
 
   return (
     <div className="max-w-4xl mx-auto p-3 bg-white shadow-lg rounded-lg text-sm">
@@ -443,6 +450,51 @@ const ConstructionDraw = ({ propertyId }) => {
       ) : (
         <p className="indent-2 text-red-500">No Construction Draws Found.</p>
       )}
+      {/* Draws Released Section */}
+      <h1 className="text-xl font-bold text-gray-700 mb-4">Draws Released</h1>
+      <table className="w-full table-auto mb-4">
+        <thead>
+          <tr>
+            <th className="px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              Draw #
+            </th>
+            <th className="px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              Release Date
+            </th>
+            <th className="px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              Amount
+            </th>
+            <th className="px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              Account
+            </th>
+            <th className="px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              Approved
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {draws.map((draw, index) => (
+            <tr key={draw.id} className="text-gray-700">
+              <td className="border text-center px-4 py-2">{index + 1}</td>
+              <td className="border text-center px-4 py-2">
+                {formatDate(draw.release_date)}
+              </td>
+              <td className="border text-center px-4 py-2">
+                {formatCurrency(draw.amount)}
+              </td>
+              <td className="border text-center px-4 py-2">
+                x{draw.bank_account_number}
+              </td>
+              <td className="border text-center px-4 py-2">
+                {draw.is_approved ? "Yes" : "No"}
+              </td>
+            </tr>
+          ))}
+          <p className="indent-2 font-semibold text-gray-700 mt-3">
+            Total Draws Released: {formatCurrency(subtotaldraws)}
+          </p>
+        </tbody>
+      </table>
     </div>
   );
 };
