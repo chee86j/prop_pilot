@@ -116,7 +116,16 @@ def get_property(property_id):
                 'expectedRemainingRentEndToYear': property.expectedRemainingRentEndToYear,
                 'totalExpenses': property.totalExpenses,
                 'totalConstructionDrawsReceived': property.totalConstructionDrawsReceived,
-                'projectNetProfitIfSold': property.projectNetProfitIfSold
+                'projectNetProfitIfSold': property.projectNetProfitIfSold,
+                'typeOfHeatingAndCooling': property.typeOfHeatingAndCooling,
+                'waterCompany': property.waterCompany,
+                'waterAccountNumber': property.waterAccountNumber,
+                'electricCompany': property.electricCompany,
+                'electricAccountNumber': property.electricAccountNumber,
+                'gasOrOilCompany': property.gasOrOilCompany,
+                'gasOrOilAccountNumber': property.gasOrOilAccountNumber,
+                'sewerCompany': property.sewerCompany,
+                'sewerAccountNumber': property.sewerAccountNumber
             }), 200
         else:
             return jsonify({"message": "Property not found or access denied"}), 403
@@ -133,54 +142,63 @@ def get_properties():
     if user:
         properties = Property.query.filter_by(user_id=user.id).all()
         return jsonify([{
-            'id': prop.id,
-            'propertyName': prop.propertyName,
-            'address': prop.address,
-            'city': prop.city,
-            'state': prop.state,
-            'zipCode': prop.zipCode,
-            'county': prop.county,
-            'municipalBuildingAddress': prop.municipalBuildingAddress,
-            'buildingDepartmentContact': prop.buildingDepartmentContact,
-            'electricDepartmentContact': prop.electricDepartmentContact,
-            'plumbingDepartmentContact': prop.plumbingDepartmentContact,
-            'fireDepartmentContact': prop.fireDepartmentContact,
-            'environmentalDepartmentContact': prop.environmentalDepartmentContact,
-            'purchaseCost': prop.purchaseCost,
-            'refinanceCosts': prop.refinanceCosts,
-            'totalRehabCost': prop.totalRehabCost,
-            'kickStartFunds': prop.kickStartFunds,
-            'lenderConstructionDrawsReceived': prop.lenderConstructionDrawsReceived,
-            'utilitiesCost': prop.utilitiesCost,
-            'yearlyPropertyTaxes': prop.yearlyPropertyTaxes,
-            'mortgagePaid': prop.mortgagePaid,
-            'homeownersInsurance': prop.homeownersInsurance,
-            'expectedYearlyRent': prop.expectedYearlyRent,
-            'rentalIncomeReceived': prop.rentalIncomeReceived,
-            'vacancyLoss': prop.vacancyLoss,
-            'managementFees': prop.managementFees,
-            'maintenanceCosts': prop.maintenanceCosts,
-            'totalEquity': prop.totalEquity,
-            'arvSalePrice': prop.arvSalePrice,
-            'realtorFees': prop.realtorFees,
-            'propTaxtillEndOfYear': prop.propTaxtillEndOfYear,
-            'lenderLoanBalance': prop.lenderLoanBalance,
-            'payOffStatement': prop.payOffStatement,
-            'attorneyFees': prop.attorneyFees,
-            'miscFees': prop.miscFees,
-            'utilities': prop.utilities,
-            'cash2closeFromPurchase': prop.cash2closeFromPurchase,
-            'cash2closeFromRefinance': prop.cash2closeFromRefinance,
-            'totalRehabCosts': prop.totalRehabCosts,
-            'expectedRemainingRentEndToYear': prop.expectedRemainingRentEndToYear,
-            'totalExpenses': prop.totalExpenses,
-            'totalConstructionDrawsReceived': prop.totalConstructionDrawsReceived,
-            'projectNetProfitIfSold': prop.projectNetProfitIfSold
-        } for prop in properties]), 200
+            'id': property.id,
+            'propertyName': property.propertyName,
+            'address': property.address,
+            'city': property.city,
+            'state': property.state,
+            'zipCode': property.zipCode,
+            'county': property.county,
+            'municipalBuildingAddress': property.municipalBuildingAddress,
+            'buildingDepartmentContact': property.buildingDepartmentContact,
+            'electricDepartmentContact': property.electricDepartmentContact,
+            'plumbingDepartmentContact': property.plumbingDepartmentContact,
+            'fireDepartmentContact': property.fireDepartmentContact,
+            'environmentalDepartmentContact': property.environmentalDepartmentContact,
+            'purchaseCost': property.purchaseCost,
+            'refinanceCosts': property.refinanceCosts,
+            'totalRehabCost': property.totalRehabCost,
+            'kickStartFunds': property.kickStartFunds,
+            'lenderConstructionDrawsReceived': property.lenderConstructionDrawsReceived,
+            'utilitiesCost': property.utilitiesCost,
+            'yearlyPropertyTaxes': property.yearlyPropertyTaxes,
+            'mortgagePaid': property.mortgagePaid,
+            'homeownersInsurance': property.homeownersInsurance,
+            'expectedYearlyRent': property.expectedYearlyRent,
+            'rentalIncomeReceived': property.rentalIncomeReceived,
+            'vacancyLoss': property.vacancyLoss,
+            'managementFees': property.managementFees,
+            'maintenanceCosts': property.maintenanceCosts,
+            'totalEquity': property.totalEquity,
+            'arvSalePrice': property.arvSalePrice,
+            'realtorFees': property.realtorFees,
+            'propTaxtillEndOfYear': property.propTaxtillEndOfYear,
+            'lenderLoanBalance': property.lenderLoanBalance,
+            'payOffStatement': property.payOffStatement,
+            'attorneyFees': property.attorneyFees,
+            'miscFees': property.miscFees,
+            'utilities': property.utilities,
+            'cash2closeFromPurchase': property.cash2closeFromPurchase,
+            'cash2closeFromRefinance': property.cash2closeFromRefinance,
+            'totalRehabCosts': property.totalRehabCosts,
+            'expectedRemainingRentEndToYear': property.expectedRemainingRentEndToYear,
+            'totalExpenses': property.totalExpenses,
+            'totalConstructionDrawsReceived': property.totalConstructionDrawsReceived,
+            'projectNetProfitIfSold': property.projectNetProfitIfSold,
+            'typeOfHeatingAndCooling': property.typeOfHeatingAndCooling,
+            'waterCompany': property.waterCompany,
+            'waterAccountNumber': property.waterAccountNumber,
+            'electricCompany': property.electricCompany,
+            'electricAccountNumber': property.electricAccountNumber,
+            'gasOrOilCompany': property.gasOrOilCompany,
+            'gasOrOilAccountNumber': property.gasOrOilAccountNumber,
+            'sewerCompany': property.sewerCompany,
+            'sewerAccountNumber': property.sewerAccountNumber
+        } for property in properties]), 200
     else:
         return jsonify({"message": "User not found"}), 404
 
-# Add a new property for the current user
+# Add a new property
 @api.route('/properties', methods=['POST'])
 @jwt_required()
 def add_property():
@@ -188,7 +206,7 @@ def add_property():
     user = User.query.filter_by(email=current_user_email).first()
     if user:
         data = request.get_json()
-        new_property = Property(
+        property = Property(
             user_id=user.id,
             propertyName=data['propertyName'],
             address=data['address'],
@@ -231,11 +249,20 @@ def add_property():
             expectedRemainingRentEndToYear=data['expectedRemainingRentEndToYear'],
             totalExpenses=data['totalExpenses'],
             totalConstructionDrawsReceived=data['totalConstructionDrawsReceived'],
-            projectNetProfitIfSold=data['projectNetProfitIfSold']
+            projectNetProfitIfSold=data['projectNetProfitIfSold'],
+            typeOfHeatingAndCooling=data['typeOfHeatingAndCooling'],
+            waterCompany=data['waterCompany'],
+            waterAccountNumber=data['waterAccountNumber'],
+            electricCompany=data['electricCompany'],
+            electricAccountNumber=data['electricAccountNumber'],
+            gasOrOilCompany=data['gasOrOilCompany'],
+            gasOrOilAccountNumber=data['gasOrOilAccountNumber'],
+            sewerCompany=data['sewerCompany'],
+            sewerAccountNumber=data['sewerAccountNumber']
         )
-        db.session.add(new_property)
+        db.session.add(property)
         db.session.commit()
-        return jsonify({"message": "Property created successfully", "id": new_property.id}), 201
+        return jsonify({"message": "Property added successfully"}), 201
     else:
         return jsonify({"message": "User not found"}), 404
 
@@ -291,6 +318,15 @@ def update_property(property_id):
             property_to_update.totalExpenses = data.get('totalExpenses', property_to_update.totalExpenses)
             property_to_update.totalConstructionDrawsReceived = data.get('totalConstructionDrawsReceived', property_to_update.totalConstructionDrawsReceived)
             property_to_update.projectNetProfitIfSold = data.get('projectNetProfitIfSold', property_to_update.projectNetProfitIfSold)
+            property_to_update.typeOfHeatingAndCooling = data.get('typeOfHeatingAndCooling', property_to_update.typeOfHeatingAndCooling)
+            property_to_update.waterCompany = data.get('waterCompany', property_to_update.waterCompany)
+            property_to_update.waterAccountNumber = data.get('waterAccountNumber', property_to_update.waterAccountNumber)
+            property_to_update.electricCompany = data.get('electricCompany', property_to_update.electricCompany)
+            property_to_update.electricAccountNumber = data.get('electricAccountNumber', property_to_update.electricAccountNumber)
+            property_to_update.gasOrOilCompany = data.get('gasOrOilCompany', property_to_update.gasOrOilCompany)
+            property_to_update.gasOrOilAccountNumber = data.get('gasOrOilAccountNumber', property_to_update.gasOrOilAccountNumber)
+            property_to_update.sewerCompany = data.get('sewerCompany', property_to_update.sewerCompany)
+            property_to_update.sewerAccountNumber = data.get('sewerAccountNumber', property_to_update.sewerAccountNumber)
             db.session.commit()
             return jsonify({"message": "Property updated successfully"}), 200
         else:
@@ -438,6 +474,30 @@ def add_receipt():
         return jsonify({"message": "Receipt added successfully", "id": new_receipt.id}), 201
     else:
         return jsonify({"message": "User not found"}), 404
+    
+# Add a receipt of current user
+@api.route('/receipts', methods=['POST'])
+@jwt_required()
+def add_receipt():
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        data = request.get_json()
+        new_receipt = Receipt(
+            construction_draw_id=data['construction_draw_id'],
+            date=data['date'],
+            vendor=data['vendor'],
+            amount=data['amount'],
+            description=data['description'],
+            pointofcontact=data['pointofcontact'],
+            ccnumber=data['ccnumber']
+        )
+        db.session.add(new_receipt)
+        db.session.commit()
+        return jsonify({"message": "Receipt added successfully", "id": new_receipt.id}), 201
+    else:
+        return jsonify({"message": "User not found"}), 404
+
     
 # Update a receipt of current user
 @api.route('/receipts/<int:receipt_id>', methods=['PUT'])

@@ -66,6 +66,16 @@ class Property(db.Model):
     totalExpenses = db.Column(db.Float)
     totalConstructionDrawsReceived = db.Column(db.Float)
     projectNetProfitIfSold = db.Column(db.Float)
+    # Utilities
+    typeOfHeatingAndCooling = db.Column(db.String(512))
+    waterCompany = db.Column(db.String(512))
+    waterAccountNumber = db.Column(db.String(32))
+    electricCompany = db.Column(db.String(512))
+    electricAccountNumber = db.Column(db.String(32))
+    gasOrOilCompany = db.Column(db.String(512))
+    gasOrOilAccountNumber = db.Column(db.String(32))
+    sewerCompany = db.Column(db.String(512))
+    sewerAccountNumber = db.Column(db.String(32))
     construction_draws = db.relationship('ConstructionDraw', backref='property', lazy='dynamic')
 
 # Construct Draw Model
