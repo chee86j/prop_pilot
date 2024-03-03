@@ -417,6 +417,57 @@ const PropertyDetails = ({ propertyId }) => {
             true
           )}
         </div>
+        {/* Utility Information Section */}
+        <div className="utilityInformation bg-gray-50 p-4 shadow-sm rounded-md">
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">
+            Utility Information
+          </h2>
+          {renderEditableField(
+            "Type of Heating & Cooling",
+            "typeOfHeatingCooling",
+            editedDetails.typeOfHeatingCooling || ""
+          )}
+          {renderEditableField(
+            "Water Company",
+            "waterCompany",
+            editedDetails.waterCompany || ""
+          )}
+          {renderEditableField(
+            "Water Account Number",
+            "waterAccountNumber",
+            editedDetails.waterAccountNumber || ""
+          )}
+          {renderEditableField(
+            "Electric Company",
+            "electricCompany",
+            editedDetails.electricCompany || ""
+          )}
+          {renderEditableField(
+            "Electric Account Number",
+            "electricAccountNumber",
+            editedDetails.electricAccountNumber || ""
+          )}
+          {renderEditableField(
+            "Gas or Oil Company",
+            "gasOrOilCompany",
+            editedDetails.gasOrOilCompany || ""
+          )}
+          {renderEditableField(
+            "Gas or Oil Account Number",
+            "gasOrOilAccountNumber",
+            editedDetails.gasOrOilAccountNumber || ""
+          )}
+          {renderEditableField(
+            "Sewer Company",
+            "sewerCompany",
+            editedDetails.sewerCompany || ""
+          )}
+          {renderEditableField(
+            "Sewer Account Number",
+            "sewerAccountNumber",
+            editedDetails.sewerAccountNumber || ""
+          )}
+        </div>
       </div>
       {/* Edit, Save, and Cancel Buttons */}
       {editMode ? (

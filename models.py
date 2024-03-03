@@ -69,13 +69,13 @@ class Property(db.Model):
     # Utilities
     typeOfHeatingAndCooling = db.Column(db.String(512))
     waterCompany = db.Column(db.String(512))
-    waterAccountNumber = db.Column(db.String(32))
+    waterAccountNumber = db.Column(db.Float(32))
     electricCompany = db.Column(db.String(512))
-    electricAccountNumber = db.Column(db.String(32))
+    electricAccountNumber = db.Column(db.Float(32))
     gasOrOilCompany = db.Column(db.String(512))
-    gasOrOilAccountNumber = db.Column(db.String(32))
+    gasOrOilAccountNumber = db.Column(db.Float(32))
     sewerCompany = db.Column(db.String(512))
-    sewerAccountNumber = db.Column(db.String(32))
+    sewerAccountNumber = db.Column(db.Float(32))
     construction_draws = db.relationship('ConstructionDraw', backref='property', lazy='dynamic')
 
 # Construct Draw Model

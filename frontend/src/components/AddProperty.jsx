@@ -45,6 +45,15 @@ const AddProperty = () => {
     totalExpenses: 0,
     totalConstructionDrawsReceived: 0,
     projectNetProfitIfSold: 0,
+    typeOfHeatingCooling: "",
+    waterCompany: "",
+    waterAccountNumber: "",
+    electricCompany: "",
+    electricAccountNumber: "",
+    gasOrOilCompany: "",
+    gasOrOilAccountNumber: "",
+    sewerCompany: "",
+    sewerAccountNumber: "",
   });
 
   const [errorMessage, setErrorMessage] = useState("");
@@ -273,6 +282,45 @@ const AddProperty = () => {
           {renderInputField(
             "Project Net Profit If Sold",
             "projectNetProfitIfSold",
+            "number",
+            true
+          )}
+        </div>
+
+        {/* Utility Information Section */}
+        <div className="utilityInformation bg-gray-50 p-4 shadow-sm rounded-md">
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">
+            Utility Information
+          </h2>
+          {renderInputField(
+            "Type of Heating & Cooling",
+            "typeOfHeatingCooling"
+          )}
+          {renderInputField("Water Company", "waterCompany")}
+          {renderInputField(
+            "Water Account Number",
+            "waterAccountNumber",
+            "number",
+            true
+          )}
+          {renderInputField("Electric Company", "electricCompany")}
+          {renderInputField(
+            "Electric Account Number",
+            "electricAccountNumber",
+            "number",
+            true
+          )}
+          {renderInputField("Gas or Oil Company", "gasOrOilCompany")}
+          {renderInputField(
+            "Gas or Oil Account Number",
+            "gasOrOilAccountNumber",
+            "number",
+            true
+          )}
+          {renderInputField("Sewer Company", "sewerCompany")}
+          {renderInputField(
+            "Sewer Account Number",
+            "sewerAccountNumber",
             "number",
             true
           )}
