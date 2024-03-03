@@ -88,8 +88,15 @@ const PropertyDetails = ({ propertyId }) => {
     type = "text",
     isCurrency = false
   ) => {
+    // for formatting Currency
     const displayValue =
       isCurrency && !editMode ? formatCurrency(value) : value;
+
+    // for formatting Account Number
+    const formattedValue =
+      name.includes("AccountNumber") && typeof value === "number"
+        ? value.toString().replace(/\B(?=(\d{4})+(?!\d))/g, "-")
+        : displayValue;
 
     return (
       <div className="flex justify-between items-center mb-2">
@@ -103,7 +110,7 @@ const PropertyDetails = ({ propertyId }) => {
             className="border rounded px-2 py-1"
           />
         ) : (
-          <span>{displayValue}</span>
+          <span>{formattedValue}</span>
         )}
       </div>
     );
@@ -417,6 +424,7 @@ const PropertyDetails = ({ propertyId }) => {
             true
           )}
         </div>
+
         {/* Utility Information Section */}
         <div className="utilityInformation bg-gray-50 p-4 shadow-sm rounded-md">
           <h2 className="text-lg font-semibold text-gray-700 mb-4">
@@ -469,6 +477,7 @@ const PropertyDetails = ({ propertyId }) => {
           )}
         </div>
       </div>
+
       {/* Edit, Save, and Cancel Buttons */}
       {editMode ? (
         <div className="flex justify-between">
