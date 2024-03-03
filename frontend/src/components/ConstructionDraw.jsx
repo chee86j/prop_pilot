@@ -474,7 +474,7 @@ const ConstructionDraw = ({ propertyId }) => {
         </thead>
         <tbody>
           {draws.map((draw, index) => (
-            <tr key={draw.id} className="text-gray-700">
+            <tr key={draw.id} className="text-gray-700 hover:bg-gray-100">
               <td className="border text-center px-4 py-2">{index + 1}</td>
               <td className="border text-center px-4 py-2">
                 {formatDate(draw.release_date)}
@@ -490,11 +490,11 @@ const ConstructionDraw = ({ propertyId }) => {
               </td>
             </tr>
           ))}
-          <p className="indent-2 font-semibold text-gray-700 mt-3">
-            Total Draws Released: {formatCurrency(subtotaldraws)}
-          </p>
         </tbody>
       </table>
+      <p className="indent-2 font-semibold text-gray-700 mt-3">
+        Total Draws Released: {formatCurrency(subtotaldraws)}
+      </p>
     </div>
   );
 };

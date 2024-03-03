@@ -1,6 +1,11 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
-import { ChevronsLeft, ChevronsRight } from "lucide-react";
+import {
+  ChevronsLeft,
+  ChevronsRight,
+  ChevronsUp,
+  ChevronsDown,
+} from "lucide-react";
 
 const Receipt = ({ drawId }) => {
   const [receipts, setReceipts] = useState([]);
@@ -17,6 +22,7 @@ const Receipt = ({ drawId }) => {
   });
   const [showAddForm, setShowAddForm] = useState(false);
   const [expandedDescriptions, setExpandedDescriptions] = useState(new Set());
+  const [expandedReceipts, setReceiptsExpanded] = useState(false);
 
   useEffect(() => {
     const fetchReceipts = async () => {
@@ -172,14 +178,29 @@ const Receipt = ({ drawId }) => {
     });
   };
 
+  const toggleReceiptsExpansion = () => {
+    setReceiptsExpanded((prevExpanded) => !prevExpanded);
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-2 bg-transparent rounded-lg text-sm">
       <h1 className="text-lg md:text-md font-bold text-gray-700 mb-2">
         Receipts
       </h1>
-      {error && <div className="text-red-600">Error: {error}</div>}
+      <button
+        onClick={toggleReceiptsExpansion}
+        className="cursor-pointer mb-2 transition-all bg-blue-500 text-white px-3 py-2 rounded-lg border-blue-600 border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[4px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px]"
+      >
+        <span>
+          {expandedReceipts ? (
+            <ChevronsUp size={24} className="text-white" />
+          ) : (
+            <ChevronsDown size={24} className="text-white" />
+          )}
+        </span>
+      </button>
       <div>
-        {receipts.length > 0 ? (
+        {expandedReceipts && receipts.length > 0 ? (
           <table className="w-full table-auto mb-4">
             <thead>
               <tr>
@@ -208,7 +229,10 @@ const Receipt = ({ drawId }) => {
             </thead>
             <tbody>
               {receipts.map((receipt) => (
-                <tr key={receipt.id} className="text-gray-700">
+                <tr
+                  key={receipt.id}
+                  className="text-gray-700 hover:bg-gray-100"
+                >
                   <td className="border px-4 py-2 text-center">
                     {new Date(receipt.date).toLocaleDateString(undefined, {
                       timeZone: "UTC",
@@ -303,9 +327,12 @@ const Receipt = ({ drawId }) => {
               ))}
             </tbody>
           </table>
-        ) : (
-          <p className="indent-2 text-red-500">No Receipts Found.</p>
-        )}
+        ) : expandedReceipts && receipts.length < 1 ? (
+          <p className="indent-2 text-lg text-red-500 my-3">
+            No Receipts Added.
+          </p>
+        ) : null}
+
         {/* Display subtotal */}
         <div className="mb-4">
           <p className="indent-2 font-semibold text-gray-700">
@@ -319,7 +346,7 @@ const Receipt = ({ drawId }) => {
         onClick={() => setShowAddForm(!showAddForm)}
         className="rounded-lg relative w-32 h-10 cursor-pointer flex items-center border border-blue-500 bg-blue-500 group hover:bg-blue-500 active:bg-blue-500 active:border-blue-500"
       >
-        <span className="text-gray-200 font-semibold ml-5 transform group-hover:translate-x-10 transition-all duration-300">
+        <span className="text-white font-semibold ml-5 transform group-hover:translate-x-10 transition-all duration-300">
           Receipt
         </span>
         <span className="absolute right-0 h-full w-12 rounded-lg bg-blue-500 flex items-center justify-center transform group-hover:translate-x-0 group-hover:w-full transition-all duration-300">
