@@ -71,12 +71,17 @@ const AuthForm = () => {
       const data = await response.json();
       if (response.ok) {
         const currentTime = new Date().getTime();
-        const expiryTime = currentTime + 1 * 24 * 60 * 60 * 1000;
+        const expiryTime = currentTime + 1 * 24 * 60 * 60 * 1000; // token expires after 1 day
         localStorage.setItem("accessToken", data.access_token);
         localStorage.setItem("expiryTime", expiryTime);
         navigate("/home");
       } else {
-        setErrorMessage(data.message || "Registration failed.");
+        if (response.status === 409) {
+          // Check if status is Conflict (409)
+          setErrorMessage("Email Already Registered.");
+        } else {
+          setErrorMessage(data.message || "Registration Failed.");
+        }
       }
     } catch (error) {
       setErrorMessage("An error occurred during registration.");

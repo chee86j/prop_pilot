@@ -432,8 +432,8 @@ const PropertyDetails = ({ propertyId }) => {
           </h2>
           {renderEditableField(
             "Type of Heating & Cooling",
-            "typeOfHeatingCooling",
-            editedDetails.typeOfHeatingCooling || ""
+            "typeOfHeatingAndCooling",
+            editedDetails.typeOfHeatingAndCooling || ""
           )}
           {renderEditableField(
             "Water Company",

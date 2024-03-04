@@ -45,7 +45,7 @@ const AddProperty = () => {
     totalExpenses: 0,
     totalConstructionDrawsReceived: 0,
     projectNetProfitIfSold: 0,
-    typeOfHeatingCooling: "",
+    typeOfHeatingAndCooling: "",
     waterCompany: "",
     waterAccountNumber: "",
     electricCompany: "",
@@ -65,6 +65,12 @@ const AddProperty = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Check if propertyName is empty, if not, proceed with saving the property
+    if (!property.propertyName.trim()) {
+      setErrorMessage("Property Name is required");
+      return;
+    }
 
     // API call to save the new property
     fetch("http://localhost:5000/api/properties", {
@@ -294,7 +300,7 @@ const AddProperty = () => {
           </h2>
           {renderInputField(
             "Type of Heating & Cooling",
-            "typeOfHeatingCooling"
+            "typeOfHeatingAndCooling"
           )}
           {renderInputField("Water Company", "waterCompany")}
           {renderInputField(

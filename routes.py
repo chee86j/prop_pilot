@@ -7,6 +7,7 @@ from models import ConstructionDraw, Receipt, db, User, Property
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from werkzeug.security import check_password_hash
 from datetime import timedelta
+from sqlalchemy.exc import IntegrityError
 
 api = Blueprint('api', __name__)
 
@@ -21,9 +22,19 @@ def register():
         email=data['email']
     )
     user.set_password(data['password'])
-    db.session.add(user)
-    db.session.commit()
-    return jsonify({"message": "User created successfully"}), 201
+
+    try:
+        db.session.add(user)
+        db.session.commit()
+        return jsonify({"message": "User Created successfully"}), 201
+
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({"message": "Email Already registered"}), 409
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"message": "An Error Occurred"}), 500
 
 # User login route
 @api.route('/login', methods=['POST'])
@@ -206,6 +217,11 @@ def add_property():
     user = User.query.filter_by(email=current_user_email).first()
     if user:
         data = request.get_json()
+        
+        # Check if propertyName is provided
+        if 'propertyName' not in data or not data['propertyName']:
+            return jsonify({"error": "Property Name is Required at the Minimum"}), 400
+
         property = Property(
             user_id=user.id,
             propertyName=data['propertyName'],
