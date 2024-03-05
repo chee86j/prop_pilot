@@ -209,7 +209,16 @@ def get_properties():
     else:
         return jsonify({"message": "User not found"}), 404
 
-# Add a new property
+# Convert a value to float to handle numeric fields, ensuring 
+# that any non-numeric input (like an empty string) is converted 
+# to a default float value (0.0).
+def convert_to_float(value, default=0.0):
+    try:
+        return float(value)
+    except ValueError:
+        return default
+
+# Add a new property for the current user
 @api.route('/properties', methods=['POST'])
 @jwt_required()
 def add_property():
@@ -217,70 +226,71 @@ def add_property():
     user = User.query.filter_by(email=current_user_email).first()
     if user:
         data = request.get_json()
-        
-        # Check if propertyName is provided
+
         if 'propertyName' not in data or not data['propertyName']:
             return jsonify({"error": "Property Name is Required at the Minimum"}), 400
 
         property = Property(
             user_id=user.id,
             propertyName=data['propertyName'],
-            address=data['address'],
-            city=data['city'],
-            state=data['state'],
-            zipCode=data['zipCode'],
-            county=data['county'],
-            municipalBuildingAddress=data['municipalBuildingAddress'],
-            buildingDepartmentContact=data['buildingDepartmentContact'],
-            electricDepartmentContact=data['electricDepartmentContact'],
-            plumbingDepartmentContact=data['plumbingDepartmentContact'],
-            fireDepartmentContact=data['fireDepartmentContact'],
-            environmentalDepartmentContact=data['environmentalDepartmentContact'],
-            purchaseCost=data['purchaseCost'],
-            refinanceCosts=data['refinanceCosts'],
-            totalRehabCost=data['totalRehabCost'],
-            kickStartFunds=data['kickStartFunds'],
-            lenderConstructionDrawsReceived=data['lenderConstructionDrawsReceived'],
-            utilitiesCost=data['utilitiesCost'],
-            yearlyPropertyTaxes=data['yearlyPropertyTaxes'],
-            mortgagePaid=data['mortgagePaid'],
-            homeownersInsurance=data['homeownersInsurance'],
-            expectedYearlyRent=data['expectedYearlyRent'],
-            rentalIncomeReceived=data['rentalIncomeReceived'],
-            vacancyLoss=data['vacancyLoss'],
-            managementFees=data['managementFees'],
-            maintenanceCosts=data['maintenanceCosts'],
-            totalEquity=data['totalEquity'],
-            arvSalePrice=data['arvSalePrice'],
-            realtorFees=data['realtorFees'],
-            propTaxtillEndOfYear=data['propTaxtillEndOfYear'],
-            lenderLoanBalance=data['lenderLoanBalance'],
-            payOffStatement=data['payOffStatement'],
-            attorneyFees=data['attorneyFees'],
-            miscFees=data['miscFees'],
-            utilities=data['utilities'],
-            cash2closeFromPurchase=data['cash2closeFromPurchase'],
-            cash2closeFromRefinance=data['cash2closeFromRefinance'],
-            totalRehabCosts=data['totalRehabCosts'],
-            expectedRemainingRentEndToYear=data['expectedRemainingRentEndToYear'],
-            totalExpenses=data['totalExpenses'],
-            totalConstructionDrawsReceived=data['totalConstructionDrawsReceived'],
-            projectNetProfitIfSold=data['projectNetProfitIfSold'],
-            typeOfHeatingAndCooling=data['typeOfHeatingAndCooling'],
-            waterCompany=data['waterCompany'],
-            waterAccountNumber=data['waterAccountNumber'],
-            electricCompany=data['electricCompany'],
-            electricAccountNumber=data['electricAccountNumber'],
-            gasOrOilCompany=data['gasOrOilCompany'],
-            gasOrOilAccountNumber=data['gasOrOilAccountNumber'],
-            sewerCompany=data['sewerCompany'],
-            sewerAccountNumber=data['sewerAccountNumber']
+            address=data.get('address', ''),
+            city=data.get('city', ''),
+            state=data.get('state', ''),
+            zipCode=data.get('zipCode', ''),
+            county=data.get('county', ''),
+            municipalBuildingAddress=data.get('municipalBuildingAddress', ''),
+            buildingDepartmentContact=data.get('buildingDepartmentContact', ''),
+            electricDepartmentContact=data.get('electricDepartmentContact', ''),
+            plumbingDepartmentContact=data.get('plumbingDepartmentContact', ''),
+            fireDepartmentContact=data.get('fireDepartmentContact', ''),
+            environmentalDepartmentContact=data.get('environmentalDepartmentContact', ''),
+            purchaseCost=convert_to_float(data.get('purchaseCost')),
+            refinanceCosts=convert_to_float(data.get('refinanceCosts')),
+            totalRehabCost=convert_to_float(data.get('totalRehabCost')),
+            kickStartFunds=convert_to_float(data.get('kickStartFunds')),
+            lenderConstructionDrawsReceived=convert_to_float(data.get('lenderConstructionDrawsReceived')),
+            utilitiesCost=convert_to_float(data.get('utilitiesCost')),
+            yearlyPropertyTaxes=convert_to_float(data.get('yearlyPropertyTaxes')),
+            mortgagePaid=convert_to_float(data.get('mortgagePaid')),
+            homeownersInsurance=convert_to_float(data.get('homeownersInsurance')),
+            expectedYearlyRent=convert_to_float(data.get('expectedYearlyRent')),
+            rentalIncomeReceived=convert_to_float(data.get('rentalIncomeReceived')),
+            vacancyLoss=convert_to_float(data.get('vacancyLoss')),
+            managementFees=convert_to_float(data.get('managementFees')),
+            maintenanceCosts=convert_to_float(data.get('maintenanceCosts')),
+            totalEquity=convert_to_float(data.get('totalEquity')),
+            arvSalePrice=convert_to_float(data.get('arvSalePrice')),
+            realtorFees=convert_to_float(data.get('realtorFees')),
+            propTaxtillEndOfYear=convert_to_float(data.get('propTaxtillEndOfYear')),
+            lenderLoanBalance=convert_to_float(data.get('lenderLoanBalance')),
+            payOffStatement=convert_to_float(data.get('payOffStatement')),
+            attorneyFees=convert_to_float(data.get('attorneyFees')),
+            miscFees=convert_to_float(data.get('miscFees')),
+            utilities=convert_to_float(data.get('utilities')),
+            cash2closeFromPurchase=convert_to_float(data.get('cash2closeFromPurchase')),
+            cash2closeFromRefinance=convert_to_float(data.get('cash2closeFromRefinance')),
+            totalRehabCosts=convert_to_float(data.get('totalRehabCosts')),
+            expectedRemainingRentEndToYear=convert_to_float(data.get('expectedRemainingRentEndToYear')),
+            totalExpenses=convert_to_float(data.get('totalExpenses')),
+            totalConstructionDrawsReceived=convert_to_float(data.get('totalConstructionDrawsReceived')),
+            projectNetProfitIfSold=convert_to_float(data.get('projectNetProfitIfSold')),
+            typeOfHeatingAndCooling=data.get('typeOfHeatingAndCooling', ''),
+            waterCompany=data.get('waterCompany', ''),
+            waterAccountNumber=convert_to_float(data.get('waterAccountNumber', '')),
+            electricCompany=data.get('electricCompany', ''),
+            electricAccountNumber=convert_to_float(data.get('electricAccountNumber', '')),
+            gasOrOilCompany=data.get('gasOrOilCompany', ''),
+            gasOrOilAccountNumber=convert_to_float(data.get('gasOrOilAccountNumber', '')),
+            sewerCompany=data.get('sewerCompany', ''),
+            sewerAccountNumber=convert_to_float(data.get('sewerAccountNumber', '')),
         )
+
         db.session.add(property)
         db.session.commit()
         return jsonify({"message": "Property added successfully"}), 201
     else:
         return jsonify({"message": "User not found"}), 404
+
 
 # Update a property of the current user
 @api.route('/properties/<int:property_id>', methods=['PUT'])

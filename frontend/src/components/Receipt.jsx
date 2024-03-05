@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import {
@@ -41,7 +42,7 @@ const Receipt = ({ drawId }) => {
         }
 
         const data = await response.json();
-        // Sort receipts by date in ascending order
+        // Sort receipts by Ascending date
         const sortedReceipts = data.sort(
           (a, b) => new Date(a.date) - new Date(b.date)
         );
@@ -440,7 +441,7 @@ const Receipt = ({ drawId }) => {
               name="pointofcontact"
               value={newReceipt.pointofcontact}
               onChange={(e) =>
-                setNewReceipt({ ...newReceipt, description: e.target.value })
+                setNewReceipt({ ...newReceipt, pointofcontact: e.target.value })
               }
               className="border rounded px-2 py-1 w-full"
               required
@@ -454,7 +455,7 @@ const Receipt = ({ drawId }) => {
               name="ccnumber"
               value={newReceipt.ccnumber}
               onChange={(e) =>
-                setNewReceipt({ ...newReceipt, description: e.target.value })
+                setNewReceipt({ ...newReceipt, ccnumber: e.target.value })
               }
               className="border rounded px-2 py-1 w-full"
               required
