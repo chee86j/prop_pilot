@@ -190,16 +190,20 @@ const Receipt = ({ drawId }) => {
       </h1>
       <button
         onClick={toggleReceiptsExpansion}
-        className="cursor-pointer mb-2 transition-all bg-blue-500 text-white px-3 py-2 rounded-lg border-blue-600 border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[4px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px]"
+        className="cursor-pointer mb-2 transition-all bg-blue-500 text-white px-3 py-2 rounded-lg border-blue-600 border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[4px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] flex items-center justify-center"
       >
-        <span>
+        <span className="flex items-center">
           {expandedReceipts ? (
             <ChevronsUp size={24} className="text-white" />
           ) : (
             <ChevronsDown size={24} className="text-white" />
           )}
+          <span className="ml-1 text-white font-semibold">
+            {expandedReceipts ? "Hide" : "Show"}
+          </span>
         </span>
       </button>
+
       <div>
         {expandedReceipts && receipts.length > 0 ? (
           <table className="w-full table-auto mb-4">
