@@ -142,27 +142,27 @@ const PropertyDetails = ({ propertyId }) => {
         Property Details
       </h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Departments Section */}
-        <div className="propDepartments bg-gray-50 p-4 shadow-sm rounded-md">
+        {/* Location Section */}
+        <div className="propHeader bg-gray-50 p-4 shadow-sm rounded-md">
           <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-semibold text-gray-700">Departments</h2>
+            <h2 className="text-lg font-semibold text-gray-700">Location</h2>
             <button
-              onClick={() => toggleSection("departments")}
+              onClick={() => toggleSection("location")}
               className="focus:outline-none"
             >
-              {expandedSections.departments ? (
+              {expandedSections.location ? (
                 <ChevronsUp size={24} className="text-gray-700" />
               ) : (
                 <ChevronsDown size={24} className="text-gray-700" />
               )}
             </button>
           </div>
-          {expandedSections.departments && (
+          {expandedSections.location && (
             <>
               {renderEditableField(
-                "Municipal Building Address",
-                "municipalBuildingAddress",
-                editedDetails.municipalBuildingAddress || ""
+                "Property Name",
+                "propertyName",
+                editedDetails.propertyName || ""
               )}
               {renderEditableField(
                 "Address",
