@@ -75,7 +75,7 @@ class Property(db.Model):
     totalExpenses = db.Column(db.Float)
     totalConstructionDrawsReceived = db.Column(db.Float)
     projectNetProfitIfSold = db.Column(db.Float)
-    # Utilities
+    # Utility Information
     typeOfHeatingAndCooling = db.Column(db.String(512))
     waterCompany = db.Column(db.String(512))
     waterAccountNumber = db.Column(db.Float(32))

@@ -3,18 +3,26 @@ import { useState } from "react";
 
 const AddProperty = () => {
   const [property, setProperty] = useState({
+    // Location Section
     propertyName: "",
     address: "",
     city: "",
     state: "",
     zipCode: "",
     county: "",
+    bedroomsDescription: "",
+    bathroomsDescription: "",
+    kitchenDescription: "",
+    amenitiesDescription: "",
+    // Departments Section
     municipalBuildingAddress: "",
     buildingDepartmentContact: "",
     electricDepartmentContact: "",
     plumbingDepartmentContact: "",
     fireDepartmentContact: "",
+    homeownersAssociationContact: "",
     environmentalDepartmentContact: "",
+    // Total Outlay To Date Section
     purchaseCost: 0,
     refinanceCosts: 0,
     totalRehabCost: 0,
@@ -30,6 +38,7 @@ const AddProperty = () => {
     managementFees: 0,
     maintenanceCosts: 0,
     totalEquity: 0,
+    // Sale Projection Section
     arvSalePrice: 0,
     realtorFees: 0,
     propTaxtillEndOfYear: 0,
@@ -45,6 +54,7 @@ const AddProperty = () => {
     totalExpenses: 0,
     totalConstructionDrawsReceived: 0,
     projectNetProfitIfSold: 0,
+    // Utility Information Section
     typeOfHeatingAndCooling: "",
     waterCompany: "",
     waterAccountNumber: "",
@@ -54,6 +64,50 @@ const AddProperty = () => {
     gasOrOilAccountNumber: "",
     sewerCompany: "",
     sewerAccountNumber: "",
+    // Key Players Information Section
+    sellersAgent: "",
+    sellersBroker: "",
+    sellersAgentPhone: "",
+    sellersAttorney: "",
+    sellersAttorneyPhone: "",
+    escrowCompany: "",
+    escrowAgent: "",
+    escrowAgentPhone: "",
+    buyersAgent: "",
+    buyersBroker: "",
+    buyersAgentPhone: "",
+    buyersAttorney: "",
+    buyersAttorneyPhone: "",
+    titleInsuranceCompany: "",
+    titleAgent: "",
+    titleAgentPhone: "",
+    titlesPhone: "",
+    appraisalCompany: "",
+    appraiser: "",
+    appraiserPhone: "",
+    surveyor: "",
+    surveyorPhone: "",
+    homeInspector: "",
+    homeInspectorPhone: "",
+    architect: "",
+    architectPhone: "",
+    // Lender Information Section
+    lender: "",
+    lenderPhone: "",
+    refinanceLender: "",
+    refinanceLenderPhone: "",
+    loanOfficer: "",
+    loanOfficerPhone: "",
+    loanNumber: "",
+    // Sales & Marketing Section
+    propertyManager: "",
+    propertyManagerPhone: "",
+    propertyManagementCompany: "",
+    propertyManagementPhone: "",
+    photographer: "",
+    photographerPhone: "",
+    videographer: "",
+    videographerPhone: "",
   });
 
   const [errorMessage, setErrorMessage] = useState("");
@@ -133,6 +187,10 @@ const AddProperty = () => {
           {renderInputField("State", "state")}
           {renderInputField("Zip Code", "zipCode")}
           {renderInputField("County", "county")}
+          {renderInputField("Bedrooms", "bedroomsDescription")}
+          {renderInputField("Bathrooms", "bathroomsDescription")}
+          {renderInputField("Kitchen", "kitchenDescription")}
+          {renderInputField("Amenities", "amenitiesDescription")}
         </div>
 
         {/* Departments Section */}
@@ -148,6 +206,7 @@ const AddProperty = () => {
           {renderInputField("Electric Dept", "electricDepartmentContact")}
           {renderInputField("Plumbing Dept", "plumbingDepartmentContact")}
           {renderInputField("Fire Dept", "fireDepartmentContact")}
+          {renderInputField("HOA", "homeownersAssociationContact")}
           {renderInputField(
             "Environmental Dept",
             "environmentalDepartmentContact"
@@ -327,6 +386,146 @@ const AddProperty = () => {
           {renderInputField(
             "Sewer Account Number",
             "sewerAccountNumber",
+            "number",
+            true
+          )}
+        </div>
+
+        {/* Key Players Information Section */}
+        <div className="keyPlayersInformation bg-gray-50 p-4 shadow-sm rounded-md">
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">
+            Key Players
+          </h2>
+          {renderInputField("Seller's Agent", "sellersAgent")}
+          {renderInputField("Seller's Broker", "sellersBroker")}
+          {renderInputField(
+            "Seller's Agent Phone",
+            "sellersAgentPhone",
+            "number",
+            true
+          )}
+          {renderInputField("Seller's Attorney", "sellersAttorney")}
+          {renderInputField(
+            "Seller's Attorney Phone",
+            "sellersAttorneyPhone",
+            "number",
+            true
+          )}
+          {renderInputField("Escrow Company", "escrowCompany")}
+          {renderInputField("Escrow Agent", "escrowAgent")}
+          {renderInputField(
+            "Escrow Agent Phone",
+            "escrowAgentPhone",
+            "number",
+            true
+          )}
+          {renderInputField("Buyer's Agent", "buyersAgent")}
+          {renderInputField("Buyer's Broker", "buyersBroker")}
+          {renderInputField(
+            "Buyer's Agent Phone",
+            "buyersAgentPhone",
+            "number",
+            true
+          )}
+          {renderInputField("Buyer's Attorney", "buyersAttorney")}
+          {renderInputField(
+            "Buyer's Attorney Phone",
+            "buyersAttorneyPhone",
+            "number",
+            true
+          )}
+          {renderInputField("Title Insurance Company", "titleInsuranceCompany")}
+          {renderInputField("Title Agent", "titleAgent")}
+          {renderInputField(
+            "Title Agent Phone",
+            "titleAgentPhone",
+            "number",
+            true
+          )}
+          {renderInputField("Titles Phone", "titlesPhone", "number", true)}
+          {renderInputField("Appraisal Company", "appraisalCompany")}
+          {renderInputField("Appraiser", "appraiser")}
+          {renderInputField(
+            "Appraiser Phone",
+            "appraiserPhone",
+            "number",
+            true
+          )}
+          {renderInputField("Surveyor", "surveyor")}
+          {renderInputField("Surveyor Phone", "surveyorPhone", "number", true)}
+          {renderInputField("Home Inspector", "homeInspector")}
+          {renderInputField(
+            "Home Inspector Phone",
+            "homeInspectorPhone",
+            "number",
+            true
+          )}
+          {renderInputField("Architect", "architect")}
+          {renderInputField(
+            "Architect Phone",
+            "architectPhone",
+            "number",
+            true
+          )}
+        </div>
+
+        {/* Lender Information Section */}
+        <div className="lenderInformation bg-gray-50 p-4 shadow-sm rounded-md">
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">
+            Utility Information
+          </h2>
+          {renderInputField("Lender", "lender")}
+          {renderInputField("Lender Phone", "lenderPhone", "number", true)}
+          {renderInputField("Refinance Lender", "refinanceLender")}
+          {renderInputField(
+            "Refinance Lender Phone",
+            "refinanceLenderPhone",
+            "number",
+            true
+          )}
+          {renderInputField("Loan Officer", "loanOfficer")}
+          {renderInputField(
+            "Loan Officer Phone",
+            "loanOfficerPhone",
+            "number",
+            true
+          )}
+          {renderInputField("Loan Number", "loanNumber")}
+        </div>
+
+        {/* Sales & Marketing Section */}
+        <div className="salesAndmarketing bg-gray-50 p-4 shadow-sm rounded-md">
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">
+            Sales & Marketing
+          </h2>
+          {renderInputField("Property Manager", "propertyManager")}
+          {renderInputField(
+            "Property Manager Phone",
+            "propertyManagerPhone",
+            "number",
+            true
+          )}
+          {renderInputField(
+            "Property Management Company",
+            "propertyManagementCompany"
+          )}
+          {renderInputField(
+            "Property Management Phone",
+            "propertyManagementPhone",
+            "number",
+            true
+          )}
+          {renderInputField("Photographer", "photographer")}
+          {renderInputField(
+            "Photographer Phone",
+            "photographerPhone",
+            "number",
+            true
+          )}
+          {renderInputField("Videographer", "videographer")}
+          {renderInputField(
+            "Videographer Phone",
+            "videographerPhone",
             "number",
             true
           )}
