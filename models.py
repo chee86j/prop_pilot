@@ -21,6 +21,8 @@ class User(db.Model):
         return check_password_hash(self.password_hash, password)
 
 # Property Model
+# Future use of indexing when filtering or sorting on specific columns are needed
+# idx_property_location = Index('idx_property_location', Property.city, Property.state, ...)
 class Property(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id')) # Many to one relationship w/User

@@ -39,7 +39,7 @@ const PropertyList = () => {
     }
     // Millions range
     if (numericValue >= 1000000) {
-      return `$${(numericValue / 1000000).toFixed(1)}M`;
+      return `$${(numericValue / 1000000).toFixed(2)}M`;
     }
     // Default format
     return numericValue.toLocaleString("en-US", {

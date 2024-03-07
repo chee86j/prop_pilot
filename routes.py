@@ -438,7 +438,7 @@ def add_property():
             propertyManager=data.get('propertyManager', ''),
             propertyManagerPhone=data.get('propertyManagerPhone', ''),
             propertyManagementCompany=data.get('propertyManagementCompany', ''),
-            propertyManagementPhone=data.get('propertyManagementCompanyPhone', ''),
+            propertyManagementPhone=data.get('propertyManagementPhone', ''),
             photographer=data.get('photographer', ''),
             photographerPhone=data.get('photographerPhone', ''),
             videographer=data.get('videographer', ''),
@@ -561,7 +561,7 @@ def update_property(property_id):
             property_to_update.propertyManager = data.get('propertyManager', property_to_update.propertyManager)
             property_to_update.propertyManagerPhone = data.get('propertyManagerPhone', property_to_update.propertyManagerPhone)
             property_to_update.propertyManagementCompany = data.get('propertyManagementCompany', property_to_update.propertyManagementCompany)
-            property_to_update.propertyManagementPhone = data.get('propertyManagementCompanyPhone', property_to_update.propertyManagementCompanyPhone)
+            property_to_update.propertyManagementPhone = data.get('propertyManagementPhone', property_to_update.propertyManagementPhone)
             property_to_update.photographer = data.get('photographer', property_to_update.photographer)
             property_to_update.photographerPhone = data.get('photographerPhone', property_to_update.photographerPhone)
             property_to_update.videographer = data.get('videographer', property_to_update.videographer)
