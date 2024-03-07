@@ -31,12 +31,17 @@ class Property(db.Model):
     state = db.Column(db.String(512))
     zipCode = db.Column(db.String(128))
     county = db.Column(db.String(512))
+    bedroomsDescription = db.Column(db.String(512))
+    bathroomsDescription = db.Column(db.String(512))
+    kitchenDescription = db.Column(db.String(512))
+    amenitiesDescription = db.Column(db.String(512))
     # Departments
     municipalBuildingAddress = db.Column(db.String(1024))
     buildingDepartmentContact = db.Column(db.String(512))
     electricDepartmentContact = db.Column(db.String(512))
     plumbingDepartmentContact = db.Column(db.String(512))
     fireDepartmentContact = db.Column(db.String(512))
+    homeownersAssociationContact = db.Column(db.String(512))
     environmentalDepartmentContact = db.Column(db.String(512))
     # Total Outlay To Date
     purchaseCost = db.Column(db.Float)
@@ -105,10 +110,25 @@ class Property(db.Model):
     surveyorPhone = db.Column(db.String(64))
     homeInspector = db.Column(db.String(128))
     homeInspectorPhone = db.Column(db.String(64))
+    architect = db.Column(db.String(128))
+    architectPhone = db.Column(db.String(64))
+    # Lender Information
     lender = db.Column(db.String(128))
+    lenderPhone = db.Column(db.String(64))
+    refinanceLender = db.Column(db.String(128))
+    refinanceLenderPhone = db.Column(db.String(64))
     loanOfficer = db.Column(db.String(128))
     loanOfficerPhone = db.Column(db.String(64))
     loanNumber = db.Column(db.String(64))
+    # Sales & Marketing
+    propertyManager = db.Column(db.String(128))
+    propertyManagerPhone = db.Column(db.String(64))
+    propertyManagementCompany = db.Column(db.String(128))
+    propertyManagementPhone = db.Column(db.String(64))
+    photographer = db.Column(db.String(128))
+    photographerPhone = db.Column(db.String(64))
+    videographer = db.Column(db.String(128))
+    videographerPhone = db.Column(db.String(64))
     construction_draws = db.relationship('ConstructionDraw', backref='property', lazy='dynamic')
 
 # Construct Draw Model

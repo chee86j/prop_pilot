@@ -86,18 +86,26 @@ def get_property(property_id):
         if property:
             return jsonify({
                 'id': property.id,
+                # Location Section
                 'propertyName': property.propertyName,
                 'address': property.address,
                 'city': property.city,
                 'state': property.state,
                 'zipCode': property.zipCode,
                 'county': property.county,
+                'bedroomsDescription': property.bedroomsDescription,
+                'bathroomsDescription': property.bathroomsDescription,
+                'kitchenDescription': property.kitchenDescription,
+                'amenitiesDescription': property.amenitiesDescription,
+                # Departments
                 'municipalBuildingAddress': property.municipalBuildingAddress,
                 'buildingDepartmentContact': property.buildingDepartmentContact,
                 'electricDepartmentContact': property.electricDepartmentContact,
                 'plumbingDepartmentContact': property.plumbingDepartmentContact,
                 'fireDepartmentContact': property.fireDepartmentContact,
+                'homeownersAssociationContact': property.homeownersAssociationContact,
                 'environmentalDepartmentContact': property.environmentalDepartmentContact,
+                # Total Outlay To Date
                 'purchaseCost': property.purchaseCost,
                 'refinanceCosts': property.refinanceCosts,
                 'totalRehabCost': property.totalRehabCost,
@@ -113,6 +121,7 @@ def get_property(property_id):
                 'managementFees': property.managementFees,
                 'maintenanceCosts': property.maintenanceCosts,
                 'totalEquity': property.totalEquity,
+                # Sale Projection
                 'arvSalePrice': property.arvSalePrice,
                 'realtorFees': property.realtorFees,
                 'propTaxtillEndOfYear': property.propTaxtillEndOfYear,
@@ -128,6 +137,7 @@ def get_property(property_id):
                 'totalExpenses': property.totalExpenses,
                 'totalConstructionDrawsReceived': property.totalConstructionDrawsReceived,
                 'projectNetProfitIfSold': property.projectNetProfitIfSold,
+                # Utilities
                 'typeOfHeatingAndCooling': property.typeOfHeatingAndCooling,
                 'waterCompany': property.waterCompany,
                 'waterAccountNumber': property.waterAccountNumber,
@@ -136,7 +146,51 @@ def get_property(property_id):
                 'gasOrOilCompany': property.gasOrOilCompany,
                 'gasOrOilAccountNumber': property.gasOrOilAccountNumber,
                 'sewerCompany': property.sewerCompany,
-                'sewerAccountNumber': property.sewerAccountNumber
+                'sewerAccountNumber': property.sewerAccountNumber,
+                # Key Players Information
+                'sellersAgent': property.sellersAagent,
+                'sellersBroker': property.sellersBroker,
+                'sellersAgentPhone': property.sellersAgentPhone,
+                'sellersAttorney': property.sellersAttorney,
+                'sellersAttorneyPhone': property.sellersAttorneyPhone,
+                'escrowCompany': property.escrowCompany,
+                'escrowAgent': property.escrowAgent,
+                'escrowAgentPhone': property.escrowAgentPhone,
+                'buyersAgent': property.buyerAgent,
+                'buyersAgentPhone': property.buyerAgentPhone,
+                'buyersAttorney': property.buyerAttorney,
+                'buyersAttorneyPhone': property.buyerAttorneyPhone,
+                'titleInsuranceCompany': property.titleInsuranceCompany,
+                'titleAgent': property.titleAgent,
+                'titleAgentPhone': property.titleAgentPhone,
+                'titlePhone': property.titlePhone,
+                'appraisalCompany': property.appraisalCompany,
+                'appraiser': property.appraiser,
+                'appraierPhone': property.appraiserPhone,
+                'surveyor': property.surveyor,
+                'surveyorPhone': property.surveyorPhone,
+                'homeInspector': property.homeInspector,
+                'homeInspectorPhone': property.homeInspectorPhone,
+                'architect': property.architect,
+                'architectPhone': property.architectPhone,
+                # Lender Information
+                'lender': property.lender,
+                'lenderPhone': property.lenderPhone,
+                'refinanceLender': property.refinanceLender,
+                'refinanceLenderPhone': property.refinanceLenderPhone,
+                'loanOfficer': property.loanOfficer,
+                'loanOfficerPhone': property.loanOfficerPhone,
+                'loanNumber': property.loanNumber,
+                # Sales & Marketing
+                'propertyManager': property.propertyManager,
+                'propertyManagerPhone': property.propertyManagerPhone,
+                'propertyManagementCompany': property.propertyManagementCompany,
+                'propertyManagementPhone': property.propertyManagementCompanyPhone,
+                'photographer': property.photographer,
+                'photographerPhone': property.photographerPhone,
+                'videographer': property.videographer,
+                'videographerPhone': property.videographerPhone
+                
             }), 200
         else:
             return jsonify({"message": "Property not found or access denied"}), 403
@@ -154,57 +208,110 @@ def get_properties():
         properties = Property.query.filter_by(user_id=user.id).all()
         return jsonify([{
             'id': property.id,
-            'propertyName': property.propertyName,
-            'address': property.address,
-            'city': property.city,
-            'state': property.state,
-            'zipCode': property.zipCode,
-            'county': property.county,
-            'municipalBuildingAddress': property.municipalBuildingAddress,
-            'buildingDepartmentContact': property.buildingDepartmentContact,
-            'electricDepartmentContact': property.electricDepartmentContact,
-            'plumbingDepartmentContact': property.plumbingDepartmentContact,
-            'fireDepartmentContact': property.fireDepartmentContact,
-            'environmentalDepartmentContact': property.environmentalDepartmentContact,
-            'purchaseCost': property.purchaseCost,
-            'refinanceCosts': property.refinanceCosts,
-            'totalRehabCost': property.totalRehabCost,
-            'kickStartFunds': property.kickStartFunds,
-            'lenderConstructionDrawsReceived': property.lenderConstructionDrawsReceived,
-            'utilitiesCost': property.utilitiesCost,
-            'yearlyPropertyTaxes': property.yearlyPropertyTaxes,
-            'mortgagePaid': property.mortgagePaid,
-            'homeownersInsurance': property.homeownersInsurance,
-            'expectedYearlyRent': property.expectedYearlyRent,
-            'rentalIncomeReceived': property.rentalIncomeReceived,
-            'vacancyLoss': property.vacancyLoss,
-            'managementFees': property.managementFees,
-            'maintenanceCosts': property.maintenanceCosts,
-            'totalEquity': property.totalEquity,
-            'arvSalePrice': property.arvSalePrice,
-            'realtorFees': property.realtorFees,
-            'propTaxtillEndOfYear': property.propTaxtillEndOfYear,
-            'lenderLoanBalance': property.lenderLoanBalance,
-            'payOffStatement': property.payOffStatement,
-            'attorneyFees': property.attorneyFees,
-            'miscFees': property.miscFees,
-            'utilities': property.utilities,
-            'cash2closeFromPurchase': property.cash2closeFromPurchase,
-            'cash2closeFromRefinance': property.cash2closeFromRefinance,
-            'totalRehabCosts': property.totalRehabCosts,
-            'expectedRemainingRentEndToYear': property.expectedRemainingRentEndToYear,
-            'totalExpenses': property.totalExpenses,
-            'totalConstructionDrawsReceived': property.totalConstructionDrawsReceived,
-            'projectNetProfitIfSold': property.projectNetProfitIfSold,
-            'typeOfHeatingAndCooling': property.typeOfHeatingAndCooling,
-            'waterCompany': property.waterCompany,
-            'waterAccountNumber': property.waterAccountNumber,
-            'electricCompany': property.electricCompany,
-            'electricAccountNumber': property.electricAccountNumber,
-            'gasOrOilCompany': property.gasOrOilCompany,
-            'gasOrOilAccountNumber': property.gasOrOilAccountNumber,
-            'sewerCompany': property.sewerCompany,
-            'sewerAccountNumber': property.sewerAccountNumber
+                # Location Section
+                'propertyName': property.propertyName,
+                'address': property.address,
+                'city': property.city,
+                'state': property.state,
+                'zipCode': property.zipCode,
+                'county': property.county,
+                'bedroomsDescription': property.bedroomsDescription,
+                'bathroomsDescription': property.bathroomsDescription,
+                'kitchenDescription': property.kitchenDescription,
+                'amenitiesDescription': property.amenitiesDescription,
+                # Departments
+                'municipalBuildingAddress': property.municipalBuildingAddress,
+                'buildingDepartmentContact': property.buildingDepartmentContact,
+                'electricDepartmentContact': property.electricDepartmentContact,
+                'plumbingDepartmentContact': property.plumbingDepartmentContact,
+                'fireDepartmentContact': property.fireDepartmentContact,
+                'homeownersAssociationContact': property.homeownersAssociationContact,
+                'environmentalDepartmentContact': property.environmentalDepartmentContact,
+                # Total Outlay To Date
+                'purchaseCost': property.purchaseCost,
+                'refinanceCosts': property.refinanceCosts,
+                'totalRehabCost': property.totalRehabCost,
+                'kickStartFunds': property.kickStartFunds,
+                'lenderConstructionDrawsReceived': property.lenderConstructionDrawsReceived,
+                'utilitiesCost': property.utilitiesCost,
+                'yearlyPropertyTaxes': property.yearlyPropertyTaxes,
+                'mortgagePaid': property.mortgagePaid,
+                'homeownersInsurance': property.homeownersInsurance,
+                'expectedYearlyRent': property.expectedYearlyRent,
+                'rentalIncomeReceived': property.rentalIncomeReceived,
+                'vacancyLoss': property.vacancyLoss,
+                'managementFees': property.managementFees,
+                'maintenanceCosts': property.maintenanceCosts,
+                'totalEquity': property.totalEquity,
+                # Sale Projection
+                'arvSalePrice': property.arvSalePrice,
+                'realtorFees': property.realtorFees,
+                'propTaxtillEndOfYear': property.propTaxtillEndOfYear,
+                'lenderLoanBalance': property.lenderLoanBalance,
+                'payOffStatement': property.payOffStatement,
+                'attorneyFees': property.attorneyFees,
+                'miscFees': property.miscFees,
+                'utilities': property.utilities,
+                'cash2closeFromPurchase': property.cash2closeFromPurchase,
+                'cash2closeFromRefinance': property.cash2closeFromRefinance,
+                'totalRehabCosts': property.totalRehabCosts,
+                'expectedRemainingRentEndToYear': property.expectedRemainingRentEndToYear,
+                'totalExpenses': property.totalExpenses,
+                'totalConstructionDrawsReceived': property.totalConstructionDrawsReceived,
+                'projectNetProfitIfSold': property.projectNetProfitIfSold,
+                # Utilities
+                'typeOfHeatingAndCooling': property.typeOfHeatingAndCooling,
+                'waterCompany': property.waterCompany,
+                'waterAccountNumber': property.waterAccountNumber,
+                'electricCompany': property.electricCompany,
+                'electricAccountNumber': property.electricAccountNumber,
+                'gasOrOilCompany': property.gasOrOilCompany,
+                'gasOrOilAccountNumber': property.gasOrOilAccountNumber,
+                'sewerCompany': property.sewerCompany,
+                'sewerAccountNumber': property.sewerAccountNumber,
+                # Key Players Information
+                'sellersAgent': property.sellersAagent,
+                'sellersBroker': property.sellersBroker,
+                'sellersAgentPhone': property.sellersAgentPhone,
+                'sellersAttorney': property.sellersAttorney,
+                'sellersAttorneyPhone': property.sellersAttorneyPhone,
+                'escrowCompany': property.escrowCompany,
+                'escrowAgent': property.escrowAgent,
+                'escrowAgentPhone': property.escrowAgentPhone,
+                'buyersAgent': property.buyerAgent,
+                'buyersAgentPhone': property.buyerAgentPhone,
+                'buyersAttorney': property.buyerAttorney,
+                'buyersAttorneyPhone': property.buyerAttorneyPhone,
+                'titleInsuranceCompany': property.titleInsuranceCompany,
+                'titleAgent': property.titleAgent,
+                'titleAgentPhone': property.titleAgentPhone,
+                'titlePhone': property.titlePhone,
+                'appraisalCompany': property.appraisalCompany,
+                'appraiser': property.appraiser,
+                'appraierPhone': property.appraiserPhone,
+                'surveyor': property.surveyor,
+                'surveyorPhone': property.surveyorPhone,
+                'homeInspector': property.homeInspector,
+                'homeInspectorPhone': property.homeInspectorPhone,
+                'architect': property.architect,
+                'architectPhone': property.architectPhone,
+                # Lender Information
+                'lender': property.lender,
+                'lenderPhone': property.lenderPhone,
+                'refinanceLender': property.refinanceLender,
+                'refinanceLenderPhone': property.refinanceLenderPhone,
+                'loanOfficer': property.loanOfficer,
+                'loanOfficerPhone': property.loanOfficerPhone,
+                'loanNumber': property.loanNumber,
+                # Sales & Marketing
+                'propertyManager': property.propertyManager,
+                'propertyManagerPhone': property.propertyManagerPhone,
+                'propertyManagementCompany': property.propertyManagementCompany,
+                'propertyManagementPhone': property.propertyManagementCompanyPhone,
+                'photographer': property.photographer,
+                'photographerPhone': property.photographerPhone,
+                'videographer': property.videographer,
+                'videographerPhone': property.videographerPhone
         } for property in properties]), 200
     else:
         return jsonify({"message": "User not found"}), 404
@@ -232,18 +339,26 @@ def add_property():
 
         property = Property(
             user_id=user.id,
+            # Location Section
             propertyName=data['propertyName'],
             address=data.get('address', ''),
             city=data.get('city', ''),
             state=data.get('state', ''),
             zipCode=data.get('zipCode', ''),
             county=data.get('county', ''),
+            bedroomsDescription=data.get('bedroomsDescription', ''),
+            bathroomsDescription=data.get('bathroomsDescription', ''),
+            kitchenDescription=data.get('kitchenDescription', ''),
+            amenitiesDescription=data.get('amenitiesDescription', ''),
+            # Departments
             municipalBuildingAddress=data.get('municipalBuildingAddress', ''),
             buildingDepartmentContact=data.get('buildingDepartmentContact', ''),
             electricDepartmentContact=data.get('electricDepartmentContact', ''),
             plumbingDepartmentContact=data.get('plumbingDepartmentContact', ''),
             fireDepartmentContact=data.get('fireDepartmentContact', ''),
+            homeownersAssociationContact=data.get('homeownersAssociationContact', ''),
             environmentalDepartmentContact=data.get('environmentalDepartmentContact', ''),
+            # Total Outlay To Date
             purchaseCost=convert_to_float(data.get('purchaseCost')),
             refinanceCosts=convert_to_float(data.get('refinanceCosts')),
             totalRehabCost=convert_to_float(data.get('totalRehabCost')),
@@ -259,6 +374,7 @@ def add_property():
             managementFees=convert_to_float(data.get('managementFees')),
             maintenanceCosts=convert_to_float(data.get('maintenanceCosts')),
             totalEquity=convert_to_float(data.get('totalEquity')),
+            # Sale Projection
             arvSalePrice=convert_to_float(data.get('arvSalePrice')),
             realtorFees=convert_to_float(data.get('realtorFees')),
             propTaxtillEndOfYear=convert_to_float(data.get('propTaxtillEndOfYear')),
@@ -274,6 +390,7 @@ def add_property():
             totalExpenses=convert_to_float(data.get('totalExpenses')),
             totalConstructionDrawsReceived=convert_to_float(data.get('totalConstructionDrawsReceived')),
             projectNetProfitIfSold=convert_to_float(data.get('projectNetProfitIfSold')),
+            # Utilities
             typeOfHeatingAndCooling=data.get('typeOfHeatingAndCooling', ''),
             waterCompany=data.get('waterCompany', ''),
             waterAccountNumber=convert_to_float(data.get('waterAccountNumber', '')),
@@ -283,6 +400,49 @@ def add_property():
             gasOrOilAccountNumber=convert_to_float(data.get('gasOrOilAccountNumber', '')),
             sewerCompany=data.get('sewerCompany', ''),
             sewerAccountNumber=convert_to_float(data.get('sewerAccountNumber', '')),
+            # Key Players Information
+            sellersAgent=data.get('sellersAgent', ''),
+            sellersBroker=data.get('sellersBroker', ''),
+            sellersAgentPhone=data.get('sellersAgentPhone', ''),
+            sellersAttorney=data.get('sellersAttorney', ''),
+            sellersAttorneyPhone=data.get('sellersAttorneyPhone', ''),
+            escrowCompany=data.get('escrowCompany', ''),
+            escrowAgent=data.get('escrowAgent', ''),
+            escrowAgentPhone=data.get('escrowAgentPhone', ''),
+            buyersAgent=data.get('buyersAgent', ''),
+            buyersAgentPhone=data.get('buyersAgentPhone', ''),
+            buyersAttorney=data.get('buyersAttorney', ''),
+            buyersAttorneyPhone=data.get('buyersAttorneyPhone', ''),
+            titleInsuranceCompany=data.get('titleInsuranceCompany', ''),
+            titleAgent=data.get('titleAgent', ''),
+            titleAgentPhone=data.get('titleAgentPhone', ''),
+            titlePhone=data.get('titlePhone', ''),
+            appraisalCompany=data.get('appraisalCompany', ''),
+            appraiser=data.get('appraiser', ''),
+            appraiserPhone=data.get('appraiserPhone', ''),
+            surveyor=data.get('surveyor', ''),
+            surveyorPhone=data.get('surveyorPhone', ''),
+            homeInspector=data.get('homeInspector', ''),
+            homeInspectorPhone=data.get('homeInspectorPhone', ''),
+            architect=data.get('architect', ''),
+            architectPhone=data.get('architectPhone', ''),
+            # Lender Information
+            lender=data.get('lender', ''),
+            lenderPhone=data.get('lenderPhone', ''),
+            refinanceLender=data.get('refinanceLender', ''),
+            refinanceLenderPhone=data.get('refinanceLenderPhone', ''),
+            loanOfficer=data.get('loanOfficer', ''),
+            loanOfficerPhone=data.get('loanOfficerPhone', ''),
+            loanNumber=data.get('loanNumber', ''),
+            # Sales & Marketing
+            propertyManager=data.get('propertyManager', ''),
+            propertyManagerPhone=data.get('propertyManagerPhone', ''),
+            propertyManagementCompany=data.get('propertyManagementCompany', ''),
+            propertyManagementPhone=data.get('propertyManagementCompanyPhone', ''),
+            photographer=data.get('photographer', ''),
+            photographerPhone=data.get('photographerPhone', ''),
+            videographer=data.get('videographer', ''),
+            videographerPhone=data.get('videographerPhone', '')
         )
 
         db.session.add(property)
@@ -302,18 +462,26 @@ def update_property(property_id):
         property_to_update = Property.query.filter_by(id=property_id, user_id=user.id).first()
         if property_to_update:
             data = request.get_json()
+            # Location Section
             property_to_update.propertyName = data.get('propertyName', property_to_update.propertyName)
             property_to_update.address = data.get('address', property_to_update.address)
             property_to_update.city = data.get('city', property_to_update.city)
             property_to_update.state = data.get('state', property_to_update.state)
             property_to_update.zipCode = data.get('zipCode', property_to_update.zipCode)
             property_to_update.county = data.get('county', property_to_update.county)
+            property_to_update.bedroomsDescription = data.get('bedroomsDescription', property_to_update.bedroomsDescription)
+            property_to_update.bathroomsDescription = data.get('bathroomsDescription', property_to_update.bathroomsDescription)
+            property_to_update.kitchenDescription = data.get('kitchenDescription', property_to_update.kitchenDescription)
+            property_to_update.amenitiesDescription = data.get('amenitiesDescription', property_to_update.amenitiesDescription)
+            # Departments
             property_to_update.municipalBuildingAddress = data.get('municipalBuildingAddress', property_to_update.municipalBuildingAddress)
             property_to_update.buildingDepartmentContact = data.get('buildingDepartmentContact', property_to_update.buildingDepartmentContact)
             property_to_update.electricDepartmentContact = data.get('electricDepartmentContact', property_to_update.electricDepartmentContact)
             property_to_update.plumbingDepartmentContact = data.get('plumbingDepartmentContact', property_to_update.plumbingDepartmentContact)
             property_to_update.fireDepartmentContact = data.get('fireDepartmentContact', property_to_update.fireDepartmentContact)
+            property_to_update.homeownersAssociationContact = data.get('homeownersAssociationContact', property_to_update.homeownersAssociationContact)
             property_to_update.environmentalDepartmentContact = data.get('environmentalDepartmentContact', property_to_update.environmentalDepartmentContact)
+            # Total Outlay To Date
             property_to_update.purchaseCost = data.get('purchaseCost', property_to_update.purchaseCost)
             property_to_update.refinanceCosts = data.get('refinanceCosts', property_to_update.refinanceCosts)
             property_to_update.totalRehabCost = data.get('totalRehabCost', property_to_update.totalRehabCost)
@@ -329,6 +497,7 @@ def update_property(property_id):
             property_to_update.managementFees = data.get('managementFees', property_to_update.managementFees)
             property_to_update.maintenanceCosts = data.get('maintenanceCosts', property_to_update.maintenanceCosts)
             property_to_update.totalEquity = data.get('totalEquity', property_to_update.totalEquity)
+            # Sale Projection
             property_to_update.arvSalePrice = data.get('arvSalePrice', property_to_update.arvSalePrice)
             property_to_update.realtorFees = data.get('realtorFees', property_to_update.realtorFees)
             property_to_update.propTaxtillEndOfYear = data.get('propTaxtillEndOfYear', property_to_update.propTaxtillEndOfYear)
@@ -344,6 +513,7 @@ def update_property(property_id):
             property_to_update.totalExpenses = data.get('totalExpenses', property_to_update.totalExpenses)
             property_to_update.totalConstructionDrawsReceived = data.get('totalConstructionDrawsReceived', property_to_update.totalConstructionDrawsReceived)
             property_to_update.projectNetProfitIfSold = data.get('projectNetProfitIfSold', property_to_update.projectNetProfitIfSold)
+            # Utilities
             property_to_update.typeOfHeatingAndCooling = data.get('typeOfHeatingAndCooling', property_to_update.typeOfHeatingAndCooling)
             property_to_update.waterCompany = data.get('waterCompany', property_to_update.waterCompany)
             property_to_update.waterAccountNumber = data.get('waterAccountNumber', property_to_update.waterAccountNumber)
@@ -353,6 +523,49 @@ def update_property(property_id):
             property_to_update.gasOrOilAccountNumber = data.get('gasOrOilAccountNumber', property_to_update.gasOrOilAccountNumber)
             property_to_update.sewerCompany = data.get('sewerCompany', property_to_update.sewerCompany)
             property_to_update.sewerAccountNumber = data.get('sewerAccountNumber', property_to_update.sewerAccountNumber)
+            # Key Players Information
+            property_to_update.sellersAgent = data.get('sellersAgent', property_to_update.sellersAgent)
+            property_to_update.sellersBroker = data.get('sellersBroker', property_to_update.sellersBroker)
+            property_to_update.sellersAgentPhone = data.get('sellersAgentPhone', property_to_update.sellersAgentPhone)
+            property_to_update.sellersAttorney = data.get('sellersAttorney', property_to_update.sellersAttorney)
+            property_to_update.sellersAttorneyPhone = data.get('sellersAttorneyPhone', property_to_update.sellersAttorneyPhone)
+            property_to_update.escrowCompany = data.get('escrowCompany', property_to_update.escrowCompany)
+            property_to_update.escrowAgent = data.get('escrowAgent', property_to_update.escrowAgent)
+            property_to_update.escrowAgentPhone = data.get('escrowAgentPhone', property_to_update.escrowAgentPhone)
+            property_to_update.buyersAgent = data.get('buyersAgent', property_to_update.buyersAgent)
+            property_to_update.buyersAgentPhone = data.get('buyersAgentPhone', property_to_update.buyersAgentPhone)
+            property_to_update.buyersAttorney = data.get('buyersAttorney', property_to_update.buyersAttorney)
+            property_to_update.buyersAttorneyPhone = data.get('buyersAttorneyPhone', property_to_update.buyersAttorneyPhone)
+            property_to_update.titleInsuranceCompany = data.get('titleInsuranceCompany', property_to_update.titleInsuranceCompany)
+            property_to_update.titleAgent = data.get('titleAgent', property_to_update.titleAgent)
+            property_to_update.titleAgentPhone = data.get('titleAgentPhone', property_to_update.titleAgentPhone)
+            property_to_update.titlePhone = data.get('titlePhone', property_to_update.titlePhone)
+            property_to_update.appraisalCompany = data.get('appraisalCompany', property_to_update.appraisalCompany)
+            property_to_update.appraiser = data.get('appraiser', property_to_update.appraiser)
+            property_to_update.appraiserPhone = data.get('appraiserPhone', property_to_update.appraiserPhone)
+            property_to_update.surveyor = data.get('surveyor', property_to_update.surveyor)
+            property_to_update.surveyorPhone = data.get('surveyorPhone', property_to_update.surveyorPhone)
+            property_to_update.homeInspector = data.get('homeInspector', property_to_update.homeInspector)
+            property_to_update.homeInspectorPhone = data.get('homeInspectorPhone', property_to_update.homeInspectorPhone)
+            property_to_update.architect = data.get('architect', property_to_update.architect)
+            property_to_update.architectPhone = data.get('architectPhone', property_to_update.architectPhone)
+            # Lender Information
+            property_to_update.lender = data.get('lender', property_to_update.lender)
+            property_to_update.lenderPhone = data.get('lenderPhone', property_to_update.lenderPhone)
+            property_to_update.refinanceLender = data.get('refinanceLender', property_to_update.refinanceLender)
+            property_to_update.refinanceLenderPhone = data.get('refinanceLenderPhone', property_to_update.refinanceLenderPhone)
+            property_to_update.loanOfficer = data.get('loanOfficer', property_to_update.loanOfficer)
+            property_to_update.loanOfficerPhone = data.get('loanOfficerPhone', property_to_update.loanOfficerPhone)
+            property_to_update.loanNumber = data.get('loanNumber', property_to_update.loanNumber)
+            # Sales & Marketing
+            property_to_update.propertyManager = data.get('propertyManager', property_to_update.propertyManager)
+            property_to_update.propertyManagerPhone = data.get('propertyManagerPhone', property_to_update.propertyManagerPhone)
+            property_to_update.propertyManagementCompany = data.get('propertyManagementCompany', property_to_update.propertyManagementCompany)
+            property_to_update.propertyManagementPhone = data.get('propertyManagementCompanyPhone', property_to_update.propertyManagementCompanyPhone)
+            property_to_update.photographer = data.get('photographer', property_to_update.photographer)
+            property_to_update.photographerPhone = data.get('photographerPhone', property_to_update.photographerPhone)
+            property_to_update.videographer = data.get('videographer', property_to_update.videographer)
+            property_to_update.videographerPhone = data.get('videographerPhone', property_to_update.videographerPhone)
             db.session.commit()
             return jsonify({"message": "Property updated successfully"}), 200
         else:
