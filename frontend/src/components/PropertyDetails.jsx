@@ -13,6 +13,9 @@ const PropertyDetails = ({ propertyId }) => {
     outlayToDate: true,
     saleProjection: true,
     utilityInformation: true,
+    keyPlayers: true,
+    lender: true,
+    salesAndMarketing: true,
   });
 
   useEffect(() => {
@@ -182,6 +185,26 @@ const PropertyDetails = ({ propertyId }) => {
                 "county",
                 editedDetails.county || ""
               )}
+              {renderEditableField(
+                "Bedrooms",
+                "bedroomsDescription",
+                editedDetails.bedroomsDescription || ""
+              )}
+              {renderEditableField(
+                "Bathrooms",
+                "bathroomsDescription",
+                editedDetails.bathroomsDescription || ""
+              )}
+              {renderEditableField(
+                "Kitchen",
+                "kitchenDescription",
+                editedDetails.kitchenDescription || ""
+              )}
+              {renderEditableField(
+                "Amenities",
+                "amenitiesDescription",
+                editedDetails.amenitiesDescription || ""
+              )}
             </>
           )}
         </div>
@@ -227,6 +250,11 @@ const PropertyDetails = ({ propertyId }) => {
                 "Fire Dept",
                 "fireDepartmentContact",
                 editedDetails.fireDepartmentContact || ""
+              )}
+              {renderEditableField(
+                "Homeowners Association",
+                "homeownersAssociationContact",
+                editedDetails.homeownersAssociationContact || ""
               )}
               {renderEditableField(
                 "Environmental Dept",
@@ -573,6 +601,276 @@ const PropertyDetails = ({ propertyId }) => {
                 "Sewer Account Number",
                 "sewerAccountNumber",
                 editedDetails.sewerAccountNumber || ""
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Key Players Section */}
+        <div className="keyPlayers bg-gray-50 p-4 shadow-sm rounded-md">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-lg font-semibold text-gray-700">Key Players</h2>
+            <button
+              onClick={() => toggleSection("keyPlayers")}
+              className="focus:outline-none"
+            >
+              {expandedSections.keyPlayers ? (
+                <ChevronsUp size={24} className="text-gray-700" />
+              ) : (
+                <ChevronsDown size={24} className="text-gray-700" />
+              )}
+            </button>
+          </div>
+          {expandedSections.keyPlayers && (
+            <>
+              {renderEditableField(
+                "Seller's Agent",
+                "sellersAgent",
+                editedDetails.sellersAgent || ""
+              )}
+              {renderEditableField(
+                "Seller's Broker",
+                "sellersBroker",
+                editedDetails.sellersBroker || ""
+              )}
+              {renderEditableField(
+                "Seller's Agent Phone",
+                "sellersAgentPhone",
+                editedDetails.sellersAgentPhone || ""
+              )}
+              {renderEditableField(
+                "Seller's Attorney",
+                "sellersAttorney",
+                editedDetails.sellersAttorney || ""
+              )}
+              {renderEditableField(
+                "Seller's Attorney Phone",
+                "sellersAttorneyPhone",
+                editedDetails.sellersAttorneyPhone || ""
+              )}
+              {renderEditableField(
+                "Escrow Company",
+                "escrowCompany",
+                editedDetails.escrowCompany || ""
+              )}
+              {renderEditableField(
+                "Escrow Agent",
+                "escrowAgent",
+                editedDetails.escrowAgent || ""
+              )}
+              {renderEditableField(
+                "Escrow Agent Phone",
+                "escrowAgentPhone",
+                editedDetails.escrowAgentPhone || ""
+              )}
+              {renderEditableField(
+                "Buyer's Agent",
+                "buyersAgent",
+                editedDetails.buyersAgent || ""
+              )}
+              {renderEditableField(
+                "Buyer's Broker",
+                "buyersBroker",
+                editedDetails.buyersBroker || ""
+              )}
+              {renderEditableField(
+                "Buyer's Agent Phone",
+                "buyersAgentPhone",
+                editedDetails.buyersAgentPhone || ""
+              )}
+              {renderEditableField(
+                "Buyer's Attorney",
+                "buyersAttorney",
+                editedDetails.buyersAttorney || ""
+              )}
+              {renderEditableField(
+                "Buyer's Attorney Phone",
+                "buyersAttorneyPhone",
+                editedDetails.buyersAttorneyPhone || ""
+              )}
+              {renderEditableField(
+                "Title Insurance Company",
+                "titleInsuranceCompany",
+                editedDetails.titleInsuranceCompany || ""
+              )}
+              {renderEditableField(
+                "Title Agent",
+                "titleAgent",
+                editedDetails.titleAgent || ""
+              )}
+              {renderEditableField(
+                "Title Agent Phone",
+                "titleAgentPhone",
+                editedDetails.titleAgentPhone || ""
+              )}
+              {renderEditableField(
+                "Title Company Phone",
+                "titlePhone",
+                editedDetails.titlePhone || ""
+              )}
+              {renderEditableField(
+                "Appraisal Company",
+                "appraisalCompany",
+                editedDetails.appraisalCompany || ""
+              )}
+              {renderEditableField(
+                "Appraiser",
+                "appraiser",
+                editedDetails.appraiser || ""
+              )}
+              {renderEditableField(
+                "Appraiser Phone",
+                "appraiserPhone",
+                editedDetails.appraiserPhone || ""
+              )}
+              {renderEditableField(
+                "Surveyor",
+                "surveyor",
+                editedDetails.surveyor || ""
+              )}
+              {renderEditableField(
+                "Surveyor Phone",
+                "surveyorPhone",
+                editedDetails.surveyorPhone || ""
+              )}
+              {renderEditableField(
+                "Home Inspector",
+                "homeInspector",
+                editedDetails.homeInspector || ""
+              )}
+              {renderEditableField(
+                "Home Inspector Phone",
+                "homeInspectorPhone",
+                editedDetails.homeInspectorPhone || ""
+              )}
+              {renderEditableField(
+                "Architect",
+                "architect",
+                editedDetails.architect || ""
+              )}
+              {renderEditableField(
+                "Architect Phone",
+                "architectPhone",
+                editedDetails.architectPhone || ""
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Lender Information Section */}
+        <div className="lenderInformation bg-gray-50 p-4 shadow-sm rounded-md">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-lg font-semibold text-gray-700">Lender</h2>
+            <button
+              onClick={() => toggleSection("lender")}
+              className="focus:outline-none"
+            >
+              {expandedSections.lender ? (
+                <ChevronsUp size={24} className="text-gray-700" />
+              ) : (
+                <ChevronsDown size={24} className="text-gray-700" />
+              )}
+            </button>
+          </div>
+          {expandedSections.lender && (
+            <>
+              {renderEditableField(
+                "Lender",
+                "lender",
+                editedDetails.lender || ""
+              )}
+              {renderEditableField(
+                "Lender Phone",
+                "lenderPhone",
+                editedDetails.lenderPhone || ""
+              )}
+              {renderEditableField(
+                "Refinance Lender",
+                "refinanceLender",
+                editedDetails.refinanceLender || ""
+              )}
+              {renderEditableField(
+                "Refinance Lender Phone",
+                "refinanceLenderPhone",
+                editedDetails.refinanceLenderPhone || ""
+              )}
+              {renderEditableField(
+                "Loan Officer",
+                "loanOfficer",
+                editedDetails.loanOfficer || ""
+              )}
+              {renderEditableField(
+                "Loan Officer Phone",
+                "loanOfficerPhone",
+                editedDetails.loanOfficerPhone || ""
+              )}
+              {renderEditableField(
+                "Loan Number",
+                "loanNumber",
+                editedDetails.loanNumber || ""
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Sales & Marketing Section */}
+        <div className="salesAndMarketing bg-gray-50 p-4 shadow-sm rounded-md">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-lg font-semibold text-gray-700">
+              Sales & Marketing
+            </h2>
+            <button
+              onClick={() => toggleSection("salesAndMarketing")}
+              className="focus:outline-none"
+            >
+              {expandedSections.salesAndMarketing ? (
+                <ChevronsUp size={24} className="text-gray-700" />
+              ) : (
+                <ChevronsDown size={24} className="text-gray-700" />
+              )}
+            </button>
+          </div>
+          {expandedSections.salesAndMarketing && (
+            <>
+              {renderEditableField(
+                "Property Manager",
+                "propertyManager",
+                editedDetails.propertyManager || ""
+              )}
+              {renderEditableField(
+                "Property Manager Phone",
+                "propertyManagerPhone",
+                editedDetails.propertyManagerPhone || ""
+              )}
+              {renderEditableField(
+                "Property Management Company",
+                "propertyManagementCompany",
+                editedDetails.propertyManagementCompany || ""
+              )}
+              {renderEditableField(
+                "Property Management Phone",
+                "propertyManagementPhone",
+                editedDetails.propertyManagementPhone || ""
+              )}
+              {renderEditableField(
+                "Photographer",
+                "photographer",
+                editedDetails.photographer || ""
+              )}
+              {renderEditableField(
+                "Photographer Phone",
+                "photographerPhone",
+                editedDetails.photographerPhone || ""
+              )}
+              {renderEditableField(
+                "Videographer",
+                "videographer",
+                editedDetails.videographer || ""
+              )}
+              {renderEditableField(
+                "Videographer Phone",
+                "videographerPhone",
+                editedDetails.videographerPhone || ""
               )}
             </>
           )}
