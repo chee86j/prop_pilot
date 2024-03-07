@@ -65,7 +65,7 @@ const Home = () => {
       </div>
 
       {/* Features Section */}
-      <div className="features-section mb-6 md:mb-10">
+      <div className="features-section p-4 md:p-6 rounded-lg mb-4 md:mb-6">
         <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-700 mb-4 md:mb-6">
           Our Features
         </h2>
