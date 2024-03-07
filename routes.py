@@ -189,8 +189,7 @@ def get_property(property_id):
                 'photographer': property.photographer,
                 'photographerPhone': property.photographerPhone,
                 'videographer': property.videographer,
-                'videographerPhone': property.videographerPhone
-                
+                'videographerPhone': property.videographerPhone,
             }), 200
         else:
             return jsonify({"message": "Property not found or access denied"}), 403
@@ -286,15 +285,6 @@ def get_properties():
                 'titleAgent': property.titleAgent,
                 'titleAgentPhone': property.titleAgentPhone,
                 'titlePhone': property.titlePhone,
-                'appraisalCompany': property.appraisalCompany,
-                'appraiser': property.appraiser,
-                'appraierPhone': property.appraiserPhone,
-                'surveyor': property.surveyor,
-                'surveyorPhone': property.surveyorPhone,
-                'homeInspector': property.homeInspector,
-                'homeInspectorPhone': property.homeInspectorPhone,
-                'architect': property.architect,
-                'architectPhone': property.architectPhone,
                 # Lender Information
                 'lender': property.lender,
                 'lenderPhone': property.lenderPhone,
@@ -311,7 +301,16 @@ def get_properties():
                 'photographer': property.photographer,
                 'photographerPhone': property.photographerPhone,
                 'videographer': property.videographer,
-                'videographerPhone': property.videographerPhone
+                'videographerPhone': property.videographerPhone,
+                'appraisalCompany': property.appraisalCompany,
+                'appraiser': property.appraiser,
+                'appraierPhone': property.appraiserPhone,
+                'surveyor': property.surveyor,
+                'surveyorPhone': property.surveyorPhone,
+                'homeInspector': property.homeInspector,
+                'homeInspectorPhone': property.homeInspectorPhone,
+                'architect': property.architect,
+                'architectPhone': property.architectPhone,
         } for property in properties]), 200
     else:
         return jsonify({"message": "User not found"}), 404
@@ -417,15 +416,6 @@ def add_property():
             titleAgent=data.get('titleAgent', ''),
             titleAgentPhone=data.get('titleAgentPhone', ''),
             titlePhone=data.get('titlePhone', ''),
-            appraisalCompany=data.get('appraisalCompany', ''),
-            appraiser=data.get('appraiser', ''),
-            appraiserPhone=data.get('appraiserPhone', ''),
-            surveyor=data.get('surveyor', ''),
-            surveyorPhone=data.get('surveyorPhone', ''),
-            homeInspector=data.get('homeInspector', ''),
-            homeInspectorPhone=data.get('homeInspectorPhone', ''),
-            architect=data.get('architect', ''),
-            architectPhone=data.get('architectPhone', ''),
             # Lender Information
             lender=data.get('lender', ''),
             lenderPhone=data.get('lenderPhone', ''),
@@ -442,7 +432,16 @@ def add_property():
             photographer=data.get('photographer', ''),
             photographerPhone=data.get('photographerPhone', ''),
             videographer=data.get('videographer', ''),
-            videographerPhone=data.get('videographerPhone', '')
+            videographerPhone=data.get('videographerPhone', ''),
+            appraisalCompany=data.get('appraisalCompany', ''),
+            appraiser=data.get('appraiser', ''),
+            appraiserPhone=data.get('appraiserPhone', ''),
+            surveyor=data.get('surveyor', ''),
+            surveyorPhone=data.get('surveyorPhone', ''),
+            homeInspector=data.get('homeInspector', ''),
+            homeInspectorPhone=data.get('homeInspectorPhone', ''),
+            architect=data.get('architect', ''),
+            architectPhone=data.get('architectPhone', ''),
         )
 
         db.session.add(property)
@@ -540,15 +539,6 @@ def update_property(property_id):
             property_to_update.titleAgent = data.get('titleAgent', property_to_update.titleAgent)
             property_to_update.titleAgentPhone = data.get('titleAgentPhone', property_to_update.titleAgentPhone)
             property_to_update.titlePhone = data.get('titlePhone', property_to_update.titlePhone)
-            property_to_update.appraisalCompany = data.get('appraisalCompany', property_to_update.appraisalCompany)
-            property_to_update.appraiser = data.get('appraiser', property_to_update.appraiser)
-            property_to_update.appraiserPhone = data.get('appraiserPhone', property_to_update.appraiserPhone)
-            property_to_update.surveyor = data.get('surveyor', property_to_update.surveyor)
-            property_to_update.surveyorPhone = data.get('surveyorPhone', property_to_update.surveyorPhone)
-            property_to_update.homeInspector = data.get('homeInspector', property_to_update.homeInspector)
-            property_to_update.homeInspectorPhone = data.get('homeInspectorPhone', property_to_update.homeInspectorPhone)
-            property_to_update.architect = data.get('architect', property_to_update.architect)
-            property_to_update.architectPhone = data.get('architectPhone', property_to_update.architectPhone)
             # Lender Information
             property_to_update.lender = data.get('lender', property_to_update.lender)
             property_to_update.lenderPhone = data.get('lenderPhone', property_to_update.lenderPhone)
@@ -566,6 +556,15 @@ def update_property(property_id):
             property_to_update.photographerPhone = data.get('photographerPhone', property_to_update.photographerPhone)
             property_to_update.videographer = data.get('videographer', property_to_update.videographer)
             property_to_update.videographerPhone = data.get('videographerPhone', property_to_update.videographerPhone)
+            property_to_update.appraisalCompany = data.get('appraisalCompany', property_to_update.appraisalCompany)
+            property_to_update.appraiser = data.get('appraiser', property_to_update.appraiser)
+            property_to_update.appraiserPhone = data.get('appraiserPhone', property_to_update.appraiserPhone)
+            property_to_update.surveyor = data.get('surveyor', property_to_update.surveyor)
+            property_to_update.surveyorPhone = data.get('surveyorPhone', property_to_update.surveyorPhone)
+            property_to_update.homeInspector = data.get('homeInspector', property_to_update.homeInspector)
+            property_to_update.homeInspectorPhone = data.get('homeInspectorPhone', property_to_update.homeInspectorPhone)
+            property_to_update.architect = data.get('architect', property_to_update.architect)
+            property_to_update.architectPhone = data.get('architectPhone', property_to_update.architectPhone)
             db.session.commit()
             return jsonify({"message": "Property updated successfully"}), 200
         else:

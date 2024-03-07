@@ -8,14 +8,14 @@ const PropertyDetails = ({ propertyId }) => {
   const [editMode, setEditMode] = useState(false);
   const [editedDetails, setEditedDetails] = useState({});
   const [expandedSections, setExpandedSections] = useState({
-    location: true,
-    departments: true,
+    location: false,
+    departments: false,
     outlayToDate: true,
     saleProjection: true,
-    utilityInformation: true,
-    keyPlayers: true,
-    lender: true,
-    salesAndMarketing: true,
+    utilityInformation: false,
+    keyPlayers: false,
+    lender: false,
+    salesAndMarketing: false,
   });
 
   useEffect(() => {
@@ -141,14 +141,14 @@ const PropertyDetails = ({ propertyId }) => {
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg text-sm">
       <ConstructionDraw propertyId={propertyId} />
-      <h1 className="text-xl md:text-2xl font-bold text-gray-700 my-6">
-        Property Details
+      <h1 className="text-center text-blue-500 text-xl md:text-2xl font-bold my-6">
+        {editedDetails.address} - Property Details
       </h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Location Section */}
         <div className="propHeader bg-gray-50 p-4 shadow-sm rounded-md">
           <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-semibold text-gray-700">Location</h2>
+            <h2 className="text-lg font-bold text-blue-700">Location</h2>
             <button
               onClick={() => toggleSection("location")}
               className="focus:outline-none"
@@ -212,7 +212,7 @@ const PropertyDetails = ({ propertyId }) => {
         {/* Departments Section */}
         <div className="propDepartments bg-gray-50 p-4 shadow-sm rounded-md">
           <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-semibold text-gray-700">Departments</h2>
+            <h2 className="text-lg font-bold text-blue-700">Departments</h2>
             <button
               onClick={() => toggleSection("departments")}
               className="focus:outline-none"
@@ -268,7 +268,7 @@ const PropertyDetails = ({ propertyId }) => {
         {/* Total Outlay To Date Section */}
         <div className="totalOutlayToDate bg-gray-50 p-4 shadow-sm rounded-md">
           <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-semibold text-gray-700">
+            <h2 className="text-lg font-bold text-blue-700">
               Total Outlay To Date
             </h2>
             <button
@@ -398,7 +398,7 @@ const PropertyDetails = ({ propertyId }) => {
         {/* Sale Projection Section */}
         <div className="saleProjection bg-gray-50 p-4 shadow-sm rounded-md">
           <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-semibold text-gray-700">
+            <h2 className="text-lg font-bold text-blue-700">
               Sale Projection
             </h2>
             <button
@@ -537,7 +537,7 @@ const PropertyDetails = ({ propertyId }) => {
         {/* Utility Information Section */}
         <div className="utilityInformation bg-gray-50 p-4 shadow-sm rounded-md">
           <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-semibold text-gray-700">
+            <h2 className="text-lg font-bold text-blue-700">
               Utility Information
             </h2>
             <button
@@ -606,161 +606,10 @@ const PropertyDetails = ({ propertyId }) => {
           )}
         </div>
 
-        {/* Key Players Section */}
-        <div className="keyPlayers bg-gray-50 p-4 shadow-sm rounded-md">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-semibold text-gray-700">Key Players</h2>
-            <button
-              onClick={() => toggleSection("keyPlayers")}
-              className="focus:outline-none"
-            >
-              {expandedSections.keyPlayers ? (
-                <ChevronsUp size={24} className="text-gray-700" />
-              ) : (
-                <ChevronsDown size={24} className="text-gray-700" />
-              )}
-            </button>
-          </div>
-          {expandedSections.keyPlayers && (
-            <>
-              {renderEditableField(
-                "Seller's Agent",
-                "sellersAgent",
-                editedDetails.sellersAgent || ""
-              )}
-              {renderEditableField(
-                "Seller's Broker",
-                "sellersBroker",
-                editedDetails.sellersBroker || ""
-              )}
-              {renderEditableField(
-                "Seller's Agent Phone",
-                "sellersAgentPhone",
-                editedDetails.sellersAgentPhone || ""
-              )}
-              {renderEditableField(
-                "Seller's Attorney",
-                "sellersAttorney",
-                editedDetails.sellersAttorney || ""
-              )}
-              {renderEditableField(
-                "Seller's Attorney Phone",
-                "sellersAttorneyPhone",
-                editedDetails.sellersAttorneyPhone || ""
-              )}
-              {renderEditableField(
-                "Escrow Company",
-                "escrowCompany",
-                editedDetails.escrowCompany || ""
-              )}
-              {renderEditableField(
-                "Escrow Agent",
-                "escrowAgent",
-                editedDetails.escrowAgent || ""
-              )}
-              {renderEditableField(
-                "Escrow Agent Phone",
-                "escrowAgentPhone",
-                editedDetails.escrowAgentPhone || ""
-              )}
-              {renderEditableField(
-                "Buyer's Agent",
-                "buyersAgent",
-                editedDetails.buyersAgent || ""
-              )}
-              {renderEditableField(
-                "Buyer's Broker",
-                "buyersBroker",
-                editedDetails.buyersBroker || ""
-              )}
-              {renderEditableField(
-                "Buyer's Agent Phone",
-                "buyersAgentPhone",
-                editedDetails.buyersAgentPhone || ""
-              )}
-              {renderEditableField(
-                "Buyer's Attorney",
-                "buyersAttorney",
-                editedDetails.buyersAttorney || ""
-              )}
-              {renderEditableField(
-                "Buyer's Attorney Phone",
-                "buyersAttorneyPhone",
-                editedDetails.buyersAttorneyPhone || ""
-              )}
-              {renderEditableField(
-                "Title Insurance Company",
-                "titleInsuranceCompany",
-                editedDetails.titleInsuranceCompany || ""
-              )}
-              {renderEditableField(
-                "Title Agent",
-                "titleAgent",
-                editedDetails.titleAgent || ""
-              )}
-              {renderEditableField(
-                "Title Agent Phone",
-                "titleAgentPhone",
-                editedDetails.titleAgentPhone || ""
-              )}
-              {renderEditableField(
-                "Title Company Phone",
-                "titlePhone",
-                editedDetails.titlePhone || ""
-              )}
-              {renderEditableField(
-                "Appraisal Company",
-                "appraisalCompany",
-                editedDetails.appraisalCompany || ""
-              )}
-              {renderEditableField(
-                "Appraiser",
-                "appraiser",
-                editedDetails.appraiser || ""
-              )}
-              {renderEditableField(
-                "Appraiser Phone",
-                "appraiserPhone",
-                editedDetails.appraiserPhone || ""
-              )}
-              {renderEditableField(
-                "Surveyor",
-                "surveyor",
-                editedDetails.surveyor || ""
-              )}
-              {renderEditableField(
-                "Surveyor Phone",
-                "surveyorPhone",
-                editedDetails.surveyorPhone || ""
-              )}
-              {renderEditableField(
-                "Home Inspector",
-                "homeInspector",
-                editedDetails.homeInspector || ""
-              )}
-              {renderEditableField(
-                "Home Inspector Phone",
-                "homeInspectorPhone",
-                editedDetails.homeInspectorPhone || ""
-              )}
-              {renderEditableField(
-                "Architect",
-                "architect",
-                editedDetails.architect || ""
-              )}
-              {renderEditableField(
-                "Architect Phone",
-                "architectPhone",
-                editedDetails.architectPhone || ""
-              )}
-            </>
-          )}
-        </div>
-
         {/* Lender Information Section */}
         <div className="lenderInformation bg-gray-50 p-4 shadow-sm rounded-md">
           <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-semibold text-gray-700">Lender</h2>
+            <h2 className="text-lg font-bold text-blue-700">Lender</h2>
             <button
               onClick={() => toggleSection("lender")}
               className="focus:outline-none"
@@ -813,10 +662,119 @@ const PropertyDetails = ({ propertyId }) => {
           )}
         </div>
 
+        {/* Key Players Section */}
+        <div className="keyPlayers bg-gray-50 p-4 shadow-sm rounded-md">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-lg font-bold text-blue-700">Key Players</h2>
+            <button
+              onClick={() => toggleSection("keyPlayers")}
+              className="focus:outline-none"
+            >
+              {expandedSections.keyPlayers ? (
+                <ChevronsUp size={24} className="text-gray-700" />
+              ) : (
+                <ChevronsDown size={24} className="text-gray-700" />
+              )}
+            </button>
+          </div>
+          {expandedSections.keyPlayers && (
+            <>
+              {renderEditableField(
+                "Seller's Agent",
+                "sellersAgent",
+                editedDetails.sellersAgent || ""
+              )}
+              {renderEditableField(
+                "Seller's Broker",
+                "sellersBroker",
+                editedDetails.sellersBroker || ""
+              )}
+              {renderEditableField(
+                "Seller's Agent Phone",
+                "sellersAgentPhone",
+                editedDetails.sellersAgentPhone || ""
+              )}
+              {renderEditableField(
+                "Seller's Attorney",
+                "sellersAttorney",
+                editedDetails.sellersAttorney || ""
+              )}
+              {renderEditableField(
+                "Seller's Attorney Phone",
+                "sellersAttorneyPhone",
+                editedDetails.sellersAttorneyPhone || ""
+              )}
+              <div className="border-t-2 border-black border-solid my-4"></div>
+              {renderEditableField(
+                "Escrow Company",
+                "escrowCompany",
+                editedDetails.escrowCompany || ""
+              )}
+              {renderEditableField(
+                "Escrow Agent",
+                "escrowAgent",
+                editedDetails.escrowAgent || ""
+              )}
+              {renderEditableField(
+                "Escrow Agent Phone",
+                "escrowAgentPhone",
+                editedDetails.escrowAgentPhone || ""
+              )}
+              <div className="border-t-2 border-black border-solid my-4"></div>
+              {renderEditableField(
+                "Buyer's Agent",
+                "buyersAgent",
+                editedDetails.buyersAgent || ""
+              )}
+              {renderEditableField(
+                "Buyer's Broker",
+                "buyersBroker",
+                editedDetails.buyersBroker || ""
+              )}
+              {renderEditableField(
+                "Buyer's Agent Phone",
+                "buyersAgentPhone",
+                editedDetails.buyersAgentPhone || ""
+              )}
+              {renderEditableField(
+                "Buyer's Attorney",
+                "buyersAttorney",
+                editedDetails.buyersAttorney || ""
+              )}
+              {renderEditableField(
+                "Buyer's Attorney Phone",
+                "buyersAttorneyPhone",
+                editedDetails.buyersAttorneyPhone || ""
+              )}
+              <div className="border-t-2 border-black border-solid my-4"></div>
+              {renderEditableField(
+                "Title Insurance Company",
+                "titleInsuranceCompany",
+                editedDetails.titleInsuranceCompany || ""
+              )}
+              {renderEditableField(
+                "Title Agent",
+                "titleAgent",
+                editedDetails.titleAgent || ""
+              )}
+              {renderEditableField(
+                "Title Agent Phone",
+                "titleAgentPhone",
+                editedDetails.titleAgentPhone || ""
+              )}
+              {renderEditableField(
+                "Title Company Phone",
+                "titlePhone",
+                editedDetails.titlePhone || ""
+              )}
+            </>
+          )}
+        </div>
+
         {/* Sales & Marketing Section */}
         <div className="salesAndMarketing bg-gray-50 p-4 shadow-sm rounded-md">
           <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-semibold text-gray-700">
+            <h2 className="text-lg font-bold text-blue-700">
               Sales & Marketing
             </h2>
             <button
@@ -852,6 +810,7 @@ const PropertyDetails = ({ propertyId }) => {
                 "propertyManagementPhone",
                 editedDetails.propertyManagementPhone || ""
               )}
+              <div className="border-t-2 border-black border-solid my-4"></div>
               {renderEditableField(
                 "Photographer",
                 "photographer",
@@ -872,6 +831,52 @@ const PropertyDetails = ({ propertyId }) => {
                 "videographerPhone",
                 editedDetails.videographerPhone || ""
               )}
+              <div className="border-t-2 border-black border-solid my-4"></div>
+              {renderEditableField(
+                "Appraisal Company",
+                "appraisalCompany",
+                editedDetails.appraisalCompany || ""
+              )}
+              {renderEditableField(
+                "Appraiser",
+                "appraiser",
+                editedDetails.appraiser || ""
+              )}
+              {renderEditableField(
+                "Appraiser Phone",
+                "appraiserPhone",
+                editedDetails.appraiserPhone || ""
+              )}
+              {renderEditableField(
+                "Surveyor",
+                "surveyor",
+                editedDetails.surveyor || ""
+              )}
+              {renderEditableField(
+                "Surveyor Phone",
+                "surveyorPhone",
+                editedDetails.surveyorPhone || ""
+              )}
+              {renderEditableField(
+                "Home Inspector",
+                "homeInspector",
+                editedDetails.homeInspector || ""
+              )}
+              {renderEditableField(
+                "Home Inspector Phone",
+                "homeInspectorPhone",
+                editedDetails.homeInspectorPhone || ""
+              )}
+              {renderEditableField(
+                "Architect",
+                "architect",
+                editedDetails.architect || ""
+              )}
+              {renderEditableField(
+                "Architect Phone",
+                "architectPhone",
+                editedDetails.architectPhone || ""
+              )}
             </>
           )}
         </div>
@@ -879,7 +884,7 @@ const PropertyDetails = ({ propertyId }) => {
 
       {/* Edit, Save, and Cancel Buttons */}
       {editMode ? (
-        <div className="flex justify-between">
+        <div className="flex justify-between py-5">
           <button
             onClick={cancelChanges}
             className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
@@ -896,7 +901,7 @@ const PropertyDetails = ({ propertyId }) => {
       ) : (
         <button
           onClick={toggleEditMode}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mt-5 rounded"
         >
           Edit
         </button>
