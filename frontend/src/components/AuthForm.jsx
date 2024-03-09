@@ -141,32 +141,47 @@ const AuthForm = () => {
             >
               {!isLogin && (
                 <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
-                  <label className="relative flex-1">
+                  <div className="relative flex-1">
                     <input
                       className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full"
                       type="text"
-                      placeholder="Firstname"
+                      placeholder="First Name"
                       required
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
                       autoComplete="given-name"
                     />
-                  </label>
-                  <label className="relative flex-1">
+
+                    {/* Each Input Field has labels that are conditionally rendered above each input field. 
+                    They transition in and out of view based on whether there is any text entered into 
+                    the corresponding input field.  */}
+                    {firstName && (
+                      <label className="form-label text-xs absolute top-0 left-3 pointer-events-none transition-all duration-300 ease-in-out text-gray-500">
+                        First Name
+                      </label>
+                    )}
+                  </div>
+
+                  <div className="relative flex-1">
                     <input
                       className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full"
                       type="text"
-                      placeholder="Lastname"
+                      placeholder="Last Name"
                       required
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
                       autoComplete="family-name"
                     />
-                  </label>
+                    {lastName && (
+                      <label className="form-label text-xs absolute top-0 left-3 pointer-events-none transition-all duration-300 ease-in-out text-gray-500">
+                        Last Name
+                      </label>
+                    )}
+                  </div>
                 </div>
               )}
 
-              <label className="relative">
+              <div className="relative">
                 <input
                   className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full my-4"
                   type="email"
@@ -176,55 +191,69 @@ const AuthForm = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
-              </label>
-              <label className="relative">
+                {email && (
+                  <label className="form-label text-xs absolute top-0 left-3 mt-4 pointer-events-none transition-all duration-300 ease-in-out text-gray-500">
+                    Email
+                  </label>
+                )}
+              </div>
+
+              <div className="relative">
+                <input
+                  className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full mb-4"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  required
+                  autoComplete={isLogin ? "current-password" : "new-password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                {password && (
+                  <label className="form-label text-xs absolute top-0 left-3 pointer-events-none transition-all duration-300 ease-in-out text-gray-500">
+                    Password
+                  </label>
+                )}
+                <div
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
+                  onClick={togglePasswordVisibility}
+                >
+                  {showPassword ? (
+                    <EyeOff className="text-gray-500" />
+                  ) : (
+                    <Eye className="text-gray-500" />
+                  )}
+                </div>
+              </div>
+
+              {!isLogin && (
                 <div className="relative">
                   <input
                     className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full mb-4"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Password"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm password"
                     required
-                    autoComplete={isLogin ? "current-password" : "new-password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="new-password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                   />
+                  {confirmPassword && (
+                    <label className="form-label text-xs absolute top-0 left-3 pointer-events-none transition-all duration-300 ease-in-out text-gray-500">
+                      Confirm Password
+                    </label>
+                  )}
                   <div
                     className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
-                    onClick={togglePasswordVisibility}
+                    onClick={toggleConfirmPasswordVisibility}
                   >
-                    {showPassword ? (
+                    {showConfirmPassword ? (
                       <EyeOff className="text-gray-500" />
                     ) : (
                       <Eye className="text-gray-500" />
                     )}
                   </div>
                 </div>
-              </label>
-              {!isLogin && (
-                <label className="relative">
-                  <div className="relative">
-                    <input
-                      className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full mb-1"
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Confirm password"
-                      required
-                      autoComplete="new-password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                    />
-                    <div
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
-                      onClick={toggleConfirmPasswordVisibility}
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff className="text-gray-500" />
-                      ) : (
-                        <Eye className="text-gray-500" />
-                      )}
-                    </div>
-                  </div>
-                </label>
               )}
+
               {errorMessage && (
                 <div className="text-red-500 text-sm">{errorMessage}</div>
               )}
