@@ -88,7 +88,8 @@ const AuthForm = () => {
         const expiryTime = currentTime + 1 * 24 * 60 * 60 * 1000; // token expires after 1 day
         localStorage.setItem("accessToken", data.access_token);
         localStorage.setItem("expiryTime", expiryTime);
-        navigate("/home");
+        setIsLogin(true);
+        setErrorMessage("");
       } else {
         if (response.status === 409) {
           // Check if status is Conflict (409)
