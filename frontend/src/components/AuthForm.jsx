@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { emailValidator, passwordValidator } from "../../../util";
 import GoogleIcon from "../assets/icons/google.svg";
 import FacebookIcon from "../assets/icons/facebook.svg";
 import GitHubIcon from "../assets/icons/github.svg";
 import PlaneIcon from "../assets/icons/plane.svg";
 import LogoIcon from "../assets/icons/logo.svg";
 import AuthFormImage from "../assets/images/authform02.jpeg";
+import { Eye, EyeOff } from "lucide-react";
 
 const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -14,6 +16,8 @@ const AuthForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const navigate = useNavigate();
@@ -57,6 +61,16 @@ const AuthForm = () => {
       setErrorMessage("Passwords do not match.");
       return;
     }
+    if (!emailValidator(email)) {
+      setErrorMessage("Invalid email format.");
+      return;
+    }
+    if (!passwordValidator(password)) {
+      setErrorMessage(
+        "Password must must contain at least one symbol, one number, one uppercase letter, one lowercase letter, and be at least 8 characters long."
+      );
+      return;
+    }
     try {
       const response = await fetch("http://localhost:5000/api/register", {
         method: "POST",
@@ -86,6 +100,14 @@ const AuthForm = () => {
     } catch (error) {
       setErrorMessage("An error occurred during registration.");
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
   };
 
   return (
@@ -155,27 +177,51 @@ const AuthForm = () => {
                 />
               </label>
               <label className="relative">
-                <input
-                  className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full mb-4"
-                  type="password"
-                  placeholder="Password"
-                  required
-                  autoComplete={isLogin ? "current-password" : "new-password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <div className="relative">
+                  <input
+                    className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full mb-4"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
+                    required
+                    autoComplete={isLogin ? "current-password" : "new-password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <div
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
+                    onClick={togglePasswordVisibility}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="text-gray-500" />
+                    ) : (
+                      <Eye className="text-gray-500" />
+                    )}
+                  </div>
+                </div>
               </label>
               {!isLogin && (
                 <label className="relative">
-                  <input
-                    className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full mb-1"
-                    type="password"
-                    placeholder="Confirm password"
-                    required
-                    autoComplete="new-password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
+                  <div className="relative">
+                    <input
+                      className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full mb-1"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirm password"
+                      required
+                      autoComplete="new-password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                    <div
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
+                      onClick={toggleConfirmPasswordVisibility}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="text-gray-500" />
+                      ) : (
+                        <Eye className="text-gray-500" />
+                      )}
+                    </div>
+                  </div>
                 </label>
               )}
               {errorMessage && (

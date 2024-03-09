@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import ConstructionDraw from "./ConstructionDraw";
+import { formatCurrency } from "../../../util";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
 
 const PropertyDetails = ({ propertyId }) => {
@@ -84,14 +85,6 @@ const PropertyDetails = ({ propertyId }) => {
     toggleEditMode();
   };
 
-  const formatCurrency = (value) => {
-    if (!value || isNaN(value)) return "";
-    return parseFloat(value).toLocaleString("en-US", {
-      style: "currency",
-      currency: "USD",
-    });
-  };
-
   const renderEditableField = (
     label,
     name,
@@ -146,7 +139,7 @@ const PropertyDetails = ({ propertyId }) => {
       </h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Location Section */}
-        <div className="propHeader bg-gray-50 p-4 shadow-sm rounded-md">
+        <div className="propLocation hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-bold text-blue-700">Location</h2>
             <button
@@ -210,7 +203,7 @@ const PropertyDetails = ({ propertyId }) => {
         </div>
 
         {/* Departments Section */}
-        <div className="propDepartments bg-gray-50 p-4 shadow-sm rounded-md">
+        <div className="propDepartments hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-bold text-blue-700">Departments</h2>
             <button
@@ -266,7 +259,7 @@ const PropertyDetails = ({ propertyId }) => {
         </div>
 
         {/* Total Outlay To Date Section */}
-        <div className="totalOutlayToDate bg-gray-50 p-4 shadow-sm rounded-md">
+        <div className="totalOutlayToDate hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-bold text-blue-700">
               Total Outlay To Date
@@ -396,11 +389,9 @@ const PropertyDetails = ({ propertyId }) => {
         </div>
 
         {/* Sale Projection Section */}
-        <div className="saleProjection bg-gray-50 p-4 shadow-sm rounded-md">
+        <div className="saleProjection hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
           <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-bold text-blue-700">
-              Sale Projection
-            </h2>
+            <h2 className="text-lg font-bold text-blue-700">Sale Projection</h2>
             <button
               onClick={() => toggleSection("saleProjection")}
               className="focus:outline-none"
@@ -535,7 +526,7 @@ const PropertyDetails = ({ propertyId }) => {
         </div>
 
         {/* Utility Information Section */}
-        <div className="utilityInformation bg-gray-50 p-4 shadow-sm rounded-md">
+        <div className="utilityInformation hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-bold text-blue-700">
               Utility Information
@@ -607,7 +598,7 @@ const PropertyDetails = ({ propertyId }) => {
         </div>
 
         {/* Lender Information Section */}
-        <div className="lenderInformation bg-gray-50 p-4 shadow-sm rounded-md">
+        <div className="lenderInformation hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-bold text-blue-700">Lender</h2>
             <button
@@ -633,6 +624,7 @@ const PropertyDetails = ({ propertyId }) => {
                 "lenderPhone",
                 editedDetails.lenderPhone || ""
               )}
+              <div className="border-t-2 border-transparent my-2"></div>
               {renderEditableField(
                 "Refinance Lender",
                 "refinanceLender",
@@ -643,6 +635,7 @@ const PropertyDetails = ({ propertyId }) => {
                 "refinanceLenderPhone",
                 editedDetails.refinanceLenderPhone || ""
               )}
+              <div className="border-t-2 border-transparent my-2"></div>
               {renderEditableField(
                 "Loan Officer",
                 "loanOfficer",
@@ -663,7 +656,7 @@ const PropertyDetails = ({ propertyId }) => {
         </div>
 
         {/* Key Players Section */}
-        <div className="keyPlayers bg-gray-50 p-4 shadow-sm rounded-md">
+        <div className="keyPlayers hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-bold text-blue-700">Key Players</h2>
             <button
@@ -772,7 +765,7 @@ const PropertyDetails = ({ propertyId }) => {
         </div>
 
         {/* Sales & Marketing Section */}
-        <div className="salesAndMarketing bg-gray-50 p-4 shadow-sm rounded-md">
+        <div className="salesAndMarketing hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-bold text-blue-700">
               Sales & Marketing
@@ -867,6 +860,7 @@ const PropertyDetails = ({ propertyId }) => {
                 "homeInspectorPhone",
                 editedDetails.homeInspectorPhone || ""
               )}
+              <div className="border-t-2 border-black border-solid my-4"></div>
               {renderEditableField(
                 "Architect",
                 "architect",

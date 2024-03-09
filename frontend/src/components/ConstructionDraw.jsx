@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
+import { formatCurrency } from "../../../util";
 import Receipt from "./Receipt";
 
 const ConstructionDraw = ({ propertyId }) => {
@@ -44,14 +45,6 @@ const ConstructionDraw = ({ propertyId }) => {
 
     fetchDraws();
   }, [propertyId]);
-
-  const formatCurrency = (value) => {
-    if (!value || isNaN(value)) return "";
-    return parseFloat(value).toLocaleString("en-US", {
-      style: "currency",
-      currency: "USD",
-    });
-  };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);

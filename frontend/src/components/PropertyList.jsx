@@ -29,7 +29,7 @@ const PropertyList = () => {
     fetchProperties();
   }, []);
 
-  const formatCurrency = (value) => {
+  const formatCurrencyPropertyList = (value) => {
     if (!value || isNaN(value)) return "";
     // Val to number
     const numericValue = parseFloat(value);
@@ -144,13 +144,19 @@ const PropertyList = () => {
                       {property.city}
                     </td>
                     <td className="px-5 py-5 text-center border-b border-gray-200 bg-white text-sm">
-                      {formatCurrency(property.purchaseCost.toFixed(2))}
+                      {formatCurrencyPropertyList(
+                        property.purchaseCost.toFixed(2)
+                      )}
                     </td>
                     <td className="px-5 py-5 text-center border-b border-gray-200 bg-white text-sm">
-                      {formatCurrency(property.totalRehabCost.toFixed(2))}
+                      {formatCurrencyPropertyList(
+                        property.totalRehabCost.toFixed(2)
+                      )}
                     </td>
                     <td className="px-5 py-5 text-center border-b border-gray-200 bg-white text-sm">
-                      {formatCurrency(property.arvSalePrice.toFixed(2))}
+                      {formatCurrencyPropertyList(
+                        property.arvSalePrice.toFixed(2)
+                      )}
                     </td>
                     <td className="px-5 py-5 text-center border-b border-gray-200 bg-white text-sm flex justify-around">
                       <span className="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
