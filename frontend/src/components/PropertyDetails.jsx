@@ -127,6 +127,24 @@ const PropertyDetails = ({ propertyId }) => {
     });
   };
 
+  const renderSectionTitle = (title, sectionName) => (
+    <div
+      className="flex justify-between items-center mb-2 cursor-pointer"
+      onClick={() => toggleSection(sectionName)}
+    >
+      <h2 className="text-lg font-bold text-blue-700 cursor-pointer">
+        {title}
+      </h2>
+      <button className="focus:outline-none">
+        {expandedSections[sectionName] ? (
+          <ChevronsUp size={24} className="text-gray-700" />
+        ) : (
+          <ChevronsDown size={24} className="text-gray-700" />
+        )}
+      </button>
+    </div>
+  );
+
   if (!propertyDetails) {
     return <div>Loading...</div>;
   }
@@ -140,19 +158,7 @@ const PropertyDetails = ({ propertyId }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Location Section */}
         <div className="propLocation hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-bold text-blue-700">Location</h2>
-            <button
-              onClick={() => toggleSection("location")}
-              className="focus:outline-none"
-            >
-              {expandedSections.location ? (
-                <ChevronsUp size={24} className="text-gray-700" />
-              ) : (
-                <ChevronsDown size={24} className="text-gray-700" />
-              )}
-            </button>
-          </div>
+          {renderSectionTitle("Location", "location")}
           {expandedSections.location && (
             <>
               {renderEditableField(
@@ -204,19 +210,7 @@ const PropertyDetails = ({ propertyId }) => {
 
         {/* Departments Section */}
         <div className="propDepartments hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-bold text-blue-700">Departments</h2>
-            <button
-              onClick={() => toggleSection("departments")}
-              className="focus:outline-none"
-            >
-              {expandedSections.departments ? (
-                <ChevronsUp size={24} className="text-gray-700" />
-              ) : (
-                <ChevronsDown size={24} className="text-gray-700" />
-              )}
-            </button>
-          </div>
+          {renderSectionTitle("Departments", "departments")}
           {expandedSections.departments && (
             <>
               {renderEditableField(
@@ -259,22 +253,8 @@ const PropertyDetails = ({ propertyId }) => {
         </div>
 
         {/* Total Outlay To Date Section */}
-        <div className="totalOutlayToDate hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-bold text-blue-700">
-              Total Outlay To Date
-            </h2>
-            <button
-              onClick={() => toggleSection("outlayToDate")}
-              className="focus:outline-none"
-            >
-              {expandedSections.outlayToDate ? (
-                <ChevronsUp size={24} className="text-gray-700" />
-              ) : (
-                <ChevronsDown size={24} className="text-gray-700" />
-              )}
-            </button>
-          </div>
+        <div className="propTotalOutlayToDate hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
+          {renderSectionTitle("Total Outlay To Date", "outlayToDate")}
           {expandedSections.outlayToDate && (
             <>
               {renderEditableField(
@@ -389,20 +369,8 @@ const PropertyDetails = ({ propertyId }) => {
         </div>
 
         {/* Sale Projection Section */}
-        <div className="saleProjection hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-bold text-blue-700">Sale Projection</h2>
-            <button
-              onClick={() => toggleSection("saleProjection")}
-              className="focus:outline-none"
-            >
-              {expandedSections.saleProjection ? (
-                <ChevronsUp size={24} className="text-gray-700" />
-              ) : (
-                <ChevronsDown size={24} className="text-gray-700" />
-              )}
-            </button>
-          </div>
+        <div className="propSaleProjection hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
+          {renderSectionTitle("Sale Projection", "saleProjection")}
           {expandedSections.saleProjection && (
             <>
               {renderEditableField(
@@ -498,7 +466,6 @@ const PropertyDetails = ({ propertyId }) => {
                 true
               )}
               <div className="border-t-2 border-black border-solid my-4"></div>
-
               {renderEditableField(
                 "Total Expenses",
                 "totalExpenses",
@@ -526,22 +493,8 @@ const PropertyDetails = ({ propertyId }) => {
         </div>
 
         {/* Utility Information Section */}
-        <div className="utilityInformation hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-bold text-blue-700">
-              Utility Information
-            </h2>
-            <button
-              onClick={() => toggleSection("utilityInformation")}
-              className="focus:outline-none"
-            >
-              {expandedSections.utilityInformation ? (
-                <ChevronsUp size={24} className="text-gray-700" />
-              ) : (
-                <ChevronsDown size={24} className="text-gray-700" />
-              )}
-            </button>
-          </div>
+        <div className="propUtilityInformation hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
+          {renderSectionTitle("Utility Information", "utilityInformation")}
           {expandedSections.utilityInformation && (
             <>
               {renderEditableField(
@@ -598,20 +551,8 @@ const PropertyDetails = ({ propertyId }) => {
         </div>
 
         {/* Lender Information Section */}
-        <div className="lenderInformation hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-bold text-blue-700">Lender</h2>
-            <button
-              onClick={() => toggleSection("lender")}
-              className="focus:outline-none"
-            >
-              {expandedSections.lender ? (
-                <ChevronsUp size={24} className="text-gray-700" />
-              ) : (
-                <ChevronsDown size={24} className="text-gray-700" />
-              )}
-            </button>
-          </div>
+        <div className="propLenderInformation hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
+          {renderSectionTitle("Lender", "lender")}
           {expandedSections.lender && (
             <>
               {renderEditableField(
@@ -656,20 +597,8 @@ const PropertyDetails = ({ propertyId }) => {
         </div>
 
         {/* Key Players Section */}
-        <div className="keyPlayers hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-bold text-blue-700">Key Players</h2>
-            <button
-              onClick={() => toggleSection("keyPlayers")}
-              className="focus:outline-none"
-            >
-              {expandedSections.keyPlayers ? (
-                <ChevronsUp size={24} className="text-gray-700" />
-              ) : (
-                <ChevronsDown size={24} className="text-gray-700" />
-              )}
-            </button>
-          </div>
+        <div className="propKeyPlayers hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
+          {renderSectionTitle("Key Players", "keyPlayers")}
           {expandedSections.keyPlayers && (
             <>
               {renderEditableField(
@@ -765,22 +694,8 @@ const PropertyDetails = ({ propertyId }) => {
         </div>
 
         {/* Sales & Marketing Section */}
-        <div className="salesAndMarketing hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-bold text-blue-700">
-              Sales & Marketing
-            </h2>
-            <button
-              onClick={() => toggleSection("salesAndMarketing")}
-              className="focus:outline-none"
-            >
-              {expandedSections.salesAndMarketing ? (
-                <ChevronsUp size={24} className="text-gray-700" />
-              ) : (
-                <ChevronsDown size={24} className="text-gray-700" />
-              )}
-            </button>
-          </div>
+        <div className="propSalesAndMarketing hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
+          {renderSectionTitle("Sales & Marketing", "salesAndMarketing")}
           {expandedSections.salesAndMarketing && (
             <>
               {renderEditableField(
@@ -874,32 +789,32 @@ const PropertyDetails = ({ propertyId }) => {
             </>
           )}
         </div>
-      </div>
 
-      {/* Edit, Save, and Cancel Buttons */}
-      {editMode ? (
-        <div className="flex justify-between py-5">
+        {/* Edit, Save, and Cancel Buttons */}
+        {editMode ? (
+          <div className="flex justify-between py-5">
+            <button
+              onClick={cancelChanges}
+              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={saveChanges}
+              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Save
+            </button>
+          </div>
+        ) : (
           <button
-            onClick={cancelChanges}
-            className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+            onClick={toggleEditMode}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mt-5 rounded"
           >
-            Cancel
+            Edit
           </button>
-          <button
-            onClick={saveChanges}
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Save
-          </button>
-        </div>
-      ) : (
-        <button
-          onClick={toggleEditMode}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mt-5 rounded"
-        >
-          Edit
-        </button>
-      )}
+        )}
+      </div>
     </div>
   );
 };
