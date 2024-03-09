@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Testimonials from "./Testimonials";
+import PropertyGallery from "./PropertyGallery";
 import planeIcon from "../assets/icons/plane.svg";
 import LogoIcon from "../assets/icons/logo.svg";
 
@@ -208,17 +209,7 @@ const Home = () => {
         <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-700 mb-4 md:mb-6">
           Our Property Portfolio
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {/* Property 1 */}
-          <div className="property bg-gray-50 p-4 rounded-lg shadow-md">
-            <img src="{LogoIcon}" alt="Property 1" className="mb-3" />
-            <h3 className="text-lg font-semibold">Modern Apartment</h3>
-            <p>City Center, 2BHK</p>
-          </div>
-
-          {/* Property 2 */}
-          {/* ... */}
-        </div>
+        <PropertyGallery />
       </div>
 
       {/* Contact Section */}
