@@ -1,21 +1,11 @@
 import { useState } from "react";
+import { Info } from "lucide-react";
 
 const PhaseTracker = () => {
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
-  const [phasesCompleted, setPhasesCompleted] = useState(Array(16).fill(false)); // Initialize array for 16 phases, all initially set to false
+  const [expanded, setExpanded] = useState(false);
 
   const phases = [
-    {
-      name: "Finding Deals",
-      tasks: [
-        "Identifying potential properties that fit the investment criteria.",
-        "Understanding the financial viability of deals.",
-        "Determining the type of loan and ensuring access to lenders.",
-        "Ensuring total costs (purchase plus renovation and closing costs) do not exceed 70% of the After-Repair-Value (ARV).",
-        "Conducting thorough investigation of the property and its potential.",
-        "Locking in the contract and renegotiating terms if necessary.",
-      ],
-    },
     {
       name: "Finding the Deal",
       tasks: [
@@ -158,67 +148,58 @@ const PhaseTracker = () => {
     }
   };
 
-  const togglePhaseCompletion = () => {
-    const updatedPhasesCompleted = [...phasesCompleted];
-    updatedPhasesCompleted[currentPhaseIndex] =
-      !updatedPhasesCompleted[currentPhaseIndex];
-    setPhasesCompleted(updatedPhasesCompleted);
+  const toggleExpansion = () => {
+    setExpanded(!expanded);
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg text-sm">
-      <h2 className="text-center text-blue-500 text-xl md:text-2xl font-bold my-6">
-        Property Management Phases
-      </h2>
-      <p className="text-xs">
-        The property management process involves multiple phases, from finding
-        deals to acquiring a Certificate of Occupancy. Each phase requires
-        careful planning, execution, and compliance with regulations to ensure
-        successful property development.
-      </p>
-      <div className="my-4">
-        <h3 className="my-2 text-bold text-lg">
-          {phases[currentPhaseIndex].name}
+    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg text-sm my-4">
+      <span
+        className="cursor-pointer flex items-center"
+        onClick={toggleExpansion}
+      >
+        <Info size={24} />
+        <h3 className="text-left text-xl font-semibold text-gray-700 md:text-xl font-bold my-1 ml-2">
+          What are the Phases in the Property Management Lifecycle?
         </h3>
-        <ol className="text-md">
-          {phases[currentPhaseIndex].tasks.map((task, index) => (
-            <li key={index}>
-              {index + 1}. {task}
-            </li>
-          ))}
-        </ol>
-        <div className="my-4">
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              checked={phasesCompleted[currentPhaseIndex]}
-              onChange={togglePhaseCompletion}
-              className="mr-2"
-            />
-            Mark Phase as Completed
-          </label>
-        </div>
-      </div>
-      <div className="flex justify-between">
-        <button
-          onClick={prevPhase}
-          disabled={currentPhaseIndex === 0}
-          className={`bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded ${
-            currentPhaseIndex === 0 ? "hidden" : ""
-          }`}
-        >
-          Previous Phase
-        </button>
-        <button
-          onClick={nextPhase}
-          disabled={currentPhaseIndex === phases.length - 1}
-          className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${
-            currentPhaseIndex === phases.length - 1 ? "hidden" : ""
-          }`}
-        >
-          Next Phase
-        </button>
-      </div>
+      </span>
+
+      {expanded && (
+        <>
+          <div className="my-4">
+            <h3 className="my-2 text-bold text-lg">
+              {phases[currentPhaseIndex].name}
+            </h3>
+            <ol className="text-md">
+              {phases[currentPhaseIndex].tasks.map((task, index) => (
+                <li key={index}>
+                  {index + 1}. {task}
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div className="flex justify-between">
+            <button
+              onClick={prevPhase}
+              disabled={currentPhaseIndex === 0}
+              className={`bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded ${
+                currentPhaseIndex === 0 ? "hidden" : ""
+              }`}
+            >
+              Previous Phase
+            </button>
+            <button
+              onClick={nextPhase}
+              disabled={currentPhaseIndex === phases.length - 1}
+              className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${
+                currentPhaseIndex === phases.length - 1 ? "hidden" : ""
+              }`}
+            >
+              Next Phase
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

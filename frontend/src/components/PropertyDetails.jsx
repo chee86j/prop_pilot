@@ -1,7 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import ConstructionDraw from "./ConstructionDraw";
-import PhaseTracker from "./PhaseTracker";
 import { formatCurrency } from "../../../util";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
 
@@ -152,7 +151,6 @@ const PropertyDetails = ({ propertyId }) => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg text-sm">
-      <PhaseTracker />
       <ConstructionDraw propertyId={propertyId} />
       <h1 className="text-center text-blue-500 text-xl md:text-2xl font-bold my-6">
         {editedDetails.address} - Property Details
