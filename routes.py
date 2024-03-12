@@ -190,6 +190,15 @@ def get_property(property_id):
                 'photographerPhone': property.photographerPhone,
                 'videographer': property.videographer,
                 'videographerPhone': property.videographerPhone,
+                'appraisalCompany': property.appraisalCompany,
+                'appraiser': property.appraiser,
+                'appraierPhone': property.appraiserPhone,
+                'surveyor': property.surveyor,
+                'surveyorPhone': property.surveyorPhone,
+                'homeInspector': property.homeInspector,
+                'homeInspectorPhone': property.homeInspectorPhone,
+                'architect': property.architect,
+                'architectPhone': property.architectPhone,
             }), 200
         else:
             return jsonify({"message": "Property not found or access denied"}), 403
@@ -776,6 +785,44 @@ def delete_receipt(receipt_id):
             return jsonify({"message": "Receipt not found or access denied"}), 403
     else:
         return jsonify({"message": "User not found"}), 404
+
+# -----TIMELINE PHASE ROUTES-----
+# Fetch all phases for a property
+@api.route('/phases/<int:property_id>', methods=['GET'])
+@jwt_required()
+def get_phases(property_id):
+    phases = ConstructionDraw.query.filter_by(property_id=property_id).all()
+    return jsonify([phase.serialize() for phase in phases]), 200
+
+# Add a new phase for a property
+@api.route('/phases', methods=['POST'])
+@jwt_required()
+def add_phase():
+    data = request.get_json()
+    phase = ConstructionDraw(**data)
+    db.session.add(phase)
+    db.session.commit()
+    return jsonify(phase.serialize()), 201
+
+# Update a phase
+@api.route('/phases/<int:phase_id>', methods=['PUT'])
+@jwt_required()
+def update_phase(phase_id):
+    phase = ConstructionDraw.query.get_or_404(phase_id)
+    data = request.get_json()
+    for key, value in data.items():
+        setattr(phase, key, value)
+    db.session.commit()
+    return jsonify(phase.serialize()), 200
+
+# Delete a phase
+@api.route('/phases/<int:phase_id>', methods=['DELETE'])
+@jwt_required()
+def delete_phase(phase_id):
+    phase = ConstructionDraw.query.get_or_404(phase_id)
+    db.session.delete(phase)
+    db.session.commit()
+    return '', 204
 
 if __name__ == '__main__':
     app.run(debug=True)
