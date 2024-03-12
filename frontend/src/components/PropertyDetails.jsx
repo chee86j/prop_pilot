@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import ConstructionDraw from "./ConstructionDraw";
+import PhaseTimeline from "./PhaseTimeline"
 import { formatCurrency } from "../../../util";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
 
@@ -18,6 +19,24 @@ const PropertyDetails = ({ propertyId }) => {
     lender: false,
     salesAndMarketing: false,
   });
+
+  const phaseNames = [
+    'Finding the Deal',
+    'Understanding Financials',
+    'Loan and Lender Consideration',
+    'Purchase and Renovation Costs',
+    'Due Diligence',
+    'Contract Negotiations',
+    'Legal and Compliance Steps',
+    'Renovation Preparation',
+    'Closing and Renovations',
+    'Demolition (Operator)',
+    'Rough-In (Operator)',
+    'Rough-In Inspections (Municipal)',
+    'Finals (Operator)',
+    'Final Inspections (Municipal)',
+    'Listing and Marketing'
+  ];
 
   useEffect(() => {
     const fetchPropertyDetails = async () => {
@@ -155,6 +174,7 @@ const PropertyDetails = ({ propertyId }) => {
       <h1 className="text-center text-blue-500 text-xl md:text-2xl font-bold my-6">
         {editedDetails.address} - Property Details
       </h1>
+      <PhaseTimeline phaseNames={phaseNames} />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Location Section */}
         <div className="propLocation hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">

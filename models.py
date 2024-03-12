@@ -143,6 +143,19 @@ class Phase(db.Model):
     expectedStartDate = db.Column(db.Date, nullable=True)
     endDate = db.Column(db.Date, nullable=True)
     expectedEndDate = db.Column(db.Date, nullable=True)
+
+    # to serialize data to key-value pair in returned dictionary ready to be converted to JSON
+    def serialize(self):
+        return {
+            'id': self.id,
+            'property_id': self.property_id,
+            'name': self.name,
+            'startDate': self.startDate.isoformat() if self.startDate else None,
+            'expectedStartDate': self.expectedStartDate.isoformat() if self.expectedStartDate else None,
+            'endDate': self.endDate.isoformat() if self.endDate else None,
+            'expectedEndDate': self.expectedEndDate.isoformat() if self.expectedEndDate else None
+        }
+
     
 # Construct Draw Model
 class ConstructionDraw(db.Model):

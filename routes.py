@@ -3,7 +3,7 @@
 # it also contains route to generate & verify JWT token
 
 from flask import Blueprint, request, jsonify
-from models import ConstructionDraw, Receipt, db, User, Property
+from models import ConstructionDraw, Phase, Receipt, db, User, Property
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from werkzeug.security import check_password_hash
 from datetime import timedelta
@@ -791,15 +791,19 @@ def delete_receipt(receipt_id):
 @api.route('/phases/<int:property_id>', methods=['GET'])
 @jwt_required()
 def get_phases(property_id):
-    phases = ConstructionDraw.query.filter_by(property_id=property_id).all()
-    return jsonify([phase.serialize() for phase in phases]), 200
+    try:
+        phases = Phase.query.filter_by(property_id=property_id).all()
+        return jsonify([phase.serialize() for phase in phases]), 200
+    except Exception as e:
+        # Handle the exception and return an appropriate response
+        return jsonify({'error': str(e)}), 500
 
 # Add a new phase for a property
 @api.route('/phases', methods=['POST'])
 @jwt_required()
 def add_phase():
     data = request.get_json()
-    phase = ConstructionDraw(**data)
+    phase = Phase(**data)
     db.session.add(phase)
     db.session.commit()
     return jsonify(phase.serialize()), 201
@@ -808,7 +812,7 @@ def add_phase():
 @api.route('/phases/<int:phase_id>', methods=['PUT'])
 @jwt_required()
 def update_phase(phase_id):
-    phase = ConstructionDraw.query.get_or_404(phase_id)
+    phase = Phase.query.get_or_404(phase_id)
     data = request.get_json()
     for key, value in data.items():
         setattr(phase, key, value)
@@ -819,7 +823,7 @@ def update_phase(phase_id):
 @api.route('/phases/<int:phase_id>', methods=['DELETE'])
 @jwt_required()
 def delete_phase(phase_id):
-    phase = ConstructionDraw.query.get_or_404(phase_id)
+    phase = Phase.query.get_or_404(phase_id)
     db.session.delete(phase)
     db.session.commit()
     return '', 204
