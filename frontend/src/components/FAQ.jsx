@@ -1,5 +1,5 @@
 import { useState } from "react";
-import PhaseTracker from "./PhaseTracker";
+import PhaseTrackerFAQ from "./PhaseTrackerFAQ";
 import { BadgePlus, BadgeMinus } from "lucide-react";
 
 const FAQ = () => {
@@ -91,7 +91,7 @@ const FAQ = () => {
       <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-700 mb-6">
         Frequently Asked Questions
       </h2>
-      <PhaseTracker />
+      <PhaseTrackerFAQ />
       <div className="faq-content">
         {faqs.map((faq, index) => (
           <div

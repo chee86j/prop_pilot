@@ -24,7 +24,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center">
           <Link
             to="/home"
-            className="flex items-center text-gray-800 text-xl font-bold md:text-2xl md:mr-2 hover:text-blue-600"
+            className="flex items-center text-gray-800 text-xl font-bold md:text-2xl md:mr-8 hover:text-blue-600"
           >
             <img
               src={LogoIcon}
