@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Info } from "lucide-react";
+
+import { BadgePlus, BadgeMinus } from "lucide-react";
 
 const PhaseTracker = () => {
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
@@ -153,24 +154,24 @@ const PhaseTracker = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg text-sm my-4">
-      <span
+    <div className="bg-gray-50 hover:bg-gray-200 mb-4 p-2 rounded-lg shadow-md hover:scale-105 transition-transform duration-200">
+      <div
         className="cursor-pointer flex items-center"
         onClick={toggleExpansion}
       >
-        <Info size={24} />
+        {expanded ? <BadgeMinus size={24} /> : <BadgePlus size={24} />}
         <h3 className="text-left text-xl font-semibold text-gray-700 md:text-xl font-bold my-1 ml-2">
           What are the Phases in the Property Management Lifecycle?
         </h3>
-      </span>
+      </div>
 
       {expanded && (
         <>
           <div className="my-4">
-            <h3 className="my-2 text-bold text-lg">
+            <h3 className="my-2 mx-8 text-bold text-lg">
               {phases[currentPhaseIndex].name}
             </h3>
-            <ol className="text-md">
+            <ol className="text-md mx-8 ">
               {phases[currentPhaseIndex].tasks.map((task, index) => (
                 <li key={index}>
                   {index + 1}. {task}
@@ -182,7 +183,7 @@ const PhaseTracker = () => {
             <button
               onClick={prevPhase}
               disabled={currentPhaseIndex === 0}
-              className={`bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded ${
+              className={`bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded ${
                 currentPhaseIndex === 0 ? "hidden" : ""
               }`}
             >
