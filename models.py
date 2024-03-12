@@ -132,7 +132,18 @@ class Property(db.Model):
     architect = db.Column(db.String(128))
     architectPhone = db.Column(db.String(64))
     construction_draws = db.relationship('ConstructionDraw', backref='property', lazy='dynamic')
+    phases = db.relationship('Phase', backref='property', lazy='dynamic')
 
+# Phase Model
+class Phase(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    property_id = db.Column(db.Integer, db.ForeignKey('property.id'))
+    name = db.Column(db.String(512), nullable=False)
+    startDate = db.Column(db.Date, nullable=True)
+    expectedStartDate = db.Column(db.Date, nullable=True)
+    endDate = db.Column(db.Date, nullable=True)
+    expectedEndDate = db.Column(db.Date, nullable=True)
+    
 # Construct Draw Model
 class ConstructionDraw(db.Model):
     id = db.Column(db.Integer, primary_key=True)
