@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import ConstructionDraw from "./ConstructionDraw";
 import PhaseTimeline from "./PhaseTimeline";
-import PhaseForm from './PhaseForm';
+import PhaseForm from "./PhaseForm";
 import { formatCurrency } from "../../../util";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
 
@@ -28,11 +28,13 @@ const PropertyDetails = ({ propertyId }) => {
     const fetchPropertyDetails = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/properties/${propertyId}`, {
+          `http://localhost:5000/api/properties/${propertyId}`,
+          {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             },
-          });
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Error fetching property details");
@@ -49,20 +51,22 @@ const PropertyDetails = ({ propertyId }) => {
     const fetchPhases = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/phases/${propertyId}`, {
+          `http://localhost:5000/api/phases/${propertyId}`,
+          {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             },
-          });
+          }
+        );
 
         if (!response.ok) {
-          throw new Error('Error fetching phases');
+          throw new Error("Error fetching phases");
         }
 
         const data = await response.json();
         setPhases(data);
       } catch (error) {
-        console.error('Error fetching phases:', error);
+        console.error("Error fetching phases:", error);
       }
     };
 
@@ -81,14 +85,16 @@ const PropertyDetails = ({ propertyId }) => {
   const saveChanges = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/properties/${propertyId}`, {
+        `http://localhost:5000/api/properties/${propertyId}`,
+        {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
           body: JSON.stringify(editedDetails),
-        });
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Error saving property details");
@@ -107,8 +113,15 @@ const PropertyDetails = ({ propertyId }) => {
     toggleEditMode();
   };
 
-  const renderEditableField = (label, name, value, type = "text", isCurrency = false) => {
-    const displayValue = isCurrency && !editMode ? formatCurrency(value) : value;
+  const renderEditableField = (
+    label,
+    name,
+    value,
+    type = "text",
+    isCurrency = false
+  ) => {
+    const displayValue =
+      isCurrency && !editMode ? formatCurrency(value) : value;
     return (
       <div className="flex justify-between items-center mb-2">
         <strong>{label}:</strong>
@@ -128,7 +141,10 @@ const PropertyDetails = ({ propertyId }) => {
   };
 
   const toggleSection = (section) => {
-    setExpandedSections({ ...expandedSections, [section]: !expandedSections[section] });
+    setExpandedSections({
+      ...expandedSections,
+      [section]: !expandedSections[section],
+    });
   };
 
   const renderSectionTitle = (title, sectionName) => (
@@ -158,20 +174,22 @@ const PropertyDetails = ({ propertyId }) => {
     if (window.confirm("Are you sure you want to delete this phase?")) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/phases/${phaseId}`, {
+          `http://localhost:5000/api/phases/${phaseId}`,
+          {
             method: "DELETE",
             headers: {
               Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             },
-          });
+          }
+        );
 
         if (!response.ok) {
-          throw new Error('Error deleting phase');
+          throw new Error("Error deleting phase");
         }
 
-        setPhases(phases.filter(phase => phase.id !== phaseId));
+        setPhases(phases.filter((phase) => phase.id !== phaseId));
       } catch (error) {
-        console.error('Error:', error);
+        console.error("Error:", error);
       }
     }
   };
@@ -180,7 +198,7 @@ const PropertyDetails = ({ propertyId }) => {
     const method = formData.id ? "PUT" : "POST";
     const url = formData.id
       ? `http://localhost:5000/api/phases/${formData.id}`
-      : 'http://localhost:5000/api/phases';
+      : "http://localhost:5000/api/phases";
 
     try {
       const response = await fetch(url, {
@@ -195,31 +213,33 @@ const PropertyDetails = ({ propertyId }) => {
       const fetchPhases = async () => {
         try {
           const response = await fetch(
-            `http://localhost:5000/api/phases/${propertyId}`, {
+            `http://localhost:5000/api/phases/${propertyId}`,
+            {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
               },
-            });
-  
+            }
+          );
+
           if (!response.ok) {
-            throw new Error('Error fetching phases');
+            throw new Error("Error fetching phases");
           }
-  
+
           const data = await response.json();
           setPhases(data);
         } catch (error) {
-          console.error('Error fetching phases:', error);
+          console.error("Error fetching phases:", error);
         }
       };
 
       if (!response.ok) {
-        throw new Error('Error saving phase');
+        throw new Error("Error saving phase");
       }
 
       fetchPhases();
       setIsEditingPhase(false);
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
     }
   };
 
@@ -237,7 +257,7 @@ const PropertyDetails = ({ propertyId }) => {
       <h1 className="text-center text-blue-500 text-xl md:text-2xl font-bold my-6">
         {editedDetails.address} - Property Details
       </h1>
-      <PhaseTimeline 
+      <PhaseTimeline
         phases={phases}
         onEdit={handleEditPhase}
         onDelete={handleDeletePhase}
@@ -251,7 +271,31 @@ const PropertyDetails = ({ propertyId }) => {
         />
       )}
       {/* Add a button to trigger adding a new phase */}
-      <button onClick={() => handleEditPhase(null)}>Add New Phase</button>
+      <button
+        onClick={() => handleEditPhase(null)}
+        className="rounded-lg relative w-32 h-10 mb-5 cursor-pointer flex items-center border border-blue-500 bg-blue-500 group hover:bg-blue-500 active:bg-blue-500 active:border-blue-500"
+      >
+        <span className="text-white font-semibold ml-5 transform group-hover:translate-x-10 transition-all duration-300">
+          Phase
+        </span>
+        <span className="absolute right-0 h-full w-12 rounded-lg bg-blue-500 flex items-center justify-center transform group-hover:translate-x-0 group-hover:w-full transition-all duration-300">
+          <svg
+            className="svg w-8 text-white"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <line x1="12" x2="12" y1="5" y2="19"></line>
+            <line x1="5" x2="19" y1="12" y2="12"></line>
+          </svg>
+        </span>
+      </button>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Location Section */}
