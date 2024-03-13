@@ -1,12 +1,16 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import ConstructionDraw from "./ConstructionDraw";
-import PhaseTimeline from "./PhaseTimeline"
+import PhaseTimeline from "./PhaseTimeline";
+import PhaseForm from './PhaseForm';
 import { formatCurrency } from "../../../util";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
 
 const PropertyDetails = ({ propertyId }) => {
   const [propertyDetails, setPropertyDetails] = useState(null);
+  const [phases, setPhases] = useState([]);
+  const [isEditingPhase, setIsEditingPhase] = useState(false);
+  const [currentPhase, setCurrentPhase] = useState({});
   const [editMode, setEditMode] = useState(false);
   const [editedDetails, setEditedDetails] = useState({});
   const [expandedSections, setExpandedSections] = useState({
@@ -20,35 +24,15 @@ const PropertyDetails = ({ propertyId }) => {
     salesAndMarketing: false,
   });
 
-  const phaseNames = [
-    'Finding the Deal',
-    'Understanding Financials',
-    'Loan and Lender Consideration',
-    'Purchase and Renovation Costs',
-    'Due Diligence',
-    'Contract Negotiations',
-    'Legal and Compliance Steps',
-    'Renovation Preparation',
-    'Closing and Renovations',
-    'Demolition (Operator)',
-    'Rough-In (Operator)',
-    'Rough-In Inspections (Municipal)',
-    'Finals (Operator)',
-    'Final Inspections (Municipal)',
-    'Listing and Marketing'
-  ];
-
   useEffect(() => {
     const fetchPropertyDetails = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/properties/${propertyId}`,
-          {
+          `http://localhost:5000/api/properties/${propertyId}`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             },
-          }
-        );
+          });
 
         if (!response.ok) {
           throw new Error("Error fetching property details");
@@ -62,7 +46,28 @@ const PropertyDetails = ({ propertyId }) => {
       }
     };
 
+    const fetchPhases = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/phases/${propertyId}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          });
+
+        if (!response.ok) {
+          throw new Error('Error fetching phases');
+        }
+
+        const data = await response.json();
+        setPhases(data);
+      } catch (error) {
+        console.error('Error fetching phases:', error);
+      }
+    };
+
     fetchPropertyDetails();
+    fetchPhases();
   }, [propertyId]);
 
   const handleEditChange = (e) => {
@@ -76,16 +81,14 @@ const PropertyDetails = ({ propertyId }) => {
   const saveChanges = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/properties/${propertyId}`,
-        {
+        `http://localhost:5000/api/properties/${propertyId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
           body: JSON.stringify(editedDetails),
-        }
-      );
+        });
 
       if (!response.ok) {
         throw new Error("Error saving property details");
@@ -104,23 +107,8 @@ const PropertyDetails = ({ propertyId }) => {
     toggleEditMode();
   };
 
-  const renderEditableField = (
-    label,
-    name,
-    value,
-    type = "text",
-    isCurrency = false
-  ) => {
-    // for formatting Currency
-    const displayValue =
-      isCurrency && !editMode ? formatCurrency(value) : value;
-
-    // for formatting Account Number
-    const formattedValue =
-      name.includes("AccountNumber") && typeof value === "number"
-        ? value.toString().replace(/\B(?=(\d{4})+(?!\d))/g, "-")
-        : displayValue;
-
+  const renderEditableField = (label, name, value, type = "text", isCurrency = false) => {
+    const displayValue = isCurrency && !editMode ? formatCurrency(value) : value;
     return (
       <div className="flex justify-between items-center mb-2">
         <strong>{label}:</strong>
@@ -133,17 +121,14 @@ const PropertyDetails = ({ propertyId }) => {
             className="border rounded px-2 py-1"
           />
         ) : (
-          <span>{formattedValue}</span>
+          <span>{displayValue}</span>
         )}
       </div>
     );
   };
 
   const toggleSection = (section) => {
-    setExpandedSections({
-      ...expandedSections,
-      [section]: !expandedSections[section],
-    });
+    setExpandedSections({ ...expandedSections, [section]: !expandedSections[section] });
   };
 
   const renderSectionTitle = (title, sectionName) => (
@@ -164,6 +149,84 @@ const PropertyDetails = ({ propertyId }) => {
     </div>
   );
 
+  const handleEditPhase = (phase) => {
+    setCurrentPhase(phase);
+    setIsEditingPhase(true);
+  };
+
+  const handleDeletePhase = async (phaseId) => {
+    if (window.confirm("Are you sure you want to delete this phase?")) {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/phases/${phaseId}`, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          });
+
+        if (!response.ok) {
+          throw new Error('Error deleting phase');
+        }
+
+        setPhases(phases.filter(phase => phase.id !== phaseId));
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+  };
+
+  const handleSavePhase = async (formData) => {
+    const method = formData.id ? "PUT" : "POST";
+    const url = formData.id
+      ? `http://localhost:5000/api/phases/${formData.id}`
+      : 'http://localhost:5000/api/phases';
+
+    try {
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const fetchPhases = async () => {
+        try {
+          const response = await fetch(
+            `http://localhost:5000/api/phases/${propertyId}`, {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              },
+            });
+  
+          if (!response.ok) {
+            throw new Error('Error fetching phases');
+          }
+  
+          const data = await response.json();
+          setPhases(data);
+        } catch (error) {
+          console.error('Error fetching phases:', error);
+        }
+      };
+
+      if (!response.ok) {
+        throw new Error('Error saving phase');
+      }
+
+      fetchPhases();
+      setIsEditingPhase(false);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const handleCancelEditPhase = () => {
+    setIsEditingPhase(false);
+  };
+
   if (!propertyDetails) {
     return <div>Loading...</div>;
   }
@@ -174,7 +237,22 @@ const PropertyDetails = ({ propertyId }) => {
       <h1 className="text-center text-blue-500 text-xl md:text-2xl font-bold my-6">
         {editedDetails.address} - Property Details
       </h1>
-      <PhaseTimeline phaseNames={phaseNames} />
+      <PhaseTimeline 
+        phases={phases}
+        onEdit={handleEditPhase}
+        onDelete={handleDeletePhase}
+      />
+
+      {isEditingPhase && (
+        <PhaseForm
+          initialData={currentPhase}
+          onSave={handleSavePhase}
+          onCancel={handleCancelEditPhase}
+        />
+      )}
+      {/* Add a button to trigger adding a new phase */}
+      <button onClick={() => handleEditPhase(null)}>Add New Phase</button>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Location Section */}
         <div className="propLocation hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">

@@ -1,17 +1,26 @@
 /* eslint-disable react/prop-types */
+/* https://www.npmjs.com/package/react-chrono*/
 import { Chrono } from 'react-chrono';
 
-const PhaseTimeline = ({ phaseNames }) => {
-  const items = phaseNames.map((name, index) => ({
-    title: name,
-    cardTitle: name,
-    cardSubtitle: `Expected Start: ${new Date().toISOString().split('T')[0]}`,
-    cardDetailedText: `Details about ${name}`,
-    key: index 
+const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
+  if (!phases || phases.length === 0) {
+    return <div className='text-center text-red-500 mb-5'>No Phases Found! Add a Phase Below!</div>;
+  }
+
+  const items = phases.map(phase => ({
+    title: phase.name,
+    cardTitle: phase.name,
+    cardSubtitle: `Expected Start: ${phase.expectedStartDate || ''}, Actual Start: ${phase.actualStartDate || ''}`,
+    cardDetailedText: (
+      <div>
+        <button onClick={() => onEdit(phase)}>Edit</button>
+        <button onClick={() => onDelete(phase.id)}>Delete</button>
+      </div>
+    ),
   }));
 
   return (
-    <div style={{ width: '100%', height: '400px' }}>
+    <div className='w-full h-full my-10'>
       <Chrono
         items={items}
         mode="HORIZONTAL"
