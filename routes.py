@@ -793,40 +793,54 @@ def delete_receipt(receipt_id):
 def get_phases(property_id):
     try:
         phases = Phase.query.filter_by(property_id=property_id).all()
+        if not phases:
+            return jsonify({"message": "No phases found for the given property"}), 404
         return jsonify([phase.serialize() for phase in phases]), 200
     except Exception as e:
-        # Handle the exception and return an appropriate response
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to fetch phases: ' + str(e)}), 500
 
 # Add a new phase for a property
 @api.route('/phases', methods=['POST'])
 @jwt_required()
 def add_phase():
-    data = request.get_json()
-    phase = Phase(**data)
-    db.session.add(phase)
-    db.session.commit()
-    return jsonify(phase.serialize()), 201
+    try:
+        data = request.get_json()
+        if not data.get('name'):
+            return jsonify({"error": "Phase name is required"}), 400
+        # Add additional validation as needed
+        phase = Phase(**data)
+        db.session.add(phase)
+        db.session.commit()
+        return jsonify(phase.serialize()), 201
+    except Exception as e:
+        return jsonify({'error': 'Failed to add phase: ' + str(e)}), 500
 
 # Update a phase
 @api.route('/phases/<int:phase_id>', methods=['PUT'])
 @jwt_required()
 def update_phase(phase_id):
-    phase = Phase.query.get_or_404(phase_id)
-    data = request.get_json()
-    for key, value in data.items():
-        setattr(phase, key, value)
-    db.session.commit()
-    return jsonify(phase.serialize()), 200
+    try:
+        phase = Phase.query.get_or_404(phase_id)
+        data = request.get_json()
+        for key, value in data.items():
+            setattr(phase, key, value)
+        db.session.commit()
+        return jsonify(phase.serialize()), 200
+    except Exception as e:
+        return jsonify({'error': 'Failed to update phase: ' + str(e)}), 500
 
 # Delete a phase
 @api.route('/phases/<int:phase_id>', methods=['DELETE'])
 @jwt_required()
 def delete_phase(phase_id):
-    phase = Phase.query.get_or_404(phase_id)
-    db.session.delete(phase)
-    db.session.commit()
-    return '', 204
+    try:
+        phase = Phase.query.get_or_404(phase_id)
+        db.session.delete(phase)
+        db.session.commit()
+        return '', 204
+    except Exception as e:
+        return jsonify({'error': 'Failed to delete phase: ' + str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
