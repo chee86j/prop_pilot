@@ -195,9 +195,15 @@ const PropertyDetails = ({ propertyId }) => {
   };
 
   const handleSavePhase = async (formData) => {
-    const method = formData.id ? "PUT" : "POST";
-    const url = formData.id
-      ? `http://localhost:5000/api/phases/${formData.id}`
+    // Include propertyId in the formData
+    const phaseData = {
+      ...formData,
+      property_id: propertyId, // Add property_id to formData
+    };
+
+    const method = phaseData.id ? "PUT" : "POST";
+    const url = phaseData.id
+      ? `http://localhost:5000/api/phases/${phaseData.id}`
       : "http://localhost:5000/api/phases";
 
     try {
@@ -207,39 +213,45 @@ const PropertyDetails = ({ propertyId }) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(phaseData), // Send phaseData with property_id
       });
 
-      const fetchPhases = async () => {
-        try {
-          const response = await fetch(
-            `http://localhost:5000/api/phases/${propertyId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-              },
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error("Error fetching phases");
-          }
-
-          const data = await response.json();
-          setPhases(data);
-        } catch (error) {
-          console.error("Error fetching phases:", error);
-        }
-      };
-
-      if (!response.ok) {
-        throw new Error("Error saving phase");
+      // Fetch phases to update the state after saving
+      if (response.ok) {
+        fetchPhases(); // Make sure fetchPhases() is defined to update the phases state
+      } else {
+        // If the request was not successful, throw an error
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error saving phase");
       }
 
-      fetchPhases();
-      setIsEditingPhase(false);
+      setIsEditingPhase(false); // Close the editing form after saving
     } catch (error) {
       console.error("Error:", error);
+      alert(error.message || "Error saving phase");
+    }
+  };
+
+  // Ensure fetchPhases function is defined and correctly fetches phases for the property
+  const fetchPhases = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/phases/${propertyId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Error fetching phases");
+      }
+
+      const data = await response.json();
+      setPhases(data);
+    } catch (error) {
+      console.error("Error fetching phases:", error);
     }
   };
 

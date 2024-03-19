@@ -805,13 +805,20 @@ def get_phases(property_id):
 def add_phase():
     try:
         data = request.get_json()
+        print(data)
         if not data.get('name'):
             return jsonify({"error": "Phase name is required"}), 400
-        # Add additional validation as needed
+        
+        if 'property_id' not in data or not data['property_id']:
+            return jsonify({"error": "property_id is required"}), 400
+        
+        # Add additional validations as needed
+        
         phase = Phase(**data)
         db.session.add(phase)
         db.session.commit()
         return jsonify(phase.serialize()), 201
+    
     except Exception as e:
         return jsonify({'error': 'Failed to add phase: ' + str(e)}), 500
 
