@@ -144,6 +144,17 @@ class Phase(db.Model):
     endDate = db.Column(db.Date, nullable=True)
     expectedEndDate = db.Column(db.Date, nullable=True)
     
+    def serialize(self):
+        return {
+            "id": self.id,
+            "property_id": self.property_id,
+            "name": self.name,
+            "startDate": self.startDate.isoformat() if self.startDate else None,
+            "expectedStartDate": self.expectedStartDate.isoformat() if self.expectedStartDate else None,
+            "endDate": self.endDate.isoformat() if self.endDate else None,
+            "expectedEndDate": self.expectedEndDate.isoformat() if self.expectedEndDate else None
+        }
+    
 # Construct Draw Model
 class ConstructionDraw(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -153,7 +164,7 @@ class ConstructionDraw(db.Model):
     bank_account_number = db.Column(db.String(256), nullable=False)
     is_approved = db.Column(db.Boolean, default=False, nullable=False)
     receipts = db.relationship('Receipt', backref='construction_draw', lazy='dynamic')
-
+    
 # Receipt Model
 class Receipt(db.Model):
     id = db.Column(db.Integer, primary_key=True)
