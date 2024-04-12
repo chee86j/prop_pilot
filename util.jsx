@@ -10,7 +10,18 @@ export const passwordValidator = (password) => {
 
 export const formatCurrency = (value) => {
   if (!value || isNaN(value)) return "";
-  return parseFloat(value).toLocaleString("en-US", {
+  // Val to number
+  const numericValue = parseFloat(value);
+  // Thousands range
+  if (numericValue >= 1000 && numericValue < 1000000) {
+    return `$${(numericValue / 1000).toFixed(0)}K`;
+  }
+  // Millions range
+  if (numericValue >= 1000000) {
+    return `$${(numericValue / 1000000).toFixed(2)}M`;
+  }
+  // Default format
+  return numericValue.toLocaleString("en-US", {
     style: "currency",
     currency: "USD",
   });

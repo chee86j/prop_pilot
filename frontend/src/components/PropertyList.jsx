@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { formatCurrency } from "../../../util";
 
 const PropertyList = () => {
   const [properties, setProperties] = useState([]);
@@ -28,25 +29,6 @@ const PropertyList = () => {
 
     fetchProperties();
   }, []);
-
-  const formatCurrencyPropertyList = (value) => {
-    if (!value || isNaN(value)) return "";
-    // Val to number
-    const numericValue = parseFloat(value);
-    // Thousands range
-    if (numericValue >= 1000 && numericValue < 1000000) {
-      return `$${(numericValue / 1000).toFixed(0)}K`;
-    }
-    // Millions range
-    if (numericValue >= 1000000) {
-      return `$${(numericValue / 1000000).toFixed(2)}M`;
-    }
-    // Default format
-    return numericValue.toLocaleString("en-US", {
-      style: "currency",
-      currency: "USD",
-    });
-  };
 
   const handleDetails = (propertyId) => {
     if (propertyId) {
@@ -164,19 +146,13 @@ const PropertyList = () => {
                     {property.city}
                   </td>
                   <td className="py-4 px-6 text-center border-b border-gray-200 bg-white hidden md:table-cell">
-                    {formatCurrencyPropertyList(
-                      property.purchaseCost.toFixed(2)
-                    )}
+                    {formatCurrency(property.purchaseCost.toFixed(2))}
                   </td>
                   <td className="py-4 px-6 text-center border-b border-gray-200 bg-white hidden md:table-cell">
-                    {formatCurrencyPropertyList(
-                      property.totalRehabCost.toFixed(2)
-                    )}
+                    {formatCurrency(property.totalRehabCost.toFixed(2))}
                   </td>
                   <td className="py-4 px-6 text-center border-b border-gray-200 bg-white hidden md:table-cell">
-                    {formatCurrencyPropertyList(
-                      property.arvSalePrice.toFixed(2)
-                    )}
+                    {formatCurrency(property.arvSalePrice.toFixed(2))}
                   </td>
                   <td className="py-4 px-6 text-center bg-white text-sm">
                     <div className="flex justify-center items-center h-full">

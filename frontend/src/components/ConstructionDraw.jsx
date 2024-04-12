@@ -352,22 +352,37 @@ const ConstructionDraw = ({ propertyId }) => {
                   <h3 className="text-xl font-extrabold text-gray-700 mb-3">
                     Draw # {index + 1}
                   </h3>
-                  <table className="w-full table-auto mb-4">
-                    <thead>
+                  <table className="w-full text-sm text-left text-gray-500">
+                    <thead className="text-xs text-gray-700 uppercase bg-gray-50">
                       <tr>
-                        <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        <th
+                          scope="col"
+                          className="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                        >
                           Release Date
                         </th>
-                        <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        <th
+                          scope="col"
+                          className="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                        >
                           Amount
                         </th>
-                        <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        <th
+                          scope="col"
+                          className="hidden md:table-cell px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                        >
                           Account
                         </th>
-                        <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        <th
+                          scope="col"
+                          className="hidden md:table-cell px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                        >
                           Approved
                         </th>
-                        <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        <th
+                          scope="col"
+                          className="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                        >
                           Actions
                         </th>
                       </tr>
@@ -380,10 +395,10 @@ const ConstructionDraw = ({ propertyId }) => {
                         <td className="border px-4 py-2 text-center">
                           {formatCurrency(draw.amount)}
                         </td>
-                        <td className="border px-4 py-2 text-center">
+                        <td className="hidden md:table-cell border px-4 py-2 text-center">
                           x{draw.bank_account_number}
                         </td>
-                        <td className="border px-4 py-2 text-center">
+                        <td className="hidden md:table-cell border px-4 py-2 text-center">
                           {draw.is_approved ? "Yes" : "No"}
                         </td>
                         <td className="px-4 py-2 border text-center">
@@ -457,10 +472,16 @@ const ConstructionDraw = ({ propertyId }) => {
             <th className="px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
               Amount
             </th>
-            <th className="px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            <th
+              scope="col"
+              className="hidden md:table-cell px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
               Account
             </th>
-            <th className="px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            <th
+              scope="col"
+              className="hidden md:table-cell px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
               Approved
             </th>
           </tr>
