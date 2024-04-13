@@ -91,6 +91,15 @@ const FAQ = () => {
       <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-700 mb-6">
         Frequently Asked Questions
       </h2>
+
+      <p className="text-lg text-gray-800 mb-6 indent-4">
+        Welcome to our FAQ section! Here, we aim to address common questions
+        related to our property management application. Whether you are curious
+        about specific features, financing options, or project management tips,
+        you will find answers to your questions below. If you don&apos;t see the
+        information you are looking for, feel free to reach out to us directly
+        for personalized assistance.
+      </p>
       <PhaseTrackerFAQ />
       <div className="faq-content">
         {faqs.map((faq, index) => (

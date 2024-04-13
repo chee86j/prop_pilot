@@ -321,7 +321,7 @@ const Receipt = ({ drawId }) => {
                 </th>
                 <th
                   scope="col"
-                  className="hidden px-2 py-1 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                  className="hidden md:table-cell px-2 py-1 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
                 >
                   Description
                 </th>
@@ -400,7 +400,7 @@ const Receipt = ({ drawId }) => {
                     <span className="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
                       <button
                         onClick={() => startEdit(receipt)}
-                        className="inline-block border-e p-3 text-gray-700 hover:bg-gray-50 focus:relative"
+                        className="inline-block border-e p-3 text-blue-600 hover:bg-blue-100 rounded-md focus:outline-none focus:ring focus:border-blue-300"
                         title="Edit Product"
                       >
                         <svg
@@ -421,7 +421,7 @@ const Receipt = ({ drawId }) => {
 
                       <button
                         onClick={() => handleDeleteReceipt(receipt.id)}
-                        className="inline-block p-3 text-gray-700 hover:bg-gray-50 focus:relative"
+                        className="inline-block p-3 text-red-600 hover:bg-red-100 rounded-md focus:outline-none focus:ring focus:border-red-300"
                         title="Delete Product"
                       >
                         <svg
