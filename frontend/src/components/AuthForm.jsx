@@ -114,7 +114,26 @@ const AuthForm = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center">
       <div className="max-w-screen-xl m-0 sm:m-20 bg-white shadow sm:rounded-lg flex justify-center flex-1">
-        <div className="lg:w-1/2 xl:w-5/12 p-6 sm:p-12">
+        {/* Image container that slides out */}
+        <div
+          className={`lg:w-1/2 xl:w-5/12 flex-1 hidden lg:flex ${
+            isLogin ? "lg:translate-x-0" : "lg:translate-x-full"
+          }`}
+          style={{
+            backgroundImage: `url(${AuthFormImage})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            height: "100%",
+          }}
+        ></div>
+
+        {/* Form container that slides in */}
+        <div
+          className={`lg:w-1/2 xl:w-5/12 p-6 sm:p-12 ${
+            isLogin ? "lg:translate-x-0" : "lg:-translate-x-full"
+          } transition-all duration-500 lg:transform`}
+        >
           <div className="text-center flex items-center justify-center">
             <Link
               to="/home"
@@ -130,14 +149,76 @@ const AuthForm = () => {
             </Link>
           </div>
 
-          <div className="mt-4 flex flex-col items-center">
-            <h1 className="text-2xl xl:text-3xl font-extrabold">
-              {isLogin ? "Login to Prop Pilot" : "Sign up for Prop Pilot"}
+          <div className="mt-2 flex flex-col items-center">
+            <h1 className="text-3xl font-bold">
+              {isLogin ? "Sign In" : "Create Account"}
             </h1>
+
+            {isLogin && (
+              <div className="social-account-container mt-7 text-center">
+                <div className="social-accounts flex justify-center gap-4">
+                  <button className="social-button bg-white border border-white p-2 rounded-full shadow-lg hover:scale-110 hover:shadow-lg transition duration-300">
+                    <img
+                      src={GoogleIcon}
+                      alt="Google"
+                      className="w-8 h-8 md:w-10 h-10"
+                    />
+                  </button>
+                  <button className="social-button bg-white border border-white p-2 rounded-full shadow-lg hover:scale-110 hover:shadow-lg transition duration-300">
+                    <img
+                      src={FacebookIcon}
+                      alt="Facebook"
+                      className="w-8 h-8 md:w-10 h-10"
+                    />
+                  </button>
+                  <button className="social-button bg-white border border-white p-2 rounded-full shadow-lg hover:scale-110 hover:shadow-lg transition duration-300">
+                    <img
+                      src={GitHubIcon}
+                      alt="GitHub"
+                      className="w-8 h-8 md:w-10 h-10"
+                    />
+                  </button>
+                </div>
+                <p className="text-xs text-gray-600 text-center mt-6">
+                  Or Use Your Email Account
+                </p>
+              </div>
+            )}
+
+            {!isLogin && (
+              <div className="social-account-container mt-2 text-center">
+                <div className="social-accounts flex justify-center gap-4">
+                  <button className="social-button bg-white border border-white p-2 rounded-full shadow-lg hover:scale-110 hover:shadow-lg transition duration-300">
+                    <img
+                      src={GoogleIcon}
+                      alt="Google"
+                      className="w-8 h-8 md:w-10 h-10"
+                    />
+                  </button>
+                  <button className="social-button bg-white border border-white p-2 rounded-full shadow-lg hover:scale-110 hover:shadow-lg transition duration-300">
+                    <img
+                      src={FacebookIcon}
+                      alt="Facebook"
+                      className="w-8 h-8 md:w-10 h-10"
+                    />
+                  </button>
+                  <button className="social-button bg-white border border-white p-2 rounded-full shadow-lg hover:scale-110 hover:shadow-lg transition duration-300">
+                    <img
+                      src={GitHubIcon}
+                      alt="GitHub"
+                      className="w-8 h-8 md:w-10 h-10"
+                    />
+                  </button>
+                </div>
+                <p className="text-xs text-gray-600 text-center mt-6">
+                  Or Use Your Email For Registration
+                </p>
+              </div>
+            )}
 
             <form
               onSubmit={isLogin ? handleLogin : handleRegister}
-              className="form mt-8 max-w-md mx-auto space-y-4"
+              className="form max-w-md mx-auto space-y-4 mt-4"
             >
               {!isLogin && (
                 <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
@@ -151,10 +232,6 @@ const AuthForm = () => {
                       onChange={(e) => setFirstName(e.target.value)}
                       autoComplete="given-name"
                     />
-
-                    {/* Each Input Field has labels that are conditionally rendered above each input field. 
-                    They transition in and out of view based on whether there is any text entered into 
-                    the corresponding input field.  */}
                     {firstName && (
                       <label className="form-label text-xs absolute top-0 left-3 pointer-events-none transition-all duration-300 ease-in-out text-gray-500">
                         First Name
@@ -271,37 +348,6 @@ const AuthForm = () => {
               </div>
             </form>
 
-            {isLogin && (
-              <div className="social-account-container mt-7 text-center">
-                <p className="text-xs text-gray-600 text-center mb-4">
-                  Or Sign In with
-                </p>
-                <div className="social-accounts flex justify-center gap-4">
-                  <button className="social-button bg-white border border-white p-2 rounded-full shadow-lg hover:scale-110 hover:shadow-lg transition duration-300">
-                    <img
-                      src={GoogleIcon}
-                      alt="Google"
-                      className="w-8 h-8 md:w-10 h-10"
-                    />
-                  </button>
-                  <button className="social-button bg-white border border-white p-2 rounded-full shadow-lg hover:scale-110 hover:shadow-lg transition duration-300">
-                    <img
-                      src={FacebookIcon}
-                      alt="Facebook"
-                      className="w-8 h-8 md:w-10 h-10"
-                    />
-                  </button>
-                  <button className="social-button bg-white border border-white p-2 rounded-full shadow-lg hover:scale-110 hover:shadow-lg transition duration-300">
-                    <img
-                      src={GitHubIcon}
-                      alt="GitHub"
-                      className="w-8 h-8 md:w-10 h-10"
-                    />
-                  </button>
-                </div>
-              </div>
-            )}
-
             <p className="mt-4 text-sm text-gray-500">
               {isLogin ? "Don't have an account?" : "Already have an account?"}
               <button
@@ -313,17 +359,10 @@ const AuthForm = () => {
             </p>
 
             <p className="mt-7 text-xs text-gray-600 text-center">
-              I agree to abide by Prop Pilot&apos;s <br /> Terms of Service &
-              its Privacy Policy
+              I agree to abide by Prop Pilot&apos;s <br /> Terms of Service
+              &amp; its Privacy Policy
             </p>
           </div>
-        </div>
-
-        <div className="lg:w-1/2 xl:w-5/12 flex-1 text-center hidden lg:flex">
-          <div
-            className="w-full bg-contain bg-center bg-no-repeat h-full"
-            style={{ backgroundImage: `url(${AuthFormImage})` }}
-          ></div>
         </div>
       </div>
     </div>
