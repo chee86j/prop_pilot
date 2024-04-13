@@ -136,29 +136,29 @@ const PropertyList = () => {
             <tbody>
               {properties.map((property) => (
                 <tr key={property.id} className="bg-white border-b">
-                  <td className="py-4 px-6 text-center border-b border-gray-200 bg-white">
+                  <td className="py-3 px-4 text-center border border-gray-200 bg-white">
                     {property.propertyName}
                   </td>
-                  <td className="py-4 px-6 text-center border-b border-gray-200 bg-white">
+                  <td className="py-3 px-4 text-center border border-gray-200 bg-white">
                     {property.address}
                   </td>
-                  <td className="py-4 px-6 text-center border-b border-gray-200 bg-white">
+                  <td className="py-3 px-4 text-center border border-gray-200 bg-white">
                     {property.city}
                   </td>
-                  <td className="py-4 px-6 text-center border-b border-gray-200 bg-white hidden md:table-cell">
+                  <td className="py-3 px-4 text-center border border-gray-200 bg-white hidden md:table-cell">
                     {formatCurrency(property.purchaseCost.toFixed(2))}
                   </td>
-                  <td className="py-4 px-6 text-center border-b border-gray-200 bg-white hidden md:table-cell">
+                  <td className="py-3 px-4 text-center border border-gray-200 bg-white hidden md:table-cell">
                     {formatCurrency(property.totalRehabCost.toFixed(2))}
                   </td>
-                  <td className="py-4 px-6 text-center border-b border-gray-200 bg-white hidden md:table-cell">
+                  <td className="py-3 px-4 text-center border border-gray-200 bg-white hidden md:table-cell">
                     {formatCurrency(property.arvSalePrice.toFixed(2))}
                   </td>
-                  <td className="py-4 px-6 text-center bg-white text-sm">
-                    <div className="flex justify-center items-center h-full">
+                  <td className="py-3 px-4 text-center bg-white text-sm">
+                    <div className="flex justify-center items-center h-full justify-evenly">
                       <button
                         onClick={() => handleDetails(property.id)}
-                        className="font-medium text-blue-600 hover:underline"
+                        className="inline-block px-2 py-1 border text-blue-600 hover:bg-blue-100 rounded-md focus:outline-none focus:ring focus:border-blue-300"
                         title="Edit Product"
                       >
                         <svg
@@ -178,7 +178,7 @@ const PropertyList = () => {
                       </button>
                       <button
                         onClick={() => handleDelete(property.id)}
-                        className="font-medium text-red-600 hover:underline"
+                        className="inline-block px-2 py-1 border text-red-600 hover:bg-red-100 rounded-md focus:outline-none focus:ring focus:border-red-300"
                         title="Delete Product"
                       >
                         <svg

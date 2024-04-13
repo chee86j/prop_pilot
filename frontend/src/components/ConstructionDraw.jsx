@@ -280,7 +280,7 @@ const ConstructionDraw = ({ propertyId }) => {
         draws.map((draw, index) => (
           <div
             key={draw.id}
-            className="mb-4 bg-gray-50 p-4 shadow-sm rounded-md"
+            className="mb-4 bg-gray-50 p-4 shadow-sm rounded-md md:p-1"
           >
             {/* Draw display logic */}
             {editDrawId === draw.id ? (
@@ -348,7 +348,7 @@ const ConstructionDraw = ({ propertyId }) => {
               </form>
             ) : (
               <>
-                <div className="draw-card bg-gray-50 p-6 rounded-md mb-4 shadow-sm">
+                <div className="draw-card bg-gray-50 rounded-md mb-4 shadow-sm">
                   <h3 className="text-xl font-extrabold text-gray-700 mb-3">
                     Draw # {index + 1}
                   </h3>
@@ -405,7 +405,7 @@ const ConstructionDraw = ({ propertyId }) => {
                           <span className="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
                             <button
                               onClick={() => startEdit(draw)}
-                              className="inline-block px-3 py-2 border text-gray-700 hover:bg-gray-100 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                              className="inline-block px-3 py-2 border text-blue-600 hover:bg-blue-100 rounded-md focus:outline-none focus:ring focus:border-blue-300"
                               title="Edit Product"
                             >
                               <svg
@@ -425,7 +425,7 @@ const ConstructionDraw = ({ propertyId }) => {
                             </button>
                             <button
                               onClick={() => handleDeleteDraw(draw.id)}
-                              className="inline-block px-3 py-2 border text-gray-700 hover:bg-gray-100 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                              className="inline-block px-3 py-2 border text-red-600 hover:bg-red-100 rounded-md focus:outline-none focus:ring focus:border-red-300"
                               title="Delete Product"
                             >
                               <svg
@@ -463,13 +463,22 @@ const ConstructionDraw = ({ propertyId }) => {
       <table className="w-full table-auto mb-4">
         <thead>
           <tr>
-            <th className="px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            <th
+              scope="col"
+              className="px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
               Draw #
             </th>
-            <th className="px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            <th
+              scope="col"
+              className="px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
               Release Date
             </th>
-            <th className="px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            <th
+              scope="col"
+              className="px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
               Amount
             </th>
             <th
@@ -496,10 +505,10 @@ const ConstructionDraw = ({ propertyId }) => {
               <td className="border text-center px-4 py-2">
                 {formatCurrency(draw.amount)}
               </td>
-              <td className="border text-center px-4 py-2">
+              <td className="hidden md:table-cell border text-center px-4 py-2">
                 x{draw.bank_account_number}
               </td>
-              <td className="border text-center px-4 py-2">
+              <td className="hidden md:table-cell border text-center px-4 py-2">
                 {draw.is_approved ? "Yes" : "No"}
               </td>
             </tr>

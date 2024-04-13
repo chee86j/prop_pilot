@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
+import { formatCurrencyDetailed } from "../../../util";
 import {
   ChevronsLeft,
   ChevronsRight,
@@ -55,14 +56,6 @@ const Receipt = ({ drawId }) => {
     fetchReceipts();
   }, [drawId]);
 
-  const formatCurrency = (value) => {
-    if (!value || isNaN(value)) return "";
-    return parseFloat(value).toLocaleString("en-US", {
-      style: "currency",
-      currency: "USD",
-    });
-  };
-
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setEditedReceipt({ ...editedReceipt, [name]: value });
@@ -89,6 +82,105 @@ const Receipt = ({ drawId }) => {
       );
 
       if (!response.ok) {
+        {
+          receipts.map((receipt) => (
+            <tr key={receipt.id} className="text-gray-700 hover:bg-gray-100">
+              <td className="border px-2 py-1 text-center">
+                {new Date(receipt.date).toLocaleDateString(undefined, {
+                  timeZone: "UTC",
+                })}
+              </td>
+              <td className="border px-2 py-1">{receipt.vendor}</td>
+              <td className="border px-2 py-1 text-center">
+                {/* Invoke formatCurrencyDetailed only if the 'Amount' column is not hidden on medium to small devices */}
+                {receipt.isAmountHidden
+                  ? `x${receipt.amount}`
+                  : formatCurrencyDetailed(receipt.amount)}
+              </td>
+              <td className="border px-2 py-1">
+                {expandedDescriptions.has(receipt.id) ? (
+                  <span>{receipt.description}</span>
+                ) : (
+                  <span>
+                    {receipt.description.length > 10
+                      ? receipt.description.substring(0, 10) + "..."
+                      : receipt.description}
+                  </span>
+                )}
+                {receipt.description.length > 10 && (
+                  <button
+                    onClick={() => toggleDescriptionExpansion(receipt.id)}
+                    className="text-blue-500 hover:underline focus:outline-none ml-2"
+                  >
+                    {expandedDescriptions.has(receipt.id) ? (
+                      <>
+                        <ChevronsLeft size={20} />
+                        {/* <span>Read Less</span> */}
+                      </>
+                    ) : (
+                      <>
+                        {/* <span>Read More</span> */}
+                        <ChevronsRight size={20} />
+                      </>
+                    )}
+                  </button>
+                )}
+              </td>
+              <td className="hidden md:table-cell border px-2 py-1 text-center">
+                {receipt.pointofcontact}
+              </td>
+              <td className="hidden md:table-cell border px-2 py-1 text-center">
+                x{receipt.ccnumber}
+              </td>
+
+              <td className="px-2 py-1 border">
+                <span className="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
+                  <button
+                    onClick={() => startEdit(receipt)}
+                    className="inline-block border-e p-3 text-gray-700 hover:bg-gray-50 focus:relative"
+                    title="Edit Product"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.5"
+                      stroke="currentColor"
+                      className="h-4 w-4"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+                      />
+                    </svg>
+                  </button>
+
+                  <button
+                    onClick={() => handleDeleteReceipt(receipt.id)}
+                    className="inline-block p-3 text-gray-700 hover:bg-gray-50 focus:relative"
+                    title="Delete Product"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.5"
+                      stroke="currentColor"
+                      className="h-4 w-4"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+                      />
+                    </svg>
+                  </button>
+                </span>
+              </td>
+            </tr>
+          ));
+        }
         throw new Error("Failed to update receipt");
       }
 
@@ -184,8 +276,8 @@ const Receipt = ({ drawId }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-2 bg-transparent rounded-lg text-sm">
-      <h1 className="text-lg md:text-md font-bold text-gray-700 mb-2">
+    <div className="max-w-4xl mx-auto p-1 bg-transparent rounded-lg text-sm">
+      <h1 className="text-lg md:text-md font-bold text-gray-700 my-2">
         Receipts
       </h1>
       <button
@@ -209,25 +301,46 @@ const Receipt = ({ drawId }) => {
           <table className="w-full table-auto mb-4">
             <thead>
               <tr>
-                <th className="px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th
+                  scope="col"
+                  className="px-2 py-1 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                >
                   Date
                 </th>
-                <th className="px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th
+                  scope="col"
+                  className="px-2 py-1 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                >
                   Vendor
                 </th>
-                <th className="px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th
+                  scope="col"
+                  className="px-2 py-1 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                >
                   Amount
                 </th>
-                <th className="px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th
+                  scope="col"
+                  className="hidden px-2 py-1 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                >
                   Description
                 </th>
-                <th className="px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th
+                  scope="col"
+                  className="hidden md:table-cell px-2 py-1 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                >
                   POC
                 </th>
-                <th className="px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th
+                  scope="col"
+                  className="hidden md:table-cell px-2 py-1 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                >
                   Card Used
                 </th>
-                <th className="px-4 py-2 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th
+                  scope="col"
+                  className="px-2 py-1 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                >
                   Actions
                 </th>
               </tr>
@@ -238,16 +351,16 @@ const Receipt = ({ drawId }) => {
                   key={receipt.id}
                   className="text-gray-700 hover:bg-gray-100"
                 >
-                  <td className="border px-4 py-2 text-center">
+                  <td className="border px-2 py-1 text-center">
                     {new Date(receipt.date).toLocaleDateString(undefined, {
                       timeZone: "UTC",
                     })}
                   </td>
-                  <td className="border px-4 py-2">{receipt.vendor}</td>
-                  <td className="border px-4 py-2 text-center">
-                    {formatCurrency(receipt.amount)}
+                  <td className="border px-2 py-1">{receipt.vendor}</td>
+                  <td className="border px-2 py-1 text-center">
+                    {formatCurrencyDetailed(receipt.amount)}
                   </td>
-                  <td className="border px-4 py-2">
+                  <td className="hidden md:table-cell border px-2 py-1">
                     {expandedDescriptions.has(receipt.id) ? (
                       <span>{receipt.description}</span>
                     ) : (
@@ -276,14 +389,14 @@ const Receipt = ({ drawId }) => {
                       </button>
                     )}
                   </td>
-                  <td className="border px-4 py-2 text-center">
+                  <td className="hidden md:table-cell border px-2 py-1 text-center">
                     {receipt.pointofcontact}
                   </td>
-                  <td className="border px-4 py-2 text-center">
+                  <td className="hidden md:table-cell border px-2 py-1 text-center">
                     x{receipt.ccnumber}
                   </td>
 
-                  <td className="px-4 py-2 border">
+                  <td className="px-2 py-1 border">
                     <span className="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
                       <button
                         onClick={() => startEdit(receipt)}
@@ -341,7 +454,7 @@ const Receipt = ({ drawId }) => {
         {/* Display subtotal */}
         <div className="mb-4">
           <p className="indent-2 font-semibold text-gray-700">
-            Subtotal: {formatCurrency(calcSubtotal())}
+            Subtotal: {formatCurrencyDetailed(calcSubtotal())}
           </p>
         </div>
       </div>
