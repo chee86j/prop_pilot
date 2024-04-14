@@ -21,9 +21,34 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const validateFormData = (data) => {
+    // Basic validation example
+    if (!data.name || !data.startDate || !data.endDate) {
+      alert("Please fill in all required fields.");
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(formData);
+    if (validateFormData(formData)) {
+      onSave(formData)
+        .then(() => {
+          setFormData({
+            name: "",
+            expectedStartDate: "",
+            startDate: "",
+            expectedEndDate: "",
+            endDate: "",
+          }); // Reset form or manage state to reflect changes
+          // Optionally notify user of success
+        })
+        .catch((error) => {
+          console.error("Save error:", error);
+          // Optionally notify user of failure
+        });
+    }
   };
 
   return (
@@ -70,8 +95,8 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
           </label>
           <input
             type="date"
-            name="startDate" // Update this line
-            value={formData.startDate} // And update the value prop accordingly
+            name="startDate"
+            value={formData.startDate}
             onChange={handleChange}
             className="mt-1 p-2 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
