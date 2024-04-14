@@ -3,7 +3,7 @@
 # it also contains route to generate & verify JWT token
 
 from flask import Blueprint, request, jsonify
-from models import ConstructionDraw, Phase, Receipt, db, User, Property
+from models import ConstructionDraw, Phase, Receipt, db, User, Property, Lease, PropertyMaintenanceRequest, Tenant
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from werkzeug.security import check_password_hash
 from datetime import timedelta
@@ -849,6 +849,381 @@ def delete_phase(phase_id):
         return jsonify({'error': 'Failed to delete phase: ' + str(e)}), 500
 
 
+# -----TENANT ROUTES-----
+# Fetch all tenants
+@api.route('/tenants', methods=['GET'])
+@jwt_required()
+def get_all_tenants():
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        tenants = Tenant.query.all()
+        tenants_data = []
+        for tenant in tenants:
+            leases = [lease.serialize() for lease in tenant.leases]  # Serialize leases associated with the tenant
+            tenant_data = {
+                'id': tenant.id,
+                'firstName': tenant.firstName,
+                'lastName': tenant.lastName,
+                'phoneNumber': tenant.phoneNumber,
+                'email': tenant.email,
+                'dateOfBirth': tenant.dateOfBirth,
+                'occupation': tenant.occupation,
+                'employerName': tenant.employerName,
+                'professionalTitle': tenant.professionalTitle,
+                'creditScoreAtInitialApplication': tenant.creditScoreAtInitialApplication,
+                'creditCheck1Complete': tenant.creditCheck1Complete,
+                'creditScoreAtLeaseRenewal': tenant.creditScoreAtLeaseRenewal,
+                'creditCheck2Complete': tenant.creditCheck2Complete,
+                'guarantor': tenant.guarantor,
+                'petsAllowed': tenant.petsAllowed,
+                'manager_id': tenant.manager_id,
+                'leases': leases  # Include serialized leases in the tenant data
+            }
+            tenants_data.append(tenant_data)
+        return jsonify(tenants_data), 200
+    else:
+        return jsonify({"message": "User not found"}), 404
+
+# Fetch a single tenant by their ID
+@api.route('/tenants/<int:tenant_id>', methods=['GET'])
+@jwt_required()
+def get_tenant(tenant_id):
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        tenant = Tenant.query.get(tenant_id)
+        if tenant:
+            leases = [lease.serialize() for lease in tenant.leases]  # Serialize leases associated with the tenant
+            tenant_data = {
+                'id': tenant.id,
+                'firstName': tenant.firstName,
+                'lastName': tenant.lastName,
+                'phoneNumber': tenant.phoneNumber,
+                'email': tenant.email,
+                'dateOfBirth': tenant.dateOfBirth,
+                'occupation': tenant.occupation,
+                'employerName': tenant.employerName,
+                'professionalTitle': tenant.professionalTitle,
+                'creditScoreAtInitialApplication': tenant.creditScoreAtInitialApplication,
+                'creditCheck1Complete': tenant.creditCheck1Complete,
+                'creditScoreAtLeaseRenewal': tenant.creditScoreAtLeaseRenewal,
+                'creditCheck2Complete': tenant.creditCheck2Complete,
+                'guarantor': tenant.guarantor,
+                'petsAllowed': tenant.petsAllowed,
+                'manager_id': tenant.manager_id,
+                'leases': leases  # Include serialized leases in the tenant data
+            }
+            return jsonify(tenant_data), 200
+        else:
+            return jsonify({"message": "Tenant not found"}), 404
+    else:
+        return jsonify({"message": "User not found"}), 404
+
+# Add a new tenant
+@api.route('/tenants', methods=['POST'])
+@jwt_required()
+def add_tenant():
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        data = request.get_json()
+        new_tenant = Tenant(
+            firstName=data['firstName'],
+            lastName=data['lastName'],
+            phoneNumber=data['phoneNumber'],
+            email=data['email'],
+            dateOfBirth=data['dateOfBirth'],
+            occupation=data['occupation'],
+            employerName=data['employerName'],
+            professionalTitle=data['professionalTitle'],
+            creditScoreAtInitialApplication=data['creditScoreAtInitialApplication'],
+            creditCheck1Complete=data['creditCheck1Complete'],
+            creditScoreAtLeaseRenewal=data['creditScoreAtLeaseRenewal'],
+            creditCheck2Complete=data['creditCheck2Complete'],
+            guarantor=data['guarantor'],
+            petsAllowed=data['petsAllowed'],
+            manager_id=data['manager_id']
+        )
+        db.session.add(new_tenant)
+        db.session.commit()
+        return jsonify({"message": "Tenant added successfully", "id": new_tenant.id}), 201
+    else:
+        return jsonify({"message": "User not found"}), 404
+
+# Update a tenant
+@api.route('/tenants/<int:tenant_id>', methods=['PUT'])
+@jwt_required()
+def update_tenant(tenant_id):
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        tenant_to_update = Tenant.query.get(tenant_id)
+        if tenant_to_update:
+            data = request.get_json()
+            tenant_to_update.firstName = data.get('firstName', tenant_to_update.firstName)
+            tenant_to_update.lastName = data.get('lastName', tenant_to_update.lastName)
+            tenant_to_update.phoneNumber = data.get('phoneNumber', tenant_to_update.phoneNumber)
+            tenant_to_update.email = data.get('email', tenant_to_update.email)
+            tenant_to_update.dateOfBirth = data.get('dateOfBirth', tenant_to_update.dateOfBirth)
+            tenant_to_update.occupation = data.get('occupation', tenant_to_update.occupation)
+            tenant_to_update.employerName = data.get('employerName', tenant_to_update.employerName)
+            tenant_to_update.professionalTitle = data.get('professionalTitle', tenant_to_update.professionalTitle)
+            tenant_to_update.creditScoreAtInitialApplication = data.get('creditScoreAtInitialApplication', tenant_to_update.creditScoreAtInitialApplication)
+            tenant_to_update.creditCheck1Complete = data.get('creditCheck1Complete', tenant_to_update.creditCheck1Complete)
+            tenant_to_update.creditScoreAtLeaseRenewal = data.get('creditScoreAtLeaseRenewal', tenant_to_update.creditScoreAtLeaseRenewal)
+            tenant_to_update.creditCheck2Complete = data.get('creditCheck2Complete', tenant_to_update.creditCheck2Complete)
+            tenant_to_update.guarantor = data.get('guarantor', tenant_to_update.guarantor)
+            tenant_to_update.petsAllowed = data.get('petsAllowed', tenant_to_update.petsAllowed)
+            tenant_to_update.manager_id = data.get('manager_id', tenant_to_update.manager_id)
+            db.session.commit()
+            return jsonify({"message": "Tenant updated successfully"}), 200
+        else:
+            return jsonify({"message": "Tenant not found"}), 404
+    else:
+        return jsonify({"message": "User not found"}), 404
+
+# Delete a tenant
+@api.route('/tenants/<int:tenant_id>', methods=['DELETE'])
+@jwt_required()
+def delete_tenant(tenant_id):
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        tenant_to_delete = Tenant.query.get(tenant_id)
+        if tenant_to_delete:
+            db.session.delete(tenant_to_delete)
+            db.session.commit()
+            return jsonify({"message": "Tenant deleted successfully"}), 200
+        else:
+            return jsonify({"message": "Tenant not found"}), 404
+    else:
+        return jsonify({"message": "User not found"}), 404
+
+# -----LEASE ROUTES-----
+# Fetch all leases for a property
+@api.route('/leases/<int:property_id>', methods=['GET'])
+@jwt_required()
+def get_property_leases(property_id):
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        property = Property.query.get(property_id)
+        if property:
+            leases = Lease.query.filter_by(propertyId=property_id).all()
+            lease_data = [{
+                "id": lease.id,
+                "tenant_id": lease.tenantId,
+                "start_date": lease.startDate.isoformat(),
+                "end_date": lease.endDate.isoformat(),
+                "rent_amount": lease.rentAmount,
+                "renewal_condition": lease.renewalCondition,
+                "type_of_lease": lease.typeOfLease
+            } for lease in leases]
+            return jsonify(lease_data), 200
+        else:
+            return jsonify({"message": "Property not found"}), 404
+    else:
+        return jsonify({"message": "User not found"}), 404
+    
+# Fetch a single lease for a property
+@api.route('/leases/<int:lease_id>', methods=['GET'])
+@jwt_required()
+def get_lease(lease_id):
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        lease = Lease.query.get(lease_id)
+        if lease:
+            lease_data = {
+                "id": lease.id,
+                "property_id": lease.propertyId,
+                "tenant_id": lease.tenantId,
+                "start_date": lease.startDate.isoformat(),
+                "end_date": lease.endDate.isoformat(),
+                "rent_amount": lease.rentAmount,
+                "renewal_condition": lease.renewalCondition,
+                "type_of_lease": lease.typeOfLease
+            }
+            return jsonify(lease_data), 200
+        else:
+            return jsonify({"message": "Lease not found"}), 404
+    else:
+        return jsonify({"message": "User not found"}), 404
+
+# Create a new lease for a property
+@api.route('/leases', methods=['POST'])
+@jwt_required()
+def create_lease():
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        data = request.get_json()
+        new_lease = Lease(
+            propertyId=data['property_id'],
+            startDate=data['start_date'],
+            endDate=data['end_date'],
+            rentAmount=data['rent_amount'],
+            renewalCondition=data.get('renewal_condition'),
+            typeOfLease=data['type_of_lease'],
+            tenantId=data['tenant_id']
+        )
+        db.session.add(new_lease)
+        db.session.commit()
+        return jsonify({"message": "Lease added successfully", "id": new_lease.id}), 201
+    else:
+        return jsonify({"message": "User not found"}), 404
+
+# Update a lease for a property
+@api.route('/leases/<int:lease_id>', methods=['PUT'])
+@jwt_required()
+def update_lease(lease_id):
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        lease = Lease.query.get(lease_id)
+        if lease:
+            data = request.get_json()
+            lease.startDate = data.get('start_date', lease.startDate)
+            lease.endDate = data.get('end_date', lease.endDate)
+            lease.rentAmount = data.get('rent_amount', lease.rentAmount)
+            lease.renewalCondition = data.get('renewal_condition', lease.renewalCondition)
+            lease.typeOfLease = data.get('type_of_lease', lease.typeOfLease)
+            db.session.commit()
+            return jsonify({"message": "Lease updated successfully"}), 200
+        else:
+            return jsonify({"message": "Lease not found"}), 404
+    else:
+        return jsonify({"message": "User not found"}), 404
+
+# Delete a lease for a property
+@api.route('/leases/<int:lease_id>', methods=['DELETE'])
+@jwt_required()
+def delete_lease(lease_id):
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        lease = Lease.query.get(lease_id)
+        if lease:
+            db.session.delete(lease)
+            db.session.commit()
+            return jsonify({"message": "Lease deleted successfully"}), 200
+        else:
+            return jsonify({"message": "Lease not found"}), 404
+    else:
+        return jsonify({"message": "User not found"}), 404
+
+# Property Maintenance Request Routes
+# Fetch all property maintenance requests
+@api.route('/property-maintenance-requests', methods=['GET'])
+@jwt_required()
+def get_property_maintenance_requests():
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        maintenance_requests = PropertyMaintenanceRequest.query.all()
+        maintenance_requests_data = [{
+            'id': request.id,
+            'property_id': request.propertyId,
+            'tenant_id': request.tenantId,
+            'description': request.description,
+            'status': request.status,
+            'time_to_completion': request.timeToCompletion,
+            'created_at': request.createdAt.isoformat(),
+            'updated_at': request.updatedAt.isoformat()
+        } for request in maintenance_requests]
+        return jsonify(maintenance_requests_data), 200
+    else:
+        return jsonify({"message": "User not found"}), 404
+
+# Fetch a single property maintenance request by its ID
+@api.route('/property-maintenance-requests/<int:request_id>', methods=['GET'])
+@jwt_required()
+def get_property_maintenance_request(request_id):
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        maintenance_request = PropertyMaintenanceRequest.query.get(request_id)
+        if maintenance_request:
+            request_data = {
+                'id': maintenance_request.id,
+                'property_id': maintenance_request.propertyId,
+                'tenant_id': maintenance_request.tenantId,
+                'description': maintenance_request.description,
+                'status': maintenance_request.status,
+                'time_to_completion': maintenance_request.timeToCompletion,
+                'created_at': maintenance_request.createdAt.isoformat(),
+                'updated_at': maintenance_request.updatedAt.isoformat()
+            }
+            return jsonify(request_data), 200
+        else:
+            return jsonify({"message": "Property maintenance request not found"}), 404
+    else:
+        return jsonify({"message": "User not found"}), 404
+
+# Add a new property maintenance request
+@api.route('/property-maintenance-requests', methods=['POST'])
+@jwt_required()
+def add_property_maintenance_request():
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        data = request.get_json()
+        new_request = PropertyMaintenanceRequest(
+            propertyId=data['property_id'],
+            tenantId=data['tenant_id'],
+            description=data['description'],
+            status=data.get('status', 'pending'),
+            timeToCompletion=data.get('time_to_completion'),
+        )
+        db.session.add(new_request)
+        db.session.commit()
+        return jsonify({"message": "Property maintenance request added successfully", "id": new_request.id}), 201
+    else:
+        return jsonify({"message": "User not found"}), 404
+
+# Update a property maintenance request
+@api.route('/property-maintenance-requests/<int:request_id>', methods=['PUT'])
+@jwt_required()
+def update_property_maintenance_request(request_id):
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        request_to_update = PropertyMaintenanceRequest.query.get(request_id)
+        if request_to_update:
+            data = request.get_json()
+            request_to_update.propertyId = data['property_id']
+            request_to_update.tenantId = data['tenant_id']
+            request_to_update.description = data['description']
+            request_to_update.status = data.get('status', request_to_update.status)
+            request_to_update.timeToCompletion = data.get('time_to_completion', request_to_update.timeToCompletion)
+            db.session.commit()
+            return jsonify({"message": "Property maintenance request updated successfully"}), 200
+        else:
+            return jsonify({"message": "Property maintenance request not found"}), 404
+    else:
+        return jsonify({"message": "User not found"}), 404
+
+# Delete a property maintenance request
+@api.route('/property-maintenance-requests/<int:request_id>', methods=['DELETE'])
+@jwt_required()
+def delete_property_maintenance_request(request_id):
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user:
+        request_to_delete = PropertyMaintenanceRequest.query.get(request_id)
+        if request_to_delete:
+            db.session.delete(request_to_delete)
+            db.session.commit()
+            return jsonify({"message": "Property maintenance request deleted successfully"}), 200
+        else:
+            return jsonify({"message": "Property maintenance request not found"}), 404
+    else:
+        return jsonify({"message": "User not found"}), 404
+
+
 if __name__ == '__main__':
     app.run(debug=True)
     
+
+

@@ -35,7 +35,7 @@ comprehensive WSGI web application library support.
 
 1. Install frontend dependencies by running `npm install` within the `/frontend` folder.
 2. Install backend dependencies by running the following commands in the root folder:
-   - `pip3 install Flask Flask-SQLAlchemy Flask-JWT-Extended Werkzeug python-dotenv psycopg2-binary flask-cors`
+   - `pip3 install Flask Flask-SQLAlchemy Flask-JWT-Extended Flask-Migrate Werkzeug python-dotenv psycopg2-binary flask-cors`
    - _(Note: you may need to upgrade pip3 to the latest version by running `pip3 install --upgrade pip`.)_
 
 ### Environment Variables Setup
@@ -51,16 +51,16 @@ JWT_SECRET_KEY=yourjwtsecretkey
 3. Ensure that the `.env` file is added to the `.gitignore` file to prevent it from
    being tracked by version control.
 
-### Setup PostgreSQL Database 
+### Setup PostgreSQL Database
 
-   MacOs - `Postico 2` as your db management tool 
-   Windows - `pgAdmin` or `DBeaver` or `HeidiSQL`as your db management tool
+MacOs - `Postico 2` as your db management tool
+Windows - `pgAdmin` or `DBeaver` or `HeidiSQL`as your db management tool
 
 1. Download and install PostgreSQL from [https://www.postgresql.org/download/].
-2. MacOs -     Open a new terminal & run `psql` to open the PostgreSQL shell. 
-   Windows -   Open a new terminal & run `psql -U postgres -d prop_pilot_db -h localhost -p 5432`
-               & enter your password plus 
-               a. add the bin path in your `Advanced System Settings`-->`Environment Variables`-->`System Variables`-->Select `Edit` for your path and add the path to your PostgreSQL /bin folder
+2. MacOs - Open a new terminal & run `psql` to open the PostgreSQL shell.
+   Windows - Open a new terminal & run `psql -U postgres -d prop_pilot_db -h localhost -p 5432`
+   & enter your password plus
+   a. add the bin path in your `Advanced System Settings`-->`Environment Variables`-->`System Variables`-->Select `Edit` for your path and add the path to your PostgreSQL /bin folder
 3. Create a new database:
 
 CREATE DATABASE prop_pilot;
@@ -91,7 +91,24 @@ GRANT ALL PRIVILEGES ON DATABASE prop_pilot TO yourusername;
 `GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO your_db_user;`
 `GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO your_db_user;`
 
-### Setup Database Tables
+### Setup Database Migrations with Flask-Migrate
+
+1. To manage database migrations & keep the database schema in sync we use Flask-Migrate
+   (you installed it earlier).
+
+   Run the following commands in the root directory:
+   MacOs - `flask db init`
+   Windows - `python -m flask db init`
+
+2. Run the following commands in the root directory for initial migration:
+   MacOs - `flask db migrate -m "Initial migration."`
+   Windows - `python -m flask db migrate -m "Initial migration."`
+
+3. Apply the migration to the database:
+   MacOs - `flask db upgrade`
+   Windows - `python -m flask db upgrade`
+
+### Setup Database Tables (If NOT using Flask-Migrate)
 
 1. Set the FLASK_APP environment variable and start a Python shell with Flask
    context by running the following commands in the root directory:
@@ -106,17 +123,17 @@ db.create_all()
 
 ### Running the Application
 
-1. To run the frontend, navigate to the `/frontend` directory 
+1. To run the frontend, navigate to the `/frontend` directory
    Execute
-   MacOs -     `npm start` or `vite` 
-   Windows -   `npm run dev` 
-   
+   MacOs - `npm start` or `vite`
+   Windows - `npm run dev`
+
    The frontend will typically be accessible at
    `http://localhost:3000` or `http://localhost:5173`.
 
-2. To run the backend, 
-   Execute 
-   MacOs -     `python3 app.py` or `flask run` 
-   Windows -   `python app.py` in the root directory. 
-   
+2. To run the backend,
+   Execute
+   MacOs - `python3 app.py` or `flask run`
+   Windows - `python app.py` in the root directory.
+
    The backend server will be accessible at `http://localhost:5000`.

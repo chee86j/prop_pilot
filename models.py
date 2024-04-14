@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import enum
+from sqlalchemy import Index
 
 # Initialize SQLAlchemy with no settings
 db = SQLAlchemy()
@@ -12,7 +13,8 @@ class User(db.Model):
     last_name = db.Column(db.String(512), nullable=False)
     email = db.Column(db.String(512), unique=True, nullable=False)
     password_hash = db.Column(db.String(512))
-    properties = db.relationship('Property', backref='owner', lazy='dynamic')
+    properties = db.relationship('Property', backref='owner', lazy='dynamic') # User can own multiple properties
+    managed_tenants = db.relationship('Tenant', backref='manager', lazy='dynamic') # User can be a landlord or manager who manages multiple tenants
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -131,8 +133,12 @@ class Property(db.Model):
     homeInspectorPhone = db.Column(db.String(64))
     architect = db.Column(db.String(128))
     architectPhone = db.Column(db.String(64))
-    construction_draws = db.relationship('ConstructionDraw', backref='property', lazy='dynamic')
-    phases = db.relationship('Phase', backref='property', lazy='dynamic')
+    construction_draws = db.relationship('ConstructionDraw', backref='property', lazy='dynamic') # One to many relationship w/ConstructionDraw
+    phases = db.relationship('Phase', backref='property', lazy='dynamic') # One to many relationship w/Phase
+    leases = db.relationship('Lease', backref='property', lazy=True) # One to many relationship w/Lease
+    maintenance_requests = db.relationship('PropertyMaintenanceRequest', backref='property', lazy=True) # One to many relationship w/PropertyMaintenanceRequest
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))  # Adding cascade so that if a user is deleted, all properties associated with that user are also deleted
+    Index('idx_user_property', 'user_id')  # Indexing this column for faster retrieval 
 
 # Phase Model
 class Phase(db.Model):
@@ -175,3 +181,50 @@ class Receipt(db.Model):
     description = db.Column(db.Text, nullable=True)
     pointofcontact = db.Column(db.String(512), nullable=True)
     ccnumber = db.Column(db.String(4), nullable=True)
+
+# Tenant Model
+class Tenant(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    firstName = db.Column(db.String(255), nullable=False)
+    lastName = db.Column(db.String(255), nullable=False)
+    phoneNumber = db.Column(db.String(255), nullable=True)
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    dateOfBirth = db.Column(db.Date, nullable=False)
+    occupation = db.Column(db.String(255), nullable=True)
+    employerName = db.Column(db.String(255), nullable=True)
+    professionalTitle = db.Column(db.String(255), nullable=True)
+    creditScoreAtInitialApplication = db.Column(db.Integer)
+    creditCheck1Complete = db.Column(db.Boolean)
+    creditScoreAtLeaseRenewal = db.Column(db.Integer)
+    creditCheck2Complete = db.Column(db.Boolean)
+    guarantor = db.Column(db.String(255), nullable=True)
+    petsAllowed = db.Column(db.Boolean, default=False)
+    manager_id = db.Column(db.Integer, db.ForeignKey('user.id')) # Link back to the manager(user) who manages this tenant
+    leases = db.relationship('Lease', backref='tenant', lazy=True) # One to many relationship w/Lease
+    manager_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='SET NULL'))  # Cascade for if a user is deleted, the manager_id is set to NULL
+    Index('idx_tenant_manager', 'manager_id')  # Index for manager queries to improve retrieval speed
+
+# Lease Model
+class Lease(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    tenantId = db.Column(db.Integer, db.ForeignKey('tenant.id', ondelete='CASCADE'), nullable=False) # Many to one relationship w/Tenant & cascade for if a tenant is deleted, the lease is also deleted
+    propertyId = db.Column(db.Integer, db.ForeignKey('property.id', ondelete='CASCADE'), nullable=False) # Many to one relationship w/Property & cascade for if a property is deleted, the lease is also deleted
+    startDate = db.Column(db.Date, nullable=False)
+    endDate = db.Column(db.Date, nullable=False)
+    rentAmount = db.Column(db.Float, nullable=False)
+    renewalCondition = db.Column(db.String(255), nullable=True)
+    typeOfLease = db.Column(db.String(100), nullable=False) # Examples: "Fixed", "Month-to-Month", "Lease to Own", etc.
+   
+
+# Property Maintenance Request Model
+class PropertyMaintenanceRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    propertyId = db.Column(db.Integer, db.ForeignKey('property.id'), nullable=False)
+    tenantId = db.Column(db.Integer, db.ForeignKey('tenant.id'), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    status = db.Column(db.String(100), default='pending')
+    timeToCompletion = db.Column(db.Integer)  # Time in hours
+    createdAt = db.Column(db.DateTime, default=db.func.current_timestamp())
+    updatedAt = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
+    tenant = db.relationship('Tenant', backref='maintenance_requests', lazy=True) # Many to one relationship w/Tenant
+
