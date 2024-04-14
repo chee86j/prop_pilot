@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+/* https://www.npmjs.com/package/react-chrono#media */
 import { Chrono } from "react-chrono";
 
 const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
@@ -15,9 +16,13 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
   const items = phases.map((phase) => ({
     title: phase.name,
     cardTitle: phase.name,
-    cardSubtitle: `Expected Start: ${
-      phase.expectedStartDate || ""
-    }, Actual Start: ${phase.startDate || ""}`,
+    cardSubtitle: (
+      <>
+        <span>Expected Start: {phase.expectedStartDate || ""}</span>
+        <br />
+        <span>Actual Start: {phase.startDate || ""}</span>
+      </>
+    ),
     cardDetailedText: (
       <div className="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0 hover:cursor-pointer">
         <button
@@ -52,6 +57,13 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
         slideShow
         slideItemDuration={4500}
         enableOutline={false}
+        theme={{
+          secondary: "rgb(239, 246, 255)", // Tailwind's blue-50 for backgrounds
+          cardBgColor: "rgb(255, 255, 255)", // white background for cards
+          cardForeColor: "rgb(55, 65, 81)", // Tailwind's gray-800 for text color
+        }}
+        cardHeight={250}
+        scrollable={{ scrollbar: true }}
       />
     </div>
   );

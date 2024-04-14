@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import ConstructionDraw from "./ConstructionDraw";
 import PhaseTimeline from "./PhaseTimeline";
 import PhaseForm from "./PhaseForm";
-import { formatCurrency } from "../../../util";
+import { formatFullCurrency } from "../../../util";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
 
 const PropertyDetails = ({ propertyId }) => {
@@ -121,7 +121,7 @@ const PropertyDetails = ({ propertyId }) => {
     isCurrency = false
   ) => {
     const displayValue =
-      isCurrency && !editMode ? formatCurrency(value) : value;
+      isCurrency && !editMode ? formatFullCurrency(value) : value;
     return (
       <div className="flex justify-between items-center mb-2">
         <strong>{label}:</strong>

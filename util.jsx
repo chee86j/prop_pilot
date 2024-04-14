@@ -41,3 +41,14 @@ export const formatCurrencyDetailed = (value) => {
     currency: "USD",
   });
 };
+
+export const formatFullCurrency = (value) => {
+  if (!value || isNaN(value)) return "";
+  // Val to number
+  const numericValue = parseFloat(value);
+  // Default format
+  return numericValue.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+  });
+};
