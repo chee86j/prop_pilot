@@ -8,6 +8,7 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 from werkzeug.security import check_password_hash
 from datetime import timedelta
 from sqlalchemy.exc import IntegrityError
+from calculations import get_property_profit_loss
 
 api = Blueprint('api', __name__)
 
@@ -1220,6 +1221,25 @@ def delete_property_maintenance_request(request_id):
             return jsonify({"message": "Property maintenance request not found"}), 404
     else:
         return jsonify({"message": "User not found"}), 404
+
+
+# -----Routes for Calculations-----
+# Calculate profit/loss for a property
+@api.route('/properties/<int:property_id>/profit_loss', methods=['GET'])
+@jwt_required()
+def profit_loss(property_id):
+    print(f"Accessing profit/loss data for property ID: {property_id}")
+    try:
+        result = get_property_profit_loss(property_id)
+        if result:
+            print("Data found:", result)
+            return jsonify(result), 200
+        else:
+            print("No data found for the given property ID")
+            return jsonify({"message": "Property not found"}), 404
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"error": "Internal server error. Please contact support."}), 500
 
 
 if __name__ == '__main__':

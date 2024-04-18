@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import ConstructionDraw from "./ConstructionDraw";
 import PhaseTimeline from "./PhaseTimeline";
 import PhaseForm from "./PhaseForm";
+import ProfitAndLoss from "./ProfitAndLoss";
 import { formatFullCurrency } from "../../../util";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
 
@@ -968,6 +969,11 @@ const PropertyDetails = ({ propertyId }) => {
             Edit
           </button>
         )}
+      </div>
+
+      <div>
+        <h1>Property Details</h1>
+        <ProfitAndLoss propertyId={propertyId} />
       </div>
     </div>
   );
