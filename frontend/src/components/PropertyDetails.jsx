@@ -970,10 +970,9 @@ const PropertyDetails = ({ propertyId }) => {
           </button>
         )}
       </div>
-
       <div>
         <h1>Property Details</h1>
-        <ProfitAndLoss propertyId={propertyId} />
+        <ProfitAndLoss property={propertyDetails} />
       </div>
     </div>
   );
