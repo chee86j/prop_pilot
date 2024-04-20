@@ -86,9 +86,9 @@ const ProfitAndLoss = ({ property }) => {
   } = calculateDetails();
 
   const renderDetails = (details, title) => (
-    <div className="bg-gray-50 p-2 shadow-sm rounded-md my-1">
+    <div className="hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md my-2">
       <h3 className="text-lg font-bold text-blue-700">{title}</h3>
-      <ul className="list-disc pl-2">
+      <ul className="list-disc pl-5">
         {Object.entries(details).map(([key, value]) => (
           <li key={key} className="flex justify-between">
             <span>
@@ -105,7 +105,7 @@ const ProfitAndLoss = ({ property }) => {
   );
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-4 max-w-4xl mx-auto mt-5 flex flex-col md:flex-row justify-between space-y-4 md:space-x-4 md:space-y-0">
+    <div className="bg-white shadow-md rounded-lg p-4 max-w-4xl mx-auto flex flex-col md:flex-row justify-between space-y-4 md:space-x-4 md:space-y-0">
       {/* Rental Strategy */}
       <div className="flex-1">
         {renderDetails(expensesDetails, "Rental Strategy Expenses")}

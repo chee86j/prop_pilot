@@ -971,7 +971,9 @@ const PropertyDetails = ({ propertyId }) => {
         )}
       </div>
       <div>
-        <h1>Property Details</h1>
+        <h2 className="text-xl md:text-2xl font-bold text-gray-700 mt-8">
+          Profit & Loss Analysis
+        </h2>
         <ProfitAndLoss property={propertyDetails} />
       </div>
     </div>
