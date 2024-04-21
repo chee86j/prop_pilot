@@ -1,10 +1,29 @@
 /* eslint-disable react/prop-types */
+import { useState } from "react";
 import { formatFullCurrency } from "../../../util";
 
 const ProfitAndLoss = ({ property }) => {
+  // State to manage expanded sections
+  const [expandedSections, setExpandedSections] = useState({
+    rentalStrategy: false,
+    saleStrategy: false,
+    combinedStrategy: false,
+    rentalIncomeDetails: false,
+    saleIncomeDetails: false,
+    combinedIncomeDetails: false,
+  });
+
   if (!property) {
     return <div>Loading...</div>;
   }
+
+  // Toggle function for expanding/collapsing sections
+  const toggleSection = (section) => {
+    setExpandedSections({
+      ...expandedSections,
+      [section]: !expandedSections[section],
+    });
+  };
 
   const calculateDetails = () => {
     // Detailed expense calculations
@@ -86,57 +105,68 @@ const ProfitAndLoss = ({ property }) => {
   } = calculateDetails();
 
   const renderDetails = (details, title) => (
-    <div className="hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md my-2">
+    <div
+      className="bg-gray-50 p-4 shadow-sm rounded-md my-2 cursor-pointer"
+      onClick={() => toggleSection(title)}
+    >
       <h3 className="text-lg font-bold text-blue-700">{title}</h3>
-      <ul className="list-disc pl-5">
-        {Object.entries(details).map(([key, value]) => (
-          <li key={key} className="flex justify-between">
-            <span>
-              {key
-                .replace(/([A-Z])/g, " $1")
-                .replace(/^./, (str) => str.toUpperCase())}
-              :
-            </span>
-            <span>{formatFullCurrency(value)}</span>
-          </li>
-        ))}
-      </ul>
+      {expandedSections[title] && (
+        <ul className="list-disc pl-5">
+          {Object.entries(details).map(([key, value]) => (
+            <li key={key} className="flex justify-between">
+              <span>
+                {key
+                  .replace(/([A-Z])/g, " $1")
+                  .replace(/^./, (str) => str.toUpperCase())}
+                :
+              </span>
+              <span>{formatFullCurrency(value)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 
   return (
     <div className="bg-white shadow-md rounded-lg p-4 max-w-4xl mx-auto flex flex-col md:flex-row justify-between space-y-4 md:space-x-4 md:space-y-0">
       {/* Rental Strategy */}
-      <div className="flex-1">
-        {renderDetails(expensesDetails, "Rental Strategy Expenses")}
+      <div className="rental-strategy flex-1">
+        {renderDetails(expensesDetails, "Rental Strategy")}
         {renderDetails(rentalIncomeDetails, "Rental Income Details")}
-        <div className="text-right text-green-600">
-          Total Expenses: {formatFullCurrency(totalExpenses)}
-          <br />
-          Total Rental Income: {formatFullCurrency(totalRentalIncome)}
-          <br />
-          Net Profit from Rentals: {formatFullCurrency(netProfitFromRentals)}
-        </div>
+        {expandedSections["Rental Strategy"] && (
+          <div className="text-right text-green-600">
+            Total Expenses: {formatFullCurrency(totalExpenses)}
+            <br />
+            Total Rental Income: {formatFullCurrency(totalRentalIncome)}
+            <br />
+            Net Profit from Rentals: {formatFullCurrency(netProfitFromRentals)}
+          </div>
+        )}
       </div>
       {/* Sale Strategy */}
-      <div className="flex-1">
-        {renderDetails(expensesDetails, "Sale Strategy Expenses")}
+      <div className="sale-strategy flex-1">
+        {renderDetails(expensesDetails, "Sale Strategy")}
         {renderDetails(saleIncomeDetails, "Sale Income Details")}
-        <div className="text-right text-green-600">
-          Total Sale Income: {formatFullCurrency(totalSaleIncome)}
-          <br />
-          Net Profit from Sale: {formatFullCurrency(netProfitFromSale)}
-        </div>
+        {expandedSections["Sale Strategy"] && (
+          <div className="text-right text-green-600">
+            Total Sale Income: {formatFullCurrency(totalSaleIncome)}
+            <br />
+            Net Profit from Sale: {formatFullCurrency(netProfitFromSale)}
+          </div>
+        )}
       </div>
       {/* Combined Strategy */}
-      <div className="flex-1">
-        {renderDetails(expensesDetails, "Combined Strategy Expenses")}
+      <div className="combined strategy flex-1">
+        {renderDetails(expensesDetails, "Combined Strategy")}
         {renderDetails(combinedIncomeDetails, "Combined Income Details")}
-        <div className="text-right text-green-600">
-          Total Combined Income: {formatFullCurrency(totalIncome)}
-          <br />
-          Net Profit Combined: {formatFullCurrency(combinedNetProfit)}
-        </div>
+        {expandedSections["Combined Strategy"] && (
+          <div className="text-right text-green-600">
+            Total Combined Income: {formatFullCurrency(totalIncome)}
+            <br />
+            Net Profit Combined: {formatFullCurrency(combinedNetProfit)}
+          </div>
+        )}
       </div>
     </div>
   );
