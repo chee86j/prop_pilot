@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState } from "react";
 import { formatFullCurrency } from "../../../util";
+import { ChevronsUp, ChevronsDown } from "lucide-react";
 
 const ProfitAndLoss = ({ property }) => {
   // State to manage expanded sections
@@ -8,9 +9,6 @@ const ProfitAndLoss = ({ property }) => {
     rentalStrategy: false,
     saleStrategy: false,
     combinedStrategy: false,
-    rentalIncomeDetails: false,
-    saleIncomeDetails: false,
-    combinedIncomeDetails: false,
   });
 
   if (!property) {
@@ -19,10 +17,10 @@ const ProfitAndLoss = ({ property }) => {
 
   // Toggle function for expanding/collapsing sections
   const toggleSection = (section) => {
-    setExpandedSections({
-      ...expandedSections,
-      [section]: !expandedSections[section],
-    });
+    setExpandedSections((prevState) => ({
+      ...prevState,
+      [section]: !prevState[section],
+    }));
   };
 
   const calculateDetails = () => {
@@ -35,7 +33,7 @@ const ProfitAndLoss = ({ property }) => {
       yearlyPropertyTaxes: property.yearlyPropertyTaxes,
       mortgagePaid: property.mortgagePaid,
       homeownersInsurance: property.homeownersInsurance,
-      YearlyManagementFees: property.managementFees,
+      yearlyManagementFees: property.managementFees,
       monthlyMaintenanceCosts: property.maintenanceCosts,
       miscFees: property.miscFees,
     };
@@ -61,14 +59,17 @@ const ProfitAndLoss = ({ property }) => {
       (sum, value) => sum + (value || 0),
       0
     );
+
     const totalRentalIncome = Object.values(rentalIncomeDetails).reduce(
       (sum, value) => sum + (value || 0),
       0
     );
+
     const totalSaleIncome = Object.values(saleIncomeDetails).reduce(
       (sum, value) => sum + (value || 0),
       0
     );
+
     const totalIncome = totalRentalIncome + totalSaleIncome;
 
     const netProfitFromRentals = totalRentalIncome - totalExpenses;
@@ -77,9 +78,9 @@ const ProfitAndLoss = ({ property }) => {
 
     return {
       totalExpenses,
-      totalIncome,
       totalRentalIncome,
       totalSaleIncome,
+      totalIncome,
       netProfitFromRentals,
       netProfitFromSale,
       combinedNetProfit,
@@ -104,13 +105,20 @@ const ProfitAndLoss = ({ property }) => {
     combinedIncomeDetails,
   } = calculateDetails();
 
-  const renderDetails = (details, title) => (
+  const renderDetails = (details, title, sectionKey) => (
     <div
       className="bg-gray-50 p-4 shadow-sm rounded-md my-2 cursor-pointer"
-      onClick={() => toggleSection(title)}
+      onClick={() => toggleSection(sectionKey)}
     >
-      <h3 className="text-lg font-bold text-blue-700">{title}</h3>
-      {expandedSections[title] && (
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-bold text-blue-700">{title}</h3>
+        {expandedSections[sectionKey] ? (
+          <ChevronsUp size={24} className="text-gray-700" />
+        ) : (
+          <ChevronsDown size={24} className="text-gray-700" />
+        )}
+      </div>
+      {expandedSections[sectionKey] && (
         <ul className="list-disc pl-5">
           {Object.entries(details).map(([key, value]) => (
             <li key={key} className="flex justify-between">
@@ -131,10 +139,14 @@ const ProfitAndLoss = ({ property }) => {
   return (
     <div className="bg-white shadow-md rounded-lg p-4 max-w-4xl mx-auto flex flex-col md:flex-row justify-between space-y-4 md:space-x-4 md:space-y-0">
       {/* Rental Strategy */}
-      <div className="rental-strategy flex-1">
-        {renderDetails(expensesDetails, "Rental Strategy")}
-        {renderDetails(rentalIncomeDetails, "Rental Income Details")}
-        {expandedSections["Rental Strategy"] && (
+      <div className="flex-1">
+        {renderDetails(expensesDetails, "Rental Strategy", "rentalStrategy")}
+        {renderDetails(
+          rentalIncomeDetails,
+          "Rental Income Details",
+          "rentalStrategy"
+        )}
+        {expandedSections.rentalStrategy && (
           <div className="text-right text-green-600">
             Total Expenses: {formatFullCurrency(totalExpenses)}
             <br />
@@ -145,10 +157,14 @@ const ProfitAndLoss = ({ property }) => {
         )}
       </div>
       {/* Sale Strategy */}
-      <div className="sale-strategy flex-1">
-        {renderDetails(expensesDetails, "Sale Strategy")}
-        {renderDetails(saleIncomeDetails, "Sale Income Details")}
-        {expandedSections["Sale Strategy"] && (
+      <div className="flex-1">
+        {renderDetails(expensesDetails, "Sale Strategy", "saleStrategy")}
+        {renderDetails(
+          saleIncomeDetails,
+          "Sale Income Details",
+          "saleStrategy"
+        )}
+        {expandedSections.saleStrategy && (
           <div className="text-right text-green-600">
             Total Sale Income: {formatFullCurrency(totalSaleIncome)}
             <br />
@@ -157,10 +173,18 @@ const ProfitAndLoss = ({ property }) => {
         )}
       </div>
       {/* Combined Strategy */}
-      <div className="combined strategy flex-1">
-        {renderDetails(expensesDetails, "Combined Strategy")}
-        {renderDetails(combinedIncomeDetails, "Combined Income Details")}
-        {expandedSections["Combined Strategy"] && (
+      <div className="flex-1">
+        {renderDetails(
+          expensesDetails,
+          "Combined Strategy",
+          "combinedStrategy"
+        )}
+        {renderDetails(
+          combinedIncomeDetails,
+          "Combined Income Details",
+          "combinedStrategy"
+        )}
+        {expandedSections.combinedStrategy && (
           <div className="text-right text-green-600">
             Total Combined Income: {formatFullCurrency(totalIncome)}
             <br />
