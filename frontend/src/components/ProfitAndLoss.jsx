@@ -26,7 +26,7 @@ const ProfitAndLoss = ({ property }) => {
   });
 
   if (!property) {
-    return <div>Loading...</div>;
+    return <div>Error: Property data not found</div>;
   }
 
   // Toggle function for expanding/collapsing sections
@@ -37,12 +37,9 @@ const ProfitAndLoss = ({ property }) => {
     }));
   };
 
-  const formatKey = (key) => {
-    return (
-      keyDisplayMapping[key] ||
-      key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())
-    );
-  };
+  const formatKey = (key) =>
+    keyDisplayMapping[key] ||
+    key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase());
 
   const calculateDetails = () => {
     // Detailed expense calculations
@@ -59,7 +56,7 @@ const ProfitAndLoss = ({ property }) => {
       miscFees: property.miscFees,
     };
 
-    // Detailed rental income calculations
+    // Detailed income calculations
     const rentalIncomeDetails = {
       expectedYearlyRent: property.expectedYearlyRent,
       rentalIncomeReceived: property.rentalIncomeReceived,
@@ -80,14 +77,17 @@ const ProfitAndLoss = ({ property }) => {
       (sum, value) => sum + (value || 0),
       0
     );
+
     const totalRentalIncome = Object.values(rentalIncomeDetails).reduce(
       (sum, value) => sum + (value || 0),
       0
     );
+
     const totalSaleIncome = Object.values(saleIncomeDetails).reduce(
       (sum, value) => sum + (value || 0),
       0
     );
+
     const totalIncome = totalRentalIncome + totalSaleIncome;
 
     const netProfitFromRentals = totalRentalIncome - totalExpenses;
@@ -96,7 +96,6 @@ const ProfitAndLoss = ({ property }) => {
 
     return {
       totalExpenses,
-
       totalRentalIncome,
       totalSaleIncome,
       totalIncome,
@@ -128,13 +127,23 @@ const ProfitAndLoss = ({ property }) => {
     <div
       className="bg-gray-50 p-4 shadow-sm rounded-md my-2 cursor-pointer"
       onClick={() => toggleSection(sectionKey)}
+      aria-expanded={expandedSections[sectionKey]}
     >
+      {/* Aria Expanded is to help screen readers understand if the section is expanded or collapsed */}
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-bold text-blue-700">{title}</h3>
         {expandedSections[sectionKey] ? (
-          <ChevronsUp size={24} className="text-gray-700" />
+          <ChevronsUp
+            size={24}
+            className="text-gray-700"
+            aria-label="Collapse section"
+          />
         ) : (
-          <ChevronsDown size={24} className="text-gray-700" />
+          <ChevronsDown
+            size={24}
+            className="text-gray-700"
+            aria-label="Expand section"
+          />
         )}
       </div>
       {expandedSections[sectionKey] && (
