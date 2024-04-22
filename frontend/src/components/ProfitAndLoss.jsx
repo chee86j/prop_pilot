@@ -1,14 +1,28 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { formatFullCurrency } from "../../../util";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
+import { useReactToPrint } from "react-to-print";
+
+const keyDisplayMapping = {
+  arvSalePrice: "ARV Sale Price",
+};
 
 const ProfitAndLoss = ({ property }) => {
+  // Reference for printing
+  const printRef = useRef(null);
+
   // State to manage expanded sections
   const [expandedSections, setExpandedSections] = useState({
     rentalStrategy: false,
     saleStrategy: false,
     combinedStrategy: false,
+  });
+
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: "Profit and Loss Statement",
+    onAfterPrint: () => console.log("Printed successfully!"),
   });
 
   if (!property) {
@@ -21,6 +35,13 @@ const ProfitAndLoss = ({ property }) => {
       ...prevState,
       [section]: !prevState[section],
     }));
+  };
+
+  const formatKey = (key) => {
+    return (
+      keyDisplayMapping[key] ||
+      key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())
+    );
   };
 
   const calculateDetails = () => {
@@ -49,7 +70,7 @@ const ProfitAndLoss = ({ property }) => {
       arvSalePrice: property.arvSalePrice,
     };
 
-    // Detailed Combined income calculations
+    // Detailed Combined Income Calculations
     const combinedIncomeDetails = {
       ...rentalIncomeDetails,
       ...saleIncomeDetails,
@@ -59,17 +80,14 @@ const ProfitAndLoss = ({ property }) => {
       (sum, value) => sum + (value || 0),
       0
     );
-
     const totalRentalIncome = Object.values(rentalIncomeDetails).reduce(
       (sum, value) => sum + (value || 0),
       0
     );
-
     const totalSaleIncome = Object.values(saleIncomeDetails).reduce(
       (sum, value) => sum + (value || 0),
       0
     );
-
     const totalIncome = totalRentalIncome + totalSaleIncome;
 
     const netProfitFromRentals = totalRentalIncome - totalExpenses;
@@ -78,6 +96,7 @@ const ProfitAndLoss = ({ property }) => {
 
     return {
       totalExpenses,
+
       totalRentalIncome,
       totalSaleIncome,
       totalIncome,
@@ -122,12 +141,7 @@ const ProfitAndLoss = ({ property }) => {
         <ul className="list-disc pl-5">
           {Object.entries(details).map(([key, value]) => (
             <li key={key} className="flex justify-between">
-              <span>
-                {key
-                  .replace(/([A-Z])/g, " $1")
-                  .replace(/^./, (str) => str.toUpperCase())}
-                :
-              </span>
+              <span>{formatKey(key)}:</span>
               <span>{formatFullCurrency(value)}</span>
             </li>
           ))}
@@ -137,60 +151,73 @@ const ProfitAndLoss = ({ property }) => {
   );
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-4 max-w-4xl mx-auto flex flex-col md:flex-row justify-between space-y-4 md:space-x-4 md:space-y-0">
-      {/* Rental Strategy */}
-      <div className="flex-1">
-        {renderDetails(expensesDetails, "Rental Strategy", "rentalStrategy")}
-        {renderDetails(
-          rentalIncomeDetails,
-          "Rental Income Details",
-          "rentalStrategy"
-        )}
-        {expandedSections.rentalStrategy && (
-          <div className="text-right text-green-600">
-            Total Expenses: {formatFullCurrency(totalExpenses)}
-            <br />
-            Total Rental Income: {formatFullCurrency(totalRentalIncome)}
-            <br />
-            Net Profit from Rentals: {formatFullCurrency(netProfitFromRentals)}
-          </div>
-        )}
-      </div>
-      {/* Sale Strategy */}
-      <div className="flex-1">
-        {renderDetails(expensesDetails, "Sale Strategy", "saleStrategy")}
-        {renderDetails(
-          saleIncomeDetails,
-          "Sale Income Details",
-          "saleStrategy"
-        )}
-        {expandedSections.saleStrategy && (
-          <div className="text-right text-green-600">
-            Total Sale Income: {formatFullCurrency(totalSaleIncome)}
-            <br />
-            Net Profit from Sale: {formatFullCurrency(netProfitFromSale)}
-          </div>
-        )}
-      </div>
-      {/* Combined Strategy */}
-      <div className="flex-1">
-        {renderDetails(
-          expensesDetails,
-          "Combined Strategy",
-          "combinedStrategy"
-        )}
-        {renderDetails(
-          combinedIncomeDetails,
-          "Combined Income Details",
-          "combinedStrategy"
-        )}
-        {expandedSections.combinedStrategy && (
-          <div className="text-right text-green-600">
-            Total Combined Income: {formatFullCurrency(totalIncome)}
-            <br />
-            Net Profit Combined: {formatFullCurrency(combinedNetProfit)}
-          </div>
-        )}
+    <div className="bg-white shadow-md rounded-lg p-4 max-w-4xl mx-auto">
+      <button
+        onClick={handlePrint}
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
+      >
+        Print to PDF
+      </button>
+
+      <div
+        ref={printRef}
+        className="flex flex-col md:flex-row justify-between space-y-4 md:space-x-4 md:space-y-0"
+      >
+        {/* Rental Strategy */}
+        <div className="flex-1">
+          {renderDetails(expensesDetails, "Rental Strategy", "rentalStrategy")}
+          {renderDetails(
+            rentalIncomeDetails,
+            "Rental Income Details",
+            "rentalStrategy"
+          )}
+          {expandedSections.rentalStrategy && (
+            <div className="text-right text-green-600">
+              Total Expenses: {formatFullCurrency(totalExpenses)}
+              <br />
+              Total Rental Income: {formatFullCurrency(totalRentalIncome)}
+              <br />
+              Net Profit from Rentals:{" "}
+              {formatFullCurrency(netProfitFromRentals)}
+            </div>
+          )}
+        </div>
+        {/* Sale Strategy */}
+        <div className="flex-1">
+          {renderDetails(expensesDetails, "Sale Strategy", "saleStrategy")}
+          {renderDetails(
+            saleIncomeDetails,
+            "Sale Income Details",
+            "saleStrategy"
+          )}
+          {expandedSections.saleStrategy && (
+            <div className="text-right text-green-600">
+              Total Sale Income: {formatFullCurrency(totalSaleIncome)}
+              <br />
+              Net Profit from Sale: {formatFullCurrency(netProfitFromSale)}
+            </div>
+          )}
+        </div>
+        {/* Combined Strategy */}
+        <div className="flex-1">
+          {renderDetails(
+            expensesDetails,
+            "Combined Strategy",
+            "combinedStrategy"
+          )}
+          {renderDetails(
+            combinedIncomeDetails,
+            "Combined Income Details",
+            "combinedStrategy"
+          )}
+          {expandedSections.combinedStrategy && (
+            <div className="text-right text-green-600">
+              Total Combined Income: {formatFullCurrency(totalIncome)}
+              <br />
+              Net Profit Combined: {formatFullCurrency(combinedNetProfit)}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
