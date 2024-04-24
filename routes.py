@@ -108,7 +108,13 @@ def get_property(property_id):
                 # Total Outlay To Date
                 'purchaseCost': property.purchaseCost,
                 'refinanceCosts': property.refinanceCosts,
+                    # Capital Expenditures
                 'totalRehabCost': property.totalRehabCost,
+                'equipmentCost': property.equipmentCost,
+                'constructionCost': property.constructionCost,
+                'largeRepairsCost': property.largeRepairsCost,
+                'renovationCost': property.renovationCost,
+                
                 'kickStartFunds': property.kickStartFunds,
                 'lenderConstructionDrawsReceived': property.lenderConstructionDrawsReceived,
                 'utilitiesCost': property.utilitiesCost,
@@ -238,7 +244,13 @@ def get_properties():
                 # Total Outlay To Date
                 'purchaseCost': property.purchaseCost,
                 'refinanceCosts': property.refinanceCosts,
+                    # Capital Expenditures
                 'totalRehabCost': property.totalRehabCost,
+                'equipmentCost': property.equipmentCost,
+                'constructionCost': property.constructionCost,
+                'largeRepairsCost': property.largeRepairsCost,
+                'renovationCost': property.renovationCost,
+                
                 'kickStartFunds': property.kickStartFunds,
                 'lenderConstructionDrawsReceived': property.lenderConstructionDrawsReceived,
                 'utilitiesCost': property.utilitiesCost,
@@ -369,7 +381,13 @@ def add_property():
             # Total Outlay To Date
             purchaseCost=convert_to_float(data.get('purchaseCost')),
             refinanceCosts=convert_to_float(data.get('refinanceCosts')),
+                # Capital Expenditures
             totalRehabCost=convert_to_float(data.get('totalRehabCost')),
+            equipmentCost=convert_to_float(data.get('equipmentCost')),
+            constructionCost=convert_to_float(data.get('constructionCost')),
+            largeRepairsCost=convert_to_float(data.get('largeRepairsCost')),
+            renovationCost=convert_to_float(data.get('renovationCost')),
+            
             kickStartFunds=convert_to_float(data.get('kickStartFunds')),
             lenderConstructionDrawsReceived=convert_to_float(data.get('lenderConstructionDrawsReceived')),
             utilitiesCost=convert_to_float(data.get('utilitiesCost')),
@@ -492,7 +510,14 @@ def update_property(property_id):
             # Total Outlay To Date
             property_to_update.purchaseCost = data.get('purchaseCost', property_to_update.purchaseCost)
             property_to_update.refinanceCosts = data.get('refinanceCosts', property_to_update.refinanceCosts)
+                # Capital Expenditures
             property_to_update.totalRehabCost = data.get('totalRehabCost', property_to_update.totalRehabCost)
+            property_to_update.equipmentCost = data.get('equipmentCost', property_to_update.equipmentCost)
+            property_to_update.constructionCost = data.get('constructionCost', property_to_update.constructionCost)
+            property_to_update.largeRepairsCost = data.get('largeRepairsCost', property_to_update.largeRepairsCost)
+            property_to_update.renovationCost = data.get('renovationCost', property_to_update.renovationCost)
+            
+            
             property_to_update.kickStartFunds = data.get('kickStartFunds', property_to_update.kickStartFunds)
             property_to_update.lenderConstructionDrawsReceived = data.get('lenderConstructionDrawsReceived', property_to_update.lenderConstructionDrawsReceived)
             property_to_update.utilitiesCost = data.get('utilitiesCost', property_to_update.utilitiesCost)

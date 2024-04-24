@@ -447,6 +447,34 @@ const PropertyDetails = ({ propertyId }) => {
                 true
               )}
               {renderEditableField(
+                "Equipment Cost",
+                "equipmentCost",
+                editedDetails.equipmentCost || "",
+                "number",
+                true
+              )}
+              {renderEditableField(
+                "Construction Cost",
+                "constructionCost",
+                editedDetails.constructionCost || "",
+                "number",
+                true
+              )}
+              {renderEditableField(
+                "Large Repair Cost",
+                "largeRepairCost",
+                editedDetails.largeRepairCost || "",
+                "number",
+                true
+              )}
+              {renderEditableField(
+                "Renovation Cost",
+                "renovationCost",
+                editedDetails.renovationCost || "",
+                "number",
+                true
+              )}
+              {renderEditableField(
                 "Total Rehab Cost",
                 "totalRehabCost",
                 editedDetails.totalRehabCost || "",

@@ -50,7 +50,13 @@ class Property(db.Model):
     # Total Outlay To Date
     purchaseCost = db.Column(db.Float)
     refinanceCosts = db.Column(db.Float)
+        # Capital Expenditures
     totalRehabCost = db.Column(db.Float)
+    equipmentCost = db.Column(db.Float)
+    constructionCost = db.Column(db.Float)
+    largeRepairsCost = db.Column(db.Float)
+    renovationCost = db.Column(db.Float)
+    
     kickStartFunds = db.Column(db.Float)
     lenderConstructionDrawsReceived = db.Column(db.Float)
     utilitiesCost = db.Column(db.Float)

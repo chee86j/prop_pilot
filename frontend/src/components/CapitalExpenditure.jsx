@@ -32,11 +32,10 @@ const CapitalExpenditure = ({ property }) => {
   // Create capital expenditure details from the property data
   const capexDetails = {
     totalRehabCost: property.totalRehabCost,
-    // equipmentCost: property.equipmentCost,
-    // constructionCost: property.constructionCost,
-    // largeRepairCost: property.largeRepairCost,
-    // renovationCost: property.renovationCost,
-    // to be added to property model and routes later
+    equipmentCost: property.equipmentCost,
+    constructionCost: property.constructionCost,
+    largeRepairCost: property.largeRepairCost,
+    renovationCost: property.renovationCost,
   };
 
   // Calculate total capital expenditure
