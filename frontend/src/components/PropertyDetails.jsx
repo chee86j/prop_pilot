@@ -5,6 +5,9 @@ import ConstructionDraw from "./ConstructionDraw";
 import PhaseTimeline from "./PhaseTimeline";
 import PhaseForm from "./PhaseForm";
 import ProfitAndLoss from "./ProfitAndLoss";
+import OperatingExpense from "./OperatingExpense";
+import RentalIncome from "./RentalIncome";
+import CapitalExpenditure from "./CapitalExpenditure";
 import { formatFullCurrency } from "../../../util";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
 
@@ -992,6 +995,9 @@ const PropertyDetails = ({ propertyId }) => {
           Profit & Loss Analysis
         </h2>
         <ProfitAndLoss property={propertyDetails} />
+        <OperatingExpense property={propertyDetails} />
+        <RentalIncome property={propertyDetails} />
+        <CapitalExpenditure property={propertyDetails} />
       </div>
     </div>
   );
