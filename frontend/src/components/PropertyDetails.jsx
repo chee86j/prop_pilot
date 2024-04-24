@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useReactToPrint } from "react-to-print";
 import ConstructionDraw from "./ConstructionDraw";
 import PhaseTimeline from "./PhaseTimeline";
 import PhaseForm from "./PhaseForm";
@@ -8,6 +9,7 @@ import { formatFullCurrency } from "../../../util";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
 
 const PropertyDetails = ({ propertyId }) => {
+  const printRef = useRef(null);
   const [propertyDetails, setPropertyDetails] = useState(null);
   const [phases, setPhases] = useState([]);
   const [isEditingPhase, setIsEditingPhase] = useState(false);
@@ -141,6 +143,12 @@ const PropertyDetails = ({ propertyId }) => {
     );
   };
 
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: "Property Details",
+    onAfterPrint: () => console.log("Printed Property Details"),
+  });
+
   const toggleSection = (section) => {
     setExpandedSections({
       ...expandedSections,
@@ -265,7 +273,16 @@ const PropertyDetails = ({ propertyId }) => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg text-sm md:p-6">
+    <div
+      className="property-details-container bg-white shadow-md rounded-lg p-4 max-w-4xl mx-auto"
+      ref={printRef}
+    >
+      <button
+        onClick={handlePrint}
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
+      >
+        Print Property Details
+      </button>
       <ConstructionDraw propertyId={propertyId} />
       <h1 className="text-center text-blue-500 text-xl md:text-2xl font-bold my-6">
         {editedDetails.address} - Property Details
