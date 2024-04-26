@@ -1,12 +1,14 @@
 const RentalAnalysis = () => {
   return (
     <div className="bg-white shadow-md rounded-lg p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-semibold leading-tight">Rental Analysis</h1>
+      <h1 className="text-2xl font-semibold leading-tight mb-6">
+        Rental Analysis
+      </h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Column 1 */}
-        <div>
+        <div className="flex flex-col space-y-6">
           {/* COSTS */}
-          <div className="mb-6 border border-gray-300 rounded-lg p-4">
+          <div className="border border-gray-300 rounded-lg p-4 flex-1">
             <h2 className="font-bold text-lg mb-3">COSTS</h2>
             <div className="mb-2">
               <strong>Purchase Price:</strong> $450,000
@@ -23,7 +25,7 @@ const RentalAnalysis = () => {
           </div>
 
           {/* FINANCING */}
-          <div className="mb-6 border border-gray-300 rounded-lg p-4">
+          <div className="border border-gray-300 rounded-lg p-4 flex-1">
             <h2 className="font-bold text-lg mb-3">FINANCING</h2>
             <div className="mb-2">
               <strong>Down payment %:</strong> 15.00%
@@ -46,7 +48,7 @@ const RentalAnalysis = () => {
           </div>
 
           {/* REVENUE ASSUMPTIONS */}
-          <div className="mb-6 border border-gray-300 rounded-lg p-4">
+          <div className="border border-gray-300 rounded-lg p-4 flex-1">
             <h2 className="font-bold text-lg mb-3">REVENUE ASSUMPTIONS</h2>
             <div className="mb-2">
               <strong>Rent per unit:</strong> $2,900
@@ -66,7 +68,7 @@ const RentalAnalysis = () => {
           </div>
 
           {/* EXPENSES PER MONTH */}
-          <div className="border border-gray-300 rounded-lg p-4">
+          <div className="border border-gray-300 rounded-lg p-4 flex-1">
             <h2 className="font-bold text-lg mb-3">EXPENSES PER MONTH</h2>
             <div className="mb-2">
               <strong>P&I (with PMI):</strong> $2,571
@@ -89,62 +91,72 @@ const RentalAnalysis = () => {
             <div className="mb-2">
               <strong>Water:</strong> $20
             </div>
-            <div className="mb-2">
-              <strong>Lawn:</strong> $0
-            </div>
             <div>
               <strong>Garbage:</strong> $80
+            </div>
+          </div>
+
+          {/* COMPUTED VALUES */}
+          <div className="border border-gray-300 rounded-lg p-4 flex-1">
+            <h2 className="font-bold text-lg mb-3">COMPUTED VALUES</h2>
+            <div className="mb-2">
+              <strong>Land Value:</strong> $112,500
+            </div>
+            <div>
+              <strong>Building Value:</strong> $337,500
             </div>
           </div>
         </div>
 
         {/* Column 2 */}
-        <div>
+        <div className="flex flex-col space-y-6">
           {/* MONTHLY INCOME */}
-          <div className="mb-6 border border-gray-300 rounded-lg p-4">
+          <div className="border border-gray-300 rounded-lg p-4 flex-1">
             <h2 className="font-bold text-lg mb-3">MONTHLY INCOME</h2>
             <div>$2,900.00</div>
           </div>
 
           {/* MONTHLY EXPENSES */}
-          <div className="mb-6 border border-gray-300 rounded-lg p-4">
+          <div className="border border-gray-300 rounded-lg p-4 flex-1">
             <h2 className="font-bold text-lg mb-3">MONTHLY EXPENSES</h2>
             <div>$3,504.36</div>
           </div>
 
           {/* CASH FLOW */}
-          <div className="mb-6 border border-gray-300 rounded-lg p-4">
+          <div className="border border-gray-300 rounded-lg p-4 flex-1">
             <h2 className="font-bold text-lg mb-3">CASH FLOW</h2>
             <div className="text-red-500">-$604.36</div>
-          </div>
-
-          {/* CASH ROI */}
-          <div className="mb-6 border border-gray-300 rounded-lg p-4">
             <h2 className="font-bold text-lg mb-3">CASH ROI</h2>
             <div className="text-red-500">-7.76%</div>
           </div>
 
           {/* DOWN PAYMENT CASH OUTLAY */}
-          <div className="mb-6 border border-gray-300 rounded-lg p-4">
+          <div className="border border-gray-300 rounded-lg p-4 flex-1">
             <h2 className="font-bold text-lg mb-3">DOWN PAYMENT CASH OUTLAY</h2>
             <div>$93,500</div>
-          </div>
-
-          {/* NET OPERATING INCOME */}
-          <div className="mb-6 border border-gray-300 rounded-lg p-4">
             <h2 className="font-bold text-lg mb-3">NET OPERATING INCOME</h2>
             <div>$23,594</div>
           </div>
 
-          {/* COMPUTED VALUES */}
-          <div className="border border-gray-300 rounded-lg p-4">
-            <h2 className="font-bold text-lg mb-3">COMPUTED VALUES</h2>
+          {/* RULES */}
+          <div className="border border-gray-300 rounded-lg p-4 flex-1">
+            <h2 className="font-bold text-lg mb-3">RULES</h2>
             <div className="mb-2">
-              <strong>Land Value:</strong> $112,500
+              <strong>The 2% Rule:</strong> 0.64%
             </div>
             <div className="mb-2">
-              <strong>Building Value:</strong> $337,500
+              <strong>The 50% Rule:</strong> 0.00%
             </div>
+            <div>
+              <strong>Finance Amount:</strong> $382,500
+            </div>
+            <div>
+              <strong>Purchase CAP Rate:</strong> 7.73%
+            </div>
+          </div>
+
+          {/* PRO FORMA CAP RATE */}
+          <div className="border border-gray-300 rounded-lg p-4 flex-1">
             <div>
               <strong>Pro Forma Cap Rate:</strong> 7.73%
             </div>
