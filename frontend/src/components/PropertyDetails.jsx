@@ -8,6 +8,8 @@ import ProfitAndLoss from "./ProfitAndLoss";
 import OperatingExpense from "./OperatingExpense";
 import RentalIncome from "./RentalIncome";
 import CapitalExpenditure from "./CapitalExpenditure";
+import CsvDisplay from "./CsvDisplay";
+import CsvReader from "./CsvReader";
 import { formatFullCurrency } from "../../../util";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
 
@@ -29,6 +31,11 @@ const PropertyDetails = ({ propertyId }) => {
     lender: false,
     salesAndMarketing: false,
   });
+  const [csvData, setCsvData] = useState(null);
+
+  const handleFileUpload = (data) => {
+    setCsvData(data); // Store the parsed CSV data
+  };
 
   useEffect(() => {
     const fetchPropertyDetails = async () => {
@@ -1026,6 +1033,10 @@ const PropertyDetails = ({ propertyId }) => {
         <OperatingExpense property={propertyDetails} />
         <RentalIncome property={propertyDetails} />
         <CapitalExpenditure property={propertyDetails} />
+        <div>
+          <CsvReader onFileUpload={handleFileUpload} />
+          {csvData && <CsvDisplay data={csvData} />}
+        </div>
       </div>
     </div>
   );
