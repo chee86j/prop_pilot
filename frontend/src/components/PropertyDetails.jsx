@@ -10,6 +10,7 @@ import RentalIncome from "./RentalIncome";
 import CapitalExpenditure from "./CapitalExpenditure";
 import CsvDisplay from "./CsvDisplay";
 import CsvReader from "./CsvReader";
+import RentalAnalysis from "./RentalAnalysis";
 import { formatFullCurrency } from "../../../util";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
 
@@ -1037,6 +1038,7 @@ const PropertyDetails = ({ propertyId }) => {
           <CsvReader onFileUpload={handleFileUpload} />
           {csvData && <CsvDisplay data={csvData} />}
         </div>
+        <RentalAnalysis />
       </div>
     </div>
   );
