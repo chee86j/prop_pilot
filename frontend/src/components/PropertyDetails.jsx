@@ -512,6 +512,34 @@ const PropertyDetails = ({ propertyId }) => {
                 true
               )}
               {renderEditableField(
+                "Sewer Yearly Cost",
+                "sewer",
+                editedDetails.sewer || "",
+                "number",
+                true
+              )}
+              {renderEditableField(
+                "Water Yearly Cost",
+                "water",
+                editedDetails.water || "",
+                "number",
+                true
+              )}
+              {renderEditableField(
+                "Lawn Yearly Cost",
+                "lawn",
+                editedDetails.lawn || "",
+                "number",
+                true
+              )}
+              {renderEditableField(
+                "Garbage Yearly Cost",
+                "garbage",
+                editedDetails.garbage || "",
+                "number",
+                true
+              )}
+              {renderEditableField(
                 "Yearly Property Taxes",
                 "yearlyPropertyTaxes",
                 editedDetails.yearlyPropertyTaxes || "",
@@ -543,6 +571,34 @@ const PropertyDetails = ({ propertyId }) => {
                 "Rental Income Received",
                 "rentalIncomeReceived",
                 editedDetails.rentalIncomeReceived || "",
+                "number",
+                true
+              )}
+              {renderEditableField(
+                "Number of Units",
+                "numUnits",
+                editedDetails.numUnits || "",
+                "number",
+                true
+              )}
+              {renderEditableField(
+                "Vacancy Rate",
+                "vacancyRate",
+                editedDetails.vacancyRate || "",
+                "number",
+                true
+              )}
+              {renderEditableField(
+                "Average Tenant Stay",
+                "avgTenantStay",
+                editedDetails.avgTenantStay || "",
+                "number",
+                true
+              )}
+              {renderEditableField(
+                "Other Monthly Income",
+                "otherMonthlyIncome",
+                editedDetails.otherMonthlyIncome || "",
                 "number",
                 true
               )}
@@ -699,6 +755,48 @@ const PropertyDetails = ({ propertyId }) => {
                 "number",
                 true
               )}
+              {renderEditableField(
+                "Cash Flow",
+                "cashFlow",
+                editedDetails.cashFlow || "",
+                "number",
+                true
+              )}
+              {renderEditableField(
+                "Cash ROI",
+                "cashRoi",
+                editedDetails.cashRoi || "",
+                "number",
+                true
+              )}
+              {renderEditableField(
+                "Rule 2 Percent",
+                "rule2Percent",
+                editedDetails.rule2Percent || "",
+                "number",
+                true
+              )}
+              {renderEditableField(
+                "Rule 50 Percent",
+                "rule50Percent",
+                editedDetails.rule50Percent || "",
+                "number",
+                true
+              )}
+              {renderEditableField(
+                "Finance Amount",
+                "financeAmount",
+                editedDetails.financeAmount || "",
+                "number",
+                true
+              )}
+              {renderEditableField(
+                "Purchase Cap Rate",
+                "purchaseCapRate",
+                editedDetails.purchaseCapRate || "",
+                "number",
+                true
+              )}
             </>
           )}
         </div>
@@ -802,6 +900,42 @@ const PropertyDetails = ({ propertyId }) => {
                 "Loan Number",
                 "loanNumber",
                 editedDetails.loanNumber || ""
+              )}
+              {renderEditableField(
+                "Down Payment Percentage",
+                "downPaymentPercentage",
+                editedDetails.downPaymentPercentage || "",
+                "number"
+              )}
+              {renderEditableField(
+                "Loan Interest Rate",
+                "loanInterestRate",
+                editedDetails.loanInterestRate || "",
+                "number"
+              )}
+              {renderEditableField(
+                "PMI Percentage",
+                "pmiPercentage",
+                editedDetails.pmiPercentage || "",
+                "number"
+              )}
+              {renderEditableField(
+                "Mortgage Years",
+                "mortgageYears",
+                editedDetails.mortgageYears || "",
+                "number"
+              )}
+              {renderEditableField(
+                "Lender Points Amount",
+                "lenderPointsAmount",
+                editedDetails.lenderPointsAmount || "",
+                "number"
+              )}
+              {renderEditableField(
+                "Other Fees",
+                "otherFees",
+                editedDetails.otherFees || "",
+                "number"
               )}
             </>
           )}

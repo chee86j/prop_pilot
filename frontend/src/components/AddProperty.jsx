@@ -33,11 +33,19 @@ const AddProperty = () => {
     kickStartFunds: 0,
     lenderConstructionDrawsReceived: 0,
     utilitiesCost: 0,
+    sewer: 0,
+    water: 0,
+    lawn: 0,
+    garbage: 0,
     yearlyPropertyTaxes: 0,
     mortgagePaid: 0,
     homeownersInsurance: 0,
     expectedYearlyRent: 0,
     rentalIncomeReceived: 0,
+    numUnits: 0,
+    vacancyRate: 0,
+    avgTenantStay: 0,
+    otherMonthlyIncome: 0,
     vacancyLoss: 0,
     managementFees: 0,
     maintenanceCosts: 0,
@@ -58,6 +66,12 @@ const AddProperty = () => {
     totalExpenses: 0,
     totalConstructionDrawsReceived: 0,
     projectNetProfitIfSold: 0,
+    cashFlow: 0,
+    cashRoi: 0,
+    rule2Percent: 0,
+    rule50Percent: 0,
+    financeAmount: 0,
+    purchaseCapRate: 0,
     // Utility Information Section
     typeOfHeatingAndCooling: "",
     waterCompany: "",
@@ -103,6 +117,12 @@ const AddProperty = () => {
     loanOfficer: "",
     loanOfficerPhone: "",
     loanNumber: "",
+    downPaymentPercentage: 0,
+    loanInterestRate: 0,
+    pmiPercentage: 0,
+    mortgageYears: 0,
+    lenderPointsAmount: 0,
+    otherFees: 0,
     // Sales & Marketing Section
     propertyManager: "",
     propertyManagerPhone: "",
@@ -248,6 +268,10 @@ const AddProperty = () => {
             true
           )}
           {renderInputField("Utilities Cost", "utilitiesCost", "number", true)}
+          {renderInputField("Sewer", "sewer", "number", true)}
+          {renderInputField("Water", "water", "number", true)}
+          {renderInputField("Lawn", "lawn", "number", true)}
+          {renderInputField("Garbage", "garbage", "number", true)}
           {renderInputField(
             "Yearly Property Taxes",
             "yearlyPropertyTaxes",
@@ -270,6 +294,15 @@ const AddProperty = () => {
           {renderInputField(
             "Rental Income Received",
             "rentalIncomeReceived",
+            "number",
+            true
+          )}
+          {renderInputField("Number of Units", "numUnits", "number", true)}
+          {renderInputField("Vacancy Rate", "vacancyRate", "number", true)}
+          {renderInputField("Avg Tenant Stay", "avgTenantStay", "number", true)}
+          {renderInputField(
+            "Other Monthly Income",
+            "otherMonthlyIncome",
             "number",
             true
           )}
@@ -351,6 +384,17 @@ const AddProperty = () => {
           {renderInputField(
             "Project Net Profit If Sold",
             "projectNetProfitIfSold",
+            "number",
+            true
+          )}
+          {renderInputField("Cash Flow", "cashFlow", "number", true)}
+          {renderInputField("Cash ROI", "cashRoi", "number", true)}
+          {renderInputField("Rule 2 Percent", "rule2Percent", "number", true)}
+          {renderInputField("Rule 50 Percent", "rule50Percent", "number", true)}
+          {renderInputField("Finance Amount", "financeAmount", "number", true)}
+          {renderInputField(
+            "Purchase Cap Rate",
+            "purchaseCapRate",
             "number",
             true
           )}
@@ -495,6 +539,27 @@ const AddProperty = () => {
             true
           )}
           {renderInputField("Loan Number", "loanNumber")}
+          {renderInputField(
+            "Down Payment Percentage",
+            "downPaymentPercentage",
+            "number",
+            true
+          )}
+          {renderInputField(
+            "Loan Interest Rate",
+            "loanInterestRate",
+            "number",
+            true
+          )}
+          {renderInputField("PMI Percentage", "pmiPercentage", "number", true)}
+          {renderInputField("Mortgage Years", "mortgageYears", "number", true)}
+          {renderInputField(
+            "Lender Points Amount",
+            "lenderPointsAmount",
+            "number",
+            true
+          )}
+          {renderInputField("Other Fees", "otherFees", "number", true)}
         </div>
 
         {/* Sales & Marketing Section */}
