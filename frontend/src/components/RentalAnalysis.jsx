@@ -1,51 +1,27 @@
 /* eslint-disable react/prop-types */
-import { useState, useRef, useEffect } from "react";
-import { useReactToPrint } from "react-to-print";
+import { useState, useRef } from "react";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
+import { useReactToPrint } from "react-to-print";
 import { formatFullCurrency } from "../../../util";
 
-const RentalAnalysis = ({ propertyId }) => {
-  const [propertyDetails, setPropertyDetails] = useState(null);
+const RentalAnalysis = ({ property }) => {
+  const printRef = useRef(null);
+
+  // State to manage expanded sections
   const [expandedSections, setExpandedSections] = useState({
-    costs: true,
-    financing: true,
-    revenue: true,
-    expenses: true,
-    cashFlow: true,
-    downPayment: true,
-    rules: true,
+    financialDetails: false,
+    rentalDetails: false,
+    otherDetails: false,
   });
 
-  const printRef = useRef(null);
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
     documentTitle: "Rental Analysis Report",
   });
 
-  useEffect(() => {
-    const fetchPropertyDetails = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:5000/api/properties/${propertyId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Error fetching property details");
-        }
-
-        const data = await response.json();
-        setPropertyDetails(data);
-      } catch (error) {
-        console.error("Error fetching property details:", error);
-      }
-    };
-    fetchPropertyDetails();
-  }, [propertyId]);
+  if (!property) {
+    return <div>Loading...</div>;
+  }
 
   const toggleSection = (section) => {
     setExpandedSections((prev) => ({
@@ -53,10 +29,6 @@ const RentalAnalysis = ({ propertyId }) => {
       [section]: !prev[section],
     }));
   };
-
-  if (!propertyDetails) {
-    return <div>Loading...</div>;
-  }
 
   const renderDetails = (details, sectionTitle, sectionName) => (
     <div
@@ -78,7 +50,10 @@ const RentalAnalysis = ({ propertyId }) => {
               <span>
                 {key
                   .replace(/([A-Z])/g, " $1")
-                  .replace(/^./, (str) => str.toUpperCase())}
+                  .replace(/^./, (str) => str.toUpperCase())
+                  .replace("Pmi", "PMI")
+                  .replace("Arv", "ARV")}
+                :
               </span>
               <span>{formatFullCurrency(value)}</span>
             </li>
@@ -88,60 +63,46 @@ const RentalAnalysis = ({ propertyId }) => {
     </div>
   );
 
-  // Define the different sections
-  const costsDetails = {
-    purchasePrice: propertyDetails.purchaseCost,
-    afterRepairValue: propertyDetails.arvSalePrice,
-    // purchaseClosingCosts: propertyDetails.refinanceCosts,
-    repairCost: propertyDetails.largeRepairsCost,
+  const financialDetails = {
+    purchasePrice: property.purchaseCost,
+    afterRepairValue: property.arvSalePrice,
+    repairCost: property.largeRepairsCost,
+    downPaymentPercentage: property.downPaymentPercentage,
+    loanInterestRate: property.loanInterestRate,
+    pmiPercentage: property.pmiPercentage,
+    mortgageYears: property.mortgageYears,
+    lenderPointsAmount: property.lenderPointsAmount,
+    otherFees: property.otherFees,
   };
 
-  const financingDetails = {
-    downPaymentPercentage: propertyDetails.downPaymentPercentage,
-    loanInterestRate: propertyDetails.loanInterestRate,
-    pmiPercentage: propertyDetails.pmiPercentage,
-    mortgageYears: propertyDetails.mortgageYears,
-    lenderPointsAmount: propertyDetails.lenderPointsAmount,
-    otherFees: propertyDetails.otherFees,
+  const rentalDetails = {
+    rentPerUnit: property.rentAmount,
+    numUnits: property.numUnits,
+    vacancyRate: property.vacancyRate,
+    avgTenantStay: property.avgTenantStay,
+    otherMonthlyIncome: property.otherMonthlyIncome,
   };
 
-  const revenueAssumptionsDetails = {
-    rentPerUnit: propertyDetails.rentAmount,
-    numUnits: propertyDetails.numUnits,
-    vacancyRate: propertyDetails.vacancyRate,
-    avgTenantStay: propertyDetails.avgTenantStay,
-    otherMonthlyIncome: propertyDetails.otherMonthlyIncome,
-  };
-
-  const expensesDetails = {
-    utilitiesCost: propertyDetails.utilitiesCost,
-    homeownersInsurance: propertyDetails.homeownersInsurance,
-    yearlyPropertyTaxes: propertyDetails.yearlyPropertyTaxes,
-    mortgagePaid: propertyDetails.mortgagePaid,
-    managementFees: propertyDetails.managementFees,
-    maintenanceCosts: propertyDetails.maintenanceCosts,
-    miscFees: propertyDetails.miscFees,
-  };
-
-  const cashFlowDetails = {
-    cashFlow: propertyDetails.cashFlow,
-    cashRoi: propertyDetails.cashRoi,
-  };
-
-  const downPaymentDetails = {
-    downPaymentCashOutlay: propertyDetails.downPaymentCashOutlay,
-    netOperatingIncome: propertyDetails.netOperatingIncome,
-  };
-
-  const rulesDetails = {
-    rule2Percent: propertyDetails.rule2Percent,
-    rule50Percent: propertyDetails.rule50Percent,
-    financeAmount: propertyDetails.financeAmount,
-    purchaseCapRate: propertyDetails.purchaseCapRate,
+  const otherDetails = {
+    utilitiesCost: property.utilitiesCost,
+    homeownersInsurance: property.homeownersInsurance,
+    yearlyPropertyTaxes: property.yearlyPropertyTaxes,
+    mortgagePaid: property.mortgagePaid,
+    managementFees: property.managementFees,
+    maintenanceCosts: property.maintenanceCosts,
+    miscFees: property.miscFees,
+    cashFlow: property.cashFlow,
+    cashRoi: property.cashRoi,
+    downPaymentCashOutlay: property.downPaymentCashOutlay,
+    netOperatingIncome: property.netOperatingIncome,
+    rule2Percent: property.rule2Percent,
+    rule50Percent: property.rule50Percent,
+    financeAmount: property.financeAmount,
+    purchaseCapRate: property.purchaseCapRate,
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-6 max-w-4xl mx-auto">
+    <div className="bg-white shadow-md rounded-lg p-4 max-w-4xl mx-auto">
       <button
         onClick={handlePrint}
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
@@ -150,17 +111,13 @@ const RentalAnalysis = ({ propertyId }) => {
       </button>
 
       <div ref={printRef}>
-        {renderDetails(costsDetails, "Costs", "costs")}
-        {renderDetails(financingDetails, "Financing", "financing")}
         {renderDetails(
-          revenueAssumptionsDetails,
-          "Revenue Assumptions",
-          "revenue"
+          financialDetails,
+          "Financial Details",
+          "financialDetails"
         )}
-        {renderDetails(expensesDetails, "Expenses", "expenses")}
-        {renderDetails(cashFlowDetails, "Cash Flow", "cashFlow")}
-        {renderDetails(downPaymentDetails, "Down Payment", "downPayment")}
-        {renderDetails(rulesDetails, "Rules", "rules")}
+        {renderDetails(rentalDetails, "Rental Details", "rentalDetails")}
+        {renderDetails(otherDetails, "Other Details", "otherDetails")}
       </div>
     </div>
   );

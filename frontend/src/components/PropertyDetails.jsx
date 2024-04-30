@@ -1172,7 +1172,7 @@ const PropertyDetails = ({ propertyId }) => {
           <CsvReader onFileUpload={handleFileUpload} />
           {csvData && <CsvDisplay data={csvData} />}
         </div>
-        <RentalAnalysis />
+        <RentalAnalysis property={propertyDetails} />
       </div>
     </div>
   );
