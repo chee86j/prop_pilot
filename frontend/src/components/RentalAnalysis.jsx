@@ -12,6 +12,7 @@ const RentalAnalysis = ({ property }) => {
     financialDetails: false,
     rentalDetails: false,
     otherDetails: false,
+    summary: false,
   });
 
   const handlePrint = useReactToPrint({
@@ -50,9 +51,7 @@ const RentalAnalysis = ({ property }) => {
               <span>
                 {key
                   .replace(/([A-Z])/g, " $1")
-                  .replace(/^./, (str) => str.toUpperCase())
-                  .replace("Pmi", "PMI")
-                  .replace("Arv", "ARV")}
+                  .replace(/^./, (str) => str.toUpperCase())}
                 :
               </span>
               <span>{formatFullCurrency(value)}</span>
@@ -64,41 +63,44 @@ const RentalAnalysis = ({ property }) => {
   );
 
   const financialDetails = {
-    purchasePrice: property.purchaseCost,
-    afterRepairValue: property.arvSalePrice,
-    repairCost: property.largeRepairsCost,
-    downPaymentPercentage: property.downPaymentPercentage,
-    loanInterestRate: property.loanInterestRate,
-    pmiPercentage: property.pmiPercentage,
-    mortgageYears: property.mortgageYears,
-    lenderPointsAmount: property.lenderPointsAmount,
-    otherFees: property.otherFees,
+    "Purchase Price": property.purchaseCost,
+    "ARV (After Repair Value)": property.arvSalePrice,
+    "Repair Costs": property.largeRepairsCost,
+    "Down Payment Percentage": `${property.downPaymentPercentage}%`,
+    "Loan Interest Rate": `${property.loanInterestRate}%`,
+    "PMI Percentage": `${property.pmiPercentage}%`,
+    "Mortgage Term": `${property.mortgageYears} years`,
+    "Lender Points": property.lenderPointsAmount,
+    "Other Fees": property.otherFees,
   };
 
   const rentalDetails = {
-    rentPerUnit: property.rentAmount,
-    numUnits: property.numUnits,
-    vacancyRate: property.vacancyRate,
-    avgTenantStay: property.avgTenantStay,
-    otherMonthlyIncome: property.otherMonthlyIncome,
+    "Rent per Unit": property.rentAmount,
+    "Number of Units": property.numUnits,
+    "Vacancy Rate": `${property.vacancyRate}%`,
+    "Average Tenant Stay": `${property.avgTenantStay} years`,
+    "Other Monthly Income": property.otherMonthlyIncome,
   };
 
   const otherDetails = {
-    utilitiesCost: property.utilitiesCost,
-    homeownersInsurance: property.homeownersInsurance,
-    yearlyPropertyTaxes: property.yearlyPropertyTaxes,
-    mortgagePaid: property.mortgagePaid,
-    managementFees: property.managementFees,
-    maintenanceCosts: property.maintenanceCosts,
-    miscFees: property.miscFees,
-    cashFlow: property.cashFlow,
-    cashRoi: property.cashRoi,
-    downPaymentCashOutlay: property.downPaymentCashOutlay,
-    netOperatingIncome: property.netOperatingIncome,
-    rule2Percent: property.rule2Percent,
-    rule50Percent: property.rule50Percent,
-    financeAmount: property.financeAmount,
-    purchaseCapRate: property.purchaseCapRate,
+    "Utilities Cost": property.utilitiesCost,
+    "Homeowners Insurance": property.homeownersInsurance,
+    "Yearly Property Taxes": property.yearlyPropertyTaxes,
+    "Mortgage Paid": property.mortgagePaid,
+    "Management Fees": property.managementFees,
+    "Maintenance Costs": property.maintenanceCosts,
+    "Miscellaneous Fees": property.miscFees,
+  };
+
+  const summaryDetails = {
+    "Cash Flow": property.cashFlow,
+    "Cash ROI": `${property.cashRoi}%`,
+    "Down Payment Outlay": property.downPaymentCashOutlay,
+    "Net Operating Income": property.netOperatingIncome,
+    "Rule of 2%": property.rule2Percent ? "Yes" : "No",
+    "Rule of 50%": property.rule50Percent ? "Yes" : "No",
+    "Finance Amount": property.financeAmount,
+    "Cap Rate": `${property.purchaseCapRate}%`,
   };
 
   return (
@@ -117,7 +119,8 @@ const RentalAnalysis = ({ property }) => {
           "financialDetails"
         )}
         {renderDetails(rentalDetails, "Rental Details", "rentalDetails")}
-        {renderDetails(otherDetails, "Other Details", "otherDetails")}
+        {renderDetails(otherDetails, "Operational Expenses", "otherDetails")}
+        {renderDetails(summaryDetails, "Summary", "summary")}
       </div>
     </div>
   );
