@@ -91,8 +91,8 @@ const RentalAnalysis = ({ propertyId }) => {
   // Define the different sections
   const costsDetails = {
     purchasePrice: propertyDetails.purchaseCost,
-    afterRepairValue: propertyDetails.totalRehabCost,
-    purchaseClosingCosts: propertyDetails.refinanceCosts,
+    afterRepairValue: propertyDetails.arvSalePrice,
+    // purchaseClosingCosts: propertyDetails.refinanceCosts,
     repairCost: propertyDetails.largeRepairsCost,
   };
 
@@ -106,7 +106,7 @@ const RentalAnalysis = ({ propertyId }) => {
   };
 
   const revenueAssumptionsDetails = {
-    rentPerUnit: propertyDetails.rentalIncomeReceived,
+    rentPerUnit: propertyDetails.rentAmount,
     numUnits: propertyDetails.numUnits,
     vacancyRate: propertyDetails.vacancyRate,
     avgTenantStay: propertyDetails.avgTenantStay,
