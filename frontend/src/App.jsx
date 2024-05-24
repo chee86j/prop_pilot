@@ -20,6 +20,9 @@ import PropertyList from "./components/PropertyList";
 import AddProperty from "./components/AddProperty";
 import ConstructionDraw from "./components/ConstructionDraw";
 import Receipt from "./components/Receipt";
+import ExcelStyleGrid from "./components/ExcelStyleGrid";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-quartz.css";
 
 function App() {
   const [auth, setAuth] = useState({
@@ -90,6 +93,7 @@ function App() {
           path="/constructiondraw/:propertyId"
           element={<ConstructionDrawWrapper />}
         />
+        <Route path="/excelstylegrid" element={<ExcelStyleGrid />} />
         <Route path="/receipts/:drawId" element={<ReceiptsWrapper />} />
         <Route path="/testimonials" element={<Testimonials />} />
         <Route path="/about" element={<About />} />

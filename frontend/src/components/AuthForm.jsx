@@ -27,6 +27,23 @@ const AuthForm = () => {
     setErrorMessage("");
   };
 
+  const handleGoogleLogin = async () => {
+    try {
+      // Fetch the URL to which the user should be redirected for Google login
+      const response = await fetch("/api/google-login");
+      const data = await response.json();
+      console.log("Response from server:", data);
+      if (response.ok) {
+        // Redirect user to Google's OAuth page
+        window.location.href = data.authUrl; // Ensure your backend is sending `authUrl`
+      } else {
+        console.error("Error during Google login:", data.error);
+      }
+    } catch (error) {
+      console.error("Error during Google login:", error);
+    }
+  };
+
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
@@ -157,7 +174,10 @@ const AuthForm = () => {
             {isLogin && (
               <div className="social-account-container mt-7 text-center">
                 <div className="social-accounts flex justify-center gap-4">
-                  <button className="social-button bg-white border border-white p-2 rounded-full shadow-lg hover:scale-110 hover:shadow-lg transition duration-300">
+                  <button
+                    onClick={handleGoogleLogin}
+                    className="social-button bg-white border border-white p-2 rounded-full shadow-lg hover:scale-110 hover:shadow-lg transition duration-300"
+                  >
                     <img
                       src={GoogleIcon}
                       alt="Google"
@@ -188,7 +208,10 @@ const AuthForm = () => {
             {!isLogin && (
               <div className="social-account-container mt-2 text-center">
                 <div className="social-accounts flex justify-center gap-4">
-                  <button className="social-button bg-white border border-white p-2 rounded-full shadow-lg hover:scale-110 hover:shadow-lg transition duration-300">
+                  <button
+                    onClick={handleGoogleLogin}
+                    className="social-button bg-white border border-white p-2 rounded-full shadow-lg hover:scale-110 hover:shadow-lg transition duration-300"
+                  >
                     <img
                       src={GoogleIcon}
                       alt="Google"
