@@ -130,7 +130,7 @@ const AuthForm = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center">
-      <div className="max-w-screen-xl m-0 sm:m-20 bg-white shadow sm:rounded-lg flex justify-center flex-1">
+      <div className="max-w-screen-xl mx-auto sm:m-20 bg-white shadow sm:rounded-lg flex justify-center flex-1">
         {/* Image container that slides out */}
         <div
           className={`lg:w-1/2 xl:w-5/12 flex-1 hidden lg:flex ${
@@ -148,7 +148,7 @@ const AuthForm = () => {
         {/* Form container that slides in */}
         <div
           className={`lg:w-1/2 xl:w-5/12 p-6 sm:p-12 ${
-            isLogin ? "lg:translate-x-0" : "lg:-translate-x-full"
+            isLogin ? "lg:translate-x-0" : "lg:-translate-x-full xl:mr-32"
           } transition-all duration-500 lg:transform`}
         >
           <div className="text-center flex items-center justify-center">
