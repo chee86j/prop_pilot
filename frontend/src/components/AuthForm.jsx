@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { emailValidator, passwordValidator } from "../../../util";
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import GoogleIcon from "../assets/icons/google.svg";
 import FacebookIcon from "../assets/icons/facebook.svg";
 import GitHubIcon from "../assets/icons/github.svg";
@@ -129,49 +130,49 @@ const AuthForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center">
-      <div className="max-w-screen-xl mx-auto sm:m-20 bg-white shadow sm:rounded-lg flex justify-center flex-1">
-        {/* Image container that slides out */}
-        <div
-          className={`lg:w-1/2 xl:w-5/12 flex-1 hidden lg:flex ${
-            isLogin ? "lg:translate-x-0" : "lg:translate-x-full"
-          }`}
-          style={{
-            backgroundImage: `url(${AuthFormImage})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            height: "100%",
-          }}
-        ></div>
+    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+      <div className="min-h-screen bg-gray-100 flex justify-center">
+        <div className="max-w-screen-xl mx-auto sm:m-20 bg-white shadow sm:rounded-lg flex justify-center flex-1">
+          {/* Image container that slides out */}
+          <div
+            className={`lg:w-1/2 xl:w-5/12 flex-1 hidden lg:flex ${
+              isLogin ? "lg:translate-x-0" : "lg:translate-x-full"
+            }`}
+            style={{
+              backgroundImage: `url(${AuthFormImage})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+              height: "100%",
+            }}
+          ></div>
 
-        {/* Form container that slides in */}
-        <div
-          className={`lg:w-1/2 xl:w-5/12 p-6 sm:p-12 ${
-            isLogin ? "lg:translate-x-0" : "lg:-translate-x-full xl:mr-32"
-          } transition-all duration-500 lg:transform`}
-        >
-          <div className="text-center flex items-center justify-center">
-            <Link
-              to="/home"
-              className="text-gray-800 text-3xl font-bold hover:text-blue-600 flex items-center"
-            >
-              <img
-                src={LogoIcon}
-                alt="Logo"
-                className="mr-2"
-                style={{ width: "76px", height: "76px" }}
-              />
-              Prop Pilot
-            </Link>
-          </div>
+          {/* Form container that slides in */}
+          <div
+            className={`lg:w-1/2 xl:w-5/12 p-6 sm:p-12 ${
+              isLogin ? "lg:translate-x-0" : "lg:-translate-x-full xl:mr-32"
+            } transition-all duration-500 lg:transform`}
+          >
+            <div className="text-center flex items-center justify-center">
+              <Link
+                to="/home"
+                className="text-gray-800 text-3xl font-bold hover:text-blue-600 flex items-center"
+              >
+                <img
+                  src={LogoIcon}
+                  alt="Logo"
+                  className="mr-2"
+                  style={{ width: "76px", height: "76px" }}
+                />
+                Prop Pilot
+              </Link>
+            </div>
 
-          <div className="mt-2 flex flex-col items-center">
-            <h1 className="text-3xl font-bold">
-              {isLogin ? "Sign In" : "Create Account"}
-            </h1>
+            <div className="mt-2 flex flex-col items-center">
+              <h1 className="text-3xl font-bold">
+                {isLogin ? "Sign In" : "Create Account"}
+              </h1>
 
-            {isLogin && (
               <div className="social-account-container mt-7 text-center">
                 <div className="social-accounts flex justify-center gap-4">
                   <button
@@ -203,192 +204,158 @@ const AuthForm = () => {
                   Or Use Your Email Account
                 </p>
               </div>
-            )}
 
-            {!isLogin && (
-              <div className="social-account-container mt-2 text-center">
-                <div className="social-accounts flex justify-center gap-4">
-                  <button
-                    onClick={handleGoogleLogin}
-                    className="social-button bg-white border border-white p-2 rounded-full shadow-lg hover:scale-110 hover:shadow-lg transition duration-300"
-                  >
-                    <img
-                      src={GoogleIcon}
-                      alt="Google"
-                      className="w-8 h-8 md:w-10 h-10"
-                    />
-                  </button>
-                  <button className="social-button bg-white border border-white p-2 rounded-full shadow-lg hover:scale-110 hover:shadow-lg transition duration-300">
-                    <img
-                      src={FacebookIcon}
-                      alt="Facebook"
-                      className="w-8 h-8 md:w-10 h-10"
-                    />
-                  </button>
-                  <button className="social-button bg-white border border-white p-2 rounded-full shadow-lg hover:scale-110 hover:shadow-lg transition duration-300">
-                    <img
-                      src={GitHubIcon}
-                      alt="GitHub"
-                      className="w-8 h-8 md:w-10 h-10"
-                    />
-                  </button>
-                </div>
-                <p className="text-xs text-gray-600 text-center mt-6">
-                  Or Use Your Email For Registration
-                </p>
-              </div>
-            )}
+              <form
+                onSubmit={isLogin ? handleLogin : handleRegister}
+                className="form max-w-md mx-auto space-y-4 mt-4"
+              >
+                {!isLogin && (
+                  <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+                    <div className="relative flex-1">
+                      <input
+                        className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full"
+                        type="text"
+                        placeholder="First Name"
+                        required
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        autoComplete="given-name"
+                      />
+                      {firstName && (
+                        <label className="form-label text-xs absolute top-0 left-3 pointer-events-none transition-all duration-300 ease-in-out text-gray-500">
+                          First Name
+                        </label>
+                      )}
+                    </div>
 
-            <form
-              onSubmit={isLogin ? handleLogin : handleRegister}
-              className="form max-w-md mx-auto space-y-4 mt-4"
-            >
-              {!isLogin && (
-                <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
-                  <div className="relative flex-1">
-                    <input
-                      className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full"
-                      type="text"
-                      placeholder="First Name"
-                      required
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      autoComplete="given-name"
-                    />
-                    {firstName && (
-                      <label className="form-label text-xs absolute top-0 left-3 pointer-events-none transition-all duration-300 ease-in-out text-gray-500">
-                        First Name
-                      </label>
-                    )}
+                    <div className="relative flex-1">
+                      <input
+                        className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full"
+                        type="text"
+                        placeholder="Last Name"
+                        required
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        autoComplete="family-name"
+                      />
+                      {lastName && (
+                        <label className="form-label text-xs absolute top-0 left-3 pointer-events-none transition-all duration-300 ease-in-out text-gray-500">
+                          Last Name
+                        </label>
+                      )}
+                    </div>
                   </div>
-
-                  <div className="relative flex-1">
-                    <input
-                      className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full"
-                      type="text"
-                      placeholder="Last Name"
-                      required
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      autoComplete="family-name"
-                    />
-                    {lastName && (
-                      <label className="form-label text-xs absolute top-0 left-3 pointer-events-none transition-all duration-300 ease-in-out text-gray-500">
-                        Last Name
-                      </label>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              <div className="relative">
-                <input
-                  className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full my-4"
-                  type="email"
-                  placeholder="Email"
-                  required
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                {email && (
-                  <label className="form-label text-xs absolute top-0 left-3 mt-4 pointer-events-none transition-all duration-300 ease-in-out text-gray-500">
-                    Email
-                  </label>
                 )}
-              </div>
 
-              <div className="relative">
-                <input
-                  className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full mb-4"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Password"
-                  required
-                  autoComplete={isLogin ? "current-password" : "new-password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                {password && (
-                  <label className="form-label text-xs absolute top-0 left-3 pointer-events-none transition-all duration-300 ease-in-out text-gray-500">
-                    Password
-                  </label>
-                )}
-                <div
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
-                  onClick={togglePasswordVisibility}
-                >
-                  {showPassword ? (
-                    <EyeOff className="text-gray-500" />
-                  ) : (
-                    <Eye className="text-gray-500" />
+                <div className="relative">
+                  <input
+                    className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full my-4"
+                    type="email"
+                    placeholder="Email"
+                    required
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  {email && (
+                    <label className="form-label text-xs absolute top-0 left-3 mt-4 pointer-events-none transition-all duration-300 ease-in-out text-gray-500">
+                      Email
+                    </label>
                   )}
                 </div>
-              </div>
 
-              {!isLogin && (
                 <div className="relative">
                   <input
                     className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full mb-4"
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Confirm password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
                     required
-                    autoComplete="new-password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    autoComplete={isLogin ? "current-password" : "new-password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
-                  {confirmPassword && (
+                  {password && (
                     <label className="form-label text-xs absolute top-0 left-3 pointer-events-none transition-all duration-300 ease-in-out text-gray-500">
-                      Confirm Password
+                      Password
                     </label>
                   )}
                   <div
                     className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
-                    onClick={toggleConfirmPasswordVisibility}
+                    onClick={togglePasswordVisibility}
                   >
-                    {showConfirmPassword ? (
+                    {showPassword ? (
                       <EyeOff className="text-gray-500" />
                     ) : (
                       <Eye className="text-gray-500" />
                     )}
                   </div>
                 </div>
-              )}
 
-              {errorMessage && (
-                <div className="text-red-500 text-sm">{errorMessage}</div>
-              )}
+                {!isLogin && (
+                  <div className="relative">
+                    <input
+                      className="input border border-gray-300 focus:border-blue-500 focus:outline-none rounded-md px-4 py-3 w-full mb-4"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirm password"
+                      required
+                      autoComplete="new-password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                    {confirmPassword && (
+                      <label className="form-label text-xs absolute top-0 left-3 pointer-events-none transition-all duration-300 ease-in-out text-gray-500">
+                        Confirm Password
+                      </label>
+                    )}
+                    <div
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
+                      onClick={toggleConfirmPasswordVisibility}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="text-gray-500" />
+                      ) : (
+                        <Eye className="text-gray-500" />
+                      )}
+                    </div>
+                  </div>
+                )}
 
-              <div className="flex justify-center">
-                <button className="submit-button submit bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out">
-                  <img
-                    src={PlaneIcon}
-                    alt="Plane"
-                    className="mr-2"
-                    style={{ width: "128px", height: "24px" }}
-                  />
-                  <span className="">{isLogin ? "Sign-In" : "Submit"}</span>
+                {errorMessage && (
+                  <div className="text-red-500 text-sm">{errorMessage}</div>
+                )}
+
+                <div className="flex justify-center">
+                  <button className="submit-button submit bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out">
+                    <img
+                      src={PlaneIcon}
+                      alt="Plane"
+                      className="mr-2"
+                      style={{ width: "128px", height: "24px" }}
+                    />
+                    <span className="">{isLogin ? "Sign-In" : "Submit"}</span>
+                  </button>
+                </div>
+              </form>
+
+              <p className="mt-4 text-sm text-gray-500">
+                {isLogin ? "Don't have an account?" : "Already have an account?"}
+                <button
+                  onClick={toggleForm}
+                  className="text-xl ml-1 text-blue-600 font-semi md:text-lg hover:underline focus:outline-none"
+                >
+                  {isLogin ? "Sign Up" : "Sign In"}
                 </button>
-              </div>
-            </form>
+              </p>
 
-            <p className="mt-4 text-sm text-gray-500">
-              {isLogin ? "Don't have an account?" : "Already have an account?"}
-              <button
-                onClick={toggleForm}
-                className="text-xl ml-1 text-blue-600 font-semi md:text-lg hover:underline focus:outline-none"
-              >
-                {isLogin ? "Sign Up" : "Sign In"}
-              </button>
-            </p>
-
-            <p className="mt-7 text-xs text-gray-600 text-center">
-              I agree to abide by Prop Pilot&apos;s <br /> Terms of Service
-              &amp; its Privacy Policy
-            </p>
+              <p className="mt-7 text-xs text-gray-600 text-center">
+                I agree to abide by Prop Pilot&apos;s <br /> Terms of Service
+                &amp; its Privacy Policy
+              </p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </GoogleOAuthProvider>
   );
 };
 
