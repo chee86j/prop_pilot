@@ -35,18 +35,34 @@ comprehensive WSGI web application library support.
 
 1. Install frontend dependencies by running `npm install` within the `/frontend` folder.
 2. Install backend dependencies by running the following commands in the root folder:
-   - `pip3 install Flask Flask-SQLAlchemy Flask-JWT-Extended Flask-Migrate Werkzeug python-dotenv psycopg2-binary flask-cors`
+   - `python -m venv venv` on Mac
+   -  `.\venv\Scripts\activate` on Windows
+   - `pip3 install -r requirements.txt`
    - _(Note: you may need to upgrade pip3 to the latest version by running `pip3 install --upgrade pip`.)_
+3. Google OAuth Setup
+   - Go to Google Cloud Console at https://console.cloud.google.com/
+   - Create project/select existing
+   - Enable Google+ API
+   - Configure OAuth consent screen
+   - Create OAuth 2.0 credentials
+   - Add authorized origins:
+      http://localhost:5173
+   - Add authorized redirect URIs:
+      http://localhost:5000/api/google/callback
 
 ### Environment Variables Setup
 
 1. Create a `.env` file in the root directory.
 2. Add the following environment variables to the `.env` file (replace placeholders with your actual values):
 
-DB_USERNAME=yourusername
-DB_PASSWORD=yourpassword
-DB_NAME=yourdbname
-JWT_SECRET_KEY=yourjwtsecretkey
+DB_USERNAME=postgres
+DB_PASSWORD=your_password
+DB_NAME=prop_pilot_db
+JWT_SECRET_KEY=your_secret_key
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_REDIRECT_URI=http://localhost:5000/api/auth/callback
+VITE_API_BASE_URL=http://localhost:5000
 
 3. Ensure that the `.env` file is added to the `.gitignore` file to prevent it from
    being tracked by version control.
@@ -61,26 +77,27 @@ Windows - `pgAdmin` or `DBeaver` or `HeidiSQL`as your db management tool
    Windows - Open a new terminal & run `psql -U postgres -d prop_pilot_db -h localhost -p 5432`
    & enter your password plus
    a. add the bin path in your `Advanced System Settings`-->`Environment Variables`-->`System Variables`-->Select `Edit` for your path and add the path to your PostgreSQL /bin folder
-3. Create a new database:
 
-CREATE DATABASE prop_pilot;
+# Database Setup
+1. Run the following in the root folder:
+`psql -U postgres`
+`CREATE DATABASE prop_pilot_db;`
+`\q`
+
+`psql -U postgres -d prop_pilot_db -h localhost -p 5432`
 
 _(Optional)_ If you want a specific user to have access to the database:
 
 CREATE USER yourusername WITH PASSWORD 'yourpassword';
 GRANT ALL PRIVILEGES ON DATABASE prop_pilot TO yourusername;
 
-4. Update your Flask app to connect to the database:
+2. Update your Flask app to connect to the database:
 
 - Open the file `app.py`.
 - Update the SQLAlchemy database URI:
   ```
   app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://yourusername:yourpassword@localhost/prop_pilot'
   ```
-
-5. Connect to the database in the PostgreSQL shell:
-
-`\c prop_pilot`
 
 ### Configure Database Permissions
 
