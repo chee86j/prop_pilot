@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Testimonials from "./Testimonials";
 import PropertyGallery from "./PropertyGallery";
+import { fetchUserProfile } from "../utils/fetchUserProfile";
 import planeIcon from "../assets/icons/plane.svg";
 import LogoIcon from "../assets/icons/logo.svg";
 
@@ -10,28 +11,7 @@ const Home = () => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Fetch user profile after successful authentication
-    const fetchUserProfile = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/profile", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        });
-        if (response.ok) {
-          const userData = await response.json();
-          setUser(userData);
-        } else {
-          // Handle error if unable to fetch user profile
-          console.error("Failed to fetch user profile");
-        }
-      } catch (error) {
-        console.error("An error occurred while fetching user profile:", error);
-      }
-    };
-
-    fetchUserProfile();
+    fetchUserProfile(setUser);
   }, []);
 
   return (
@@ -39,8 +19,11 @@ const Home = () => {
       {/* Hero Section */}
       <div className="hero-section bg-white shadow-lg rounded-lg text-center p-6 md:p-10 mb-6 md:mb-10">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-700 mb-0">
-          Welcome {user ? `${user.first_name} ${user.last_name}` : ""} to Prop
-          Pilot
+          Welcome{" "}
+          <span className="italic text-green-500">
+            {user ? `${user.first_name} ${user.last_name}` : ""}
+          </span>{" "}
+          to Prop Pilot
           <img
             src={LogoIcon}
             alt="Logo"

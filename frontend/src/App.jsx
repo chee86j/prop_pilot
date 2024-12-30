@@ -21,6 +21,7 @@ import AddProperty from "./components/AddProperty";
 import ConstructionDraw from "./components/ConstructionDraw";
 import Receipt from "./components/Receipt";
 import ExcelStyleGrid from "./components/ExcelStyleGrid";
+import { fetchUserProfile } from "./utils/fetchUserProfile";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 
@@ -45,34 +46,15 @@ function App() {
     return <Receipt drawId={drawId} auth={auth} />;
   };
 
-  const fetchUserProfile = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/api/profile", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setAuth({
-          isAuthenticated: true,
-          user: data,
-        });
-      } else {
-        setAuth({
-          isAuthenticated: false,
-          user: null,
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-    }
-  };
-
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (token) {
-      fetchUserProfile();
+      fetchUserProfile().then((user) => {
+        setAuth({
+          isAuthenticated: true,
+          user: user,
+        });
+      });
     }
   }, []);
 

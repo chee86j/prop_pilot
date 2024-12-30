@@ -54,6 +54,7 @@ def profile():
     current_user_email = get_jwt_identity()
     user = User.query.filter_by(email=current_user_email).first()
     if user:
+        print(f"Currently Logged In as: {user.first_name}{user.last_name}")
         return jsonify(email=user.email, first_name=user.first_name, last_name=user.last_name), 200
     else:
         return jsonify({"message": "User not found"}), 404
