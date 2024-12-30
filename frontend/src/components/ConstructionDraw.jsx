@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
-import { formatCurrency } from "../../../util";
+import { formatCurrency } from "../utils/formatting";
 import Receipt from "./Receipt";
 
 const ConstructionDraw = ({ propertyId }) => {

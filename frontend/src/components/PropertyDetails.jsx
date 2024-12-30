@@ -11,7 +11,7 @@ import CapitalExpenditure from "./CapitalExpenditure";
 import CsvDisplay from "./CsvDisplay";
 import CsvReader from "./CsvReader";
 import RentalAnalysis from "./RentalAnalysis";
-import { formatFullCurrency } from "../../../util";
+import { formatFullCurrency } from "../utils/formatting";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
 
 const PropertyDetails = ({ propertyId }) => {

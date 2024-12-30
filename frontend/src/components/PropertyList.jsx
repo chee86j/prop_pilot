@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { formatCurrency } from "../../../util";
+import { formatCurrency } from "../utils/formatting";
 import { fetchUserProfile } from "../utils/fetchUserProfile";
 import SkyScrapers from "../assets/icons/skyscrapers.png";
 
@@ -131,7 +131,10 @@ const PropertyList = () => {
               </thead>
               <tbody>
                 {properties.map((property) => (
-                  <tr key={property.id} className="bg-white border-b">
+                  <tr
+                    key={property.id}
+                    className="bg-white border-b hover:bg-gray-100"
+                  >
                     <td className="py-4 px-6">{property.propertyName}</td>
                     <td className="py-4 px-6">{property.address}</td>
                     <td className="py-4 px-6">{property.city}</td>

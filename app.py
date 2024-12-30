@@ -30,7 +30,14 @@ app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 jwt = JWTManager(app)
 
 # Enable CORS for all domains on all routes
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 # Register API blueprint
 app.register_blueprint(api, url_prefix='/api')

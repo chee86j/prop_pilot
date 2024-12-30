@@ -2,7 +2,7 @@
 import { useState, useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
-import { formatFullCurrency } from "../../../util";
+import { formatFullCurrency } from "../utils/formatting";
 
 const CapitalExpenditure = ({ property }) => {
   // Reference for printing

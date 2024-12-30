@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useRef } from "react";
-import { formatFullCurrency } from "../../../util";
+import { formatFullCurrency } from "../utils/formatting";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
 import { useReactToPrint } from "react-to-print";
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { emailValidator, passwordValidator } from "../../../util";
+import { emailValidator, passwordValidator } from "../utils/validation";
 import GoogleIcon from "../assets/icons/google.svg";
 import FacebookIcon from "../assets/icons/facebook.svg";
 import GitHubIcon from "../assets/icons/github.svg";

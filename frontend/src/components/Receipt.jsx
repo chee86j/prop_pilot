@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
-import { formatCurrencyDetailed } from "../../../util";
+import { formatCurrencyDetailed } from "../utils/formatting";
 import {
   ChevronsLeft,
   ChevronsRight,

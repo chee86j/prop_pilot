@@ -2,7 +2,7 @@
 import { useState, useRef } from "react";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
 import { useReactToPrint } from "react-to-print";
-import { formatFullCurrency } from "../../../util";
+import { formatFullCurrency } from "../utils/formatting";
 
 const RentalIncome = ({ property }) => {
   // Reference for printing

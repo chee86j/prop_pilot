@@ -1,37 +1,44 @@
-/* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { fetchUserProfile } from "../utils/fetchUserProfile";
+import { emailValidator, passwordValidator } from "../utils/validation";
+import { Eye, EyeOff } from "lucide-react";
 
-const Profile = ({ auth }) => {
-  const [userDetails, setUserDetails] = useState({
-    email: "",
-    first_name: "",
-    last_name: "",
-  });
+const Profile = () => {
+  const [userDetails, setUserDetails] = useState({});
   const [editing, setEditing] = useState(false);
-  const [editedDetails, setEditedDetails] = useState({
-    email: "",
-    first_name: "",
-    last_name: "",
-  });
   const [errorMessage, setErrorMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwords, setPasswords] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmNewPassword: "",
+  });
+
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Ensure that auth.user is defined before setting user details
-    if (auth && auth.user) {
-      setUserDetails({
-        email: auth.user.email || "",
-        first_name: auth.user.first_name || "",
-        last_name: auth.user.last_name || "",
-      });
-      setEditedDetails({
-        email: auth.user.email || "",
-        first_name: auth.user.first_name || "",
-        last_name: auth.user.last_name || "",
-      });
-    }
-  }, [auth]);
+    fetchUserProfile(setUserDetails);
+  }, []);
 
-  const handleSave = async () => {
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    if (name in passwords) {
+      setPasswords({ ...passwords, [name]: value });
+    } else {
+      setUserDetails({ ...userDetails, [name]: value });
+    }
+  };
+
+  const handleSaveProfile = async (event) => {
+    event.preventDefault();
+
+    // Validate email first
+    if (!emailValidator(userDetails.email)) {
+      setErrorMessage("Invalid email format.");
+      return;
+    }
+
     try {
       const response = await fetch("http://localhost:5000/api/profile", {
         method: "PUT",
@@ -39,26 +46,72 @@ const Profile = ({ auth }) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
-        body: JSON.stringify(editedDetails),
+        body: JSON.stringify(userDetails),
       });
       const data = await response.json();
       if (response.ok) {
-        setUserDetails(editedDetails);
         setEditing(false);
+        navigate("/profile");
       } else {
-        setErrorMessage(data.message || "Failed to update profile");
+        setErrorMessage(data.message || "Update failed.");
       }
     } catch (error) {
-      setErrorMessage("An error occurred while updating profile");
+      console.error("Error updating profile:", error);
+      setErrorMessage("An error occurred while updating the profile.");
     }
   };
 
-  const handleChange = (e) => {
-    setEditedDetails({ ...editedDetails, [e.target.name]: e.target.value });
+  const handleSavePassword = async (event) => {
+    event.preventDefault();
+
+    // Validate passwords
+    if (passwords.newPassword !== passwords.confirmNewPassword) {
+      setErrorMessage("New passwords do not match.");
+      return;
+    }
+    if (!passwordValidator(passwords.newPassword)) {
+      setErrorMessage("New password does not meet requirements.");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/profile/password",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          body: JSON.stringify({
+            current_password: passwords.currentPassword,
+            new_password: passwords.newPassword,
+          }),
+        }
+      );
+      const data = await response.json();
+      if (response.ok) {
+        setPasswords({
+          currentPassword: "",
+          newPassword: "",
+          confirmNewPassword: "",
+        });
+        navigate("/profile");
+      } else {
+        setErrorMessage(data.message || "Password update failed.");
+      }
+    } catch (error) {
+      console.error("Error updating password:", error);
+      setErrorMessage("An error occurred while updating the password.");
+    }
   };
 
   const handleEdit = () => {
     setEditing(true);
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -66,64 +119,91 @@ const Profile = ({ auth }) => {
       <div className="bg-white/30 backdrop-blur-lg rounded-xl shadow-lg p-6 md:p-8 border border-gray-200/50 max-w-full md:max-w-md w-full">
         <h1 className="text-2xl font-semibold text-center mb-6">Profile</h1>
         {editing ? (
-          <form>
-            {/* Input Fields */}
-            <div>
-              <label>Email:</label>
-              <input
-                type="email"
-                name="email"
-                value={editedDetails.email}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>First Name:</label>
-              <input
-                type="text"
-                name="first_name"
-                value={editedDetails.first_name}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>Last Name:</label>
-              <input
-                type="text"
-                name="last_name"
-                value={editedDetails.last_name}
-                onChange={handleChange}
-              />
-            </div>
-            {errorMessage && <div>{errorMessage}</div>}
-            {/* Save Button */}
-            <div className="flex items-center justify-between mt-6">
-              <button
-                onClick={handleSave}
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full focus:outline-none focus:shadow-outline"
-              >
-                Save
+          <>
+            <form onSubmit={handleSaveProfile}>
+              <div>
+                <label>Email:</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={userDetails.email}
+                  onChange={handleChange}
+                  disabled
+                />
+              </div>
+              <div>
+                <label>First Name:</label>
+                <input
+                  type="text"
+                  name="first_name"
+                  value={userDetails.first_name}
+                  onChange={handleChange}
+                />
+              </div>
+              <div>
+                <label>Last Name:</label>
+                <input
+                  type="text"
+                  name="last_name"
+                  value={userDetails.last_name}
+                  onChange={handleChange}
+                />
+              </div>
+              {errorMessage && <div>{errorMessage}</div>}
+              <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full focus:outline-none focus:shadow-outline">
+                Save Profile
               </button>
-            </div>
-          </form>
+            </form>
+            <form onSubmit={handleSavePassword}>
+              <div>
+                <label>Current Password:</label>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="currentPassword"
+                  value={passwords.currentPassword}
+                  onChange={handleChange}
+                />
+              </div>
+              <div>
+                <label>New Password:</label>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="newPassword"
+                  value={passwords.newPassword}
+                  onChange={handleChange}
+                />
+              </div>
+              <div>
+                <label>Confirm New Password:</label>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="confirmNewPassword"
+                  value={passwords.confirmNewPassword}
+                  onChange={handleChange}
+                />
+                <span onClick={togglePasswordVisibility}>
+                  {showPassword ? <EyeOff /> : <Eye />}
+                </span>
+              </div>
+              {errorMessage && <div>{errorMessage}</div>}
+              <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full focus:outline-none focus:shadow-outline">
+                Save Password
+              </button>
+            </form>
+          </>
         ) : (
-          // Displaying User Details
           <>
             <p className="text-md mb-2">
               <strong>Email:</strong> {userDetails.email}
             </p>
             <p>First Name: {userDetails.first_name}</p>
             <p>Last Name: {userDetails.last_name}</p>
-
-            {/* Edit Button */}
-            <div className="text-center mt-6">
-              <button
-                onClick={handleEdit}
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full focus:outline-none focus:shadow-outline"
-              >
-                Edit
-              </button>
-            </div>
+            <button
+              onClick={handleEdit}
+              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full focus:outline-none focus:shadow-outline"
+            >
+              Edit
+            </button>
           </>
         )}
       </div>
