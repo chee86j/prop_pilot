@@ -361,8 +361,8 @@ def get_properties():
 # to a default float value (0.0).
 def convert_to_float(value, default=0.0):
     try:
-        return float(value)
-    except ValueError:
+        return float(value) if value is not None else default
+    except (ValueError, TypeError):
         return default
 
 # Add a new property for the current user
@@ -401,13 +401,12 @@ def add_property():
             # Total Outlay To Date
             purchaseCost=convert_to_float(data.get('purchaseCost')),
             refinanceCosts=convert_to_float(data.get('refinanceCosts')),
-                # Capital Expenditures
+            # Capital Expenditures
             totalRehabCost=convert_to_float(data.get('totalRehabCost')),
             equipmentCost=convert_to_float(data.get('equipmentCost')),
             constructionCost=convert_to_float(data.get('constructionCost')),
             largeRepairsCost=convert_to_float(data.get('largeRepairsCost')),
             renovationCost=convert_to_float(data.get('renovationCost')),
-            
             kickStartFunds=convert_to_float(data.get('kickStartFunds')),
             lenderConstructionDrawsReceived=convert_to_float(data.get('lenderConstructionDrawsReceived')),
             utilitiesCost=convert_to_float(data.get('utilitiesCost')),
@@ -453,47 +452,16 @@ def add_property():
             sellersAttorney=data.get('sellersAttorney', ''),
             sellersAttorneyPhone=data.get('sellersAttorneyPhone', ''),
             escrowCompany=data.get('escrowCompany', ''),
-            escrowAgent=data.get('escrowAgent', ''),
-            escrowAgentPhone=data.get('escrowAgentPhone', ''),
-            buyersAgent=data.get('buyersAgent', ''),
-            buyersAgentPhone=data.get('buyersAgentPhone', ''),
-            buyersAttorney=data.get('buyersAttorney', ''),
-            buyersAttorneyPhone=data.get('buyersAttorneyPhone', ''),
-            titleInsuranceCompany=data.get('titleInsuranceCompany', ''),
-            titleAgent=data.get('titleAgent', ''),
-            titleAgentPhone=data.get('titleAgentPhone', ''),
-            titlePhone=data.get('titlePhone', ''),
-            # Lender Information
-            lender=data.get('lender', ''),
-            lenderPhone=data.get('lenderPhone', ''),
-            refinanceLender=data.get('refinanceLender', ''),
-            refinanceLenderPhone=data.get('refinanceLenderPhone', ''),
-            loanOfficer=data.get('loanOfficer', ''),
-            loanOfficerPhone=data.get('loanOfficerPhone', ''),
-            loanNumber=data.get('loanNumber', ''),
-            # Sales & Marketing
-            propertyManager=data.get('propertyManager', ''),
-            propertyManagerPhone=data.get('propertyManagerPhone', ''),
-            propertyManagementCompany=data.get('propertyManagementCompany', ''),
-            propertyManagementPhone=data.get('propertyManagementPhone', ''),
-            photographer=data.get('photographer', ''),
-            photographerPhone=data.get('photographerPhone', ''),
-            videographer=data.get('videographer', ''),
-            videographerPhone=data.get('videographerPhone', ''),
-            appraisalCompany=data.get('appraisalCompany', ''),
-            appraiser=data.get('appraiser', ''),
-            appraiserPhone=data.get('appraiserPhone', ''),
-            surveyor=data.get('surveyor', ''),
-            surveyorPhone=data.get('surveyorPhone', ''),
-            homeInspector=data.get('homeInspector', ''),
-            homeInspectorPhone=data.get('homeInspectorPhone', ''),
-            architect=data.get('architect', ''),
-            architectPhone=data.get('architectPhone', ''),
+            escrowAgent=data.get('escrowAgent', '')
         )
 
-        db.session.add(property)
-        db.session.commit()
-        return jsonify({"message": "Property added successfully"}), 201
+        try:
+            db.session.add(property)
+            db.session.commit()
+            return jsonify({"message": "Property added successfully"}), 201
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"error": str(e)}), 500
     else:
         return jsonify({"message": "User not found"}), 404
 
