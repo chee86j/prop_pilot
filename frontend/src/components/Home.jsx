@@ -21,7 +21,7 @@ const Home = () => {
         <h1 className="text-4xl md:text-5xl font-bold text-gray-700 mb-0">
           Welcome{" "}
           <span className="italic text-green-500">
-            {user ? `${user.first_name} ${user.last_name}` : ""}
+            {user ? `${user.first_name} ${user.last_name}` : "Guest"}
           </span>{" "}
           to Prop Pilot
           <img
