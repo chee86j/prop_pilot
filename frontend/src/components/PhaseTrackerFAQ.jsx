@@ -7,6 +7,7 @@ const PhaseTrackerFAQ = () => {
   const [expanded, setExpanded] = useState(false);
 
   const phases = [
+    // reference https://www.homelight.com/blog/buyer-steps-to-building-a-house/
     {
       name: "Finding the Deal",
       tasks: [
@@ -49,6 +50,7 @@ const PhaseTrackerFAQ = () => {
       name: "Due Diligence",
       tasks: [
         "Conducting thorough investigation of the property and its potential risks and opportunities.",
+        "Determine types of utilities available and costs associated with connecting to them.",
         "Engaging experts such as inspectors, appraisers, and attorneys to assess property condition and legal aspects.",
         "Reviewing property documents, including titles, surveys, and inspection reports.",
         "Identifying potential issues or red flags that may affect the investment decision.",
@@ -97,6 +99,7 @@ const PhaseTrackerFAQ = () => {
         "Ensuring compliance with safety regulations and environmental considerations during demolition activities.",
       ],
     },
+
     {
       name: "Rough-In (Operator)",
       tasks: [
@@ -109,6 +112,19 @@ const PhaseTrackerFAQ = () => {
       tasks: [
         "Scheduling inspections with municipal authorities to verify compliance with building codes and regulations.",
         "Addressing any deficiencies or issues identified during inspections to ensure timely resolution.",
+      ],
+    },
+    {
+      name: "Utility Setup",
+      tasks: [
+        "Check availability and set up city water or well water systems.",
+        "Connect to city sewer or install a septic tank system, including permits.",
+        "Select and install a heating system: gas, oil, electric, or central air.",
+        "Arrange electrical utility connections and ensure compliance with city codes.",
+        "Install natural gas service, if applicable.",
+        "Consider energy-efficient options like solar panels or geothermal systems.",
+        "Schedule inspections to comply with safety and regulatory standards.",
+        "Coordinate with contractors and utilities for installation timelines.",
       ],
     },
     {

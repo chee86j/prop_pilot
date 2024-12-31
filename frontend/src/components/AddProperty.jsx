@@ -1,5 +1,6 @@
 /* this component allows auth user to create a new single property */
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const AddProperty = () => {
   const [property, setProperty] = useState({
@@ -136,6 +137,8 @@ const AddProperty = () => {
 
   const [errorMessage, setErrorMessage] = useState("");
 
+  const navigate = useNavigate();
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProperty({ ...property, [name]: value });
@@ -168,6 +171,7 @@ const AddProperty = () => {
       .then(() => {
         // Handle successful property save
         console.log("Property added successfully");
+        navigate("/propertylist");
         // Redirect or update UI accordingly
       })
       .catch((error) => {
