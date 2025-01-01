@@ -53,7 +53,7 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
     <div className="w-full h-full my-10 px-4 sm:px-0">
       <Chrono
         items={items}
-        mode="HORIZONTAL"
+        mode="VERTICAL_ALTERNATING"
         slideShow
         slideItemDuration={4500}
         enableOutline={false}
