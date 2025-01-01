@@ -16,14 +16,15 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
   const items = phases.map((phase) => ({
     title: phase.name,
     cardTitle: phase.name,
-    // Use span with display block instead of br
-    cardSubtitle: [
-      `Expected Start: ${phase.expectedStartDate || ""}`,
-      `Actual Start: ${phase.startDate || ""}`,
-    ].join(" | "),
-    // Wrap buttons in span instead of div to avoid nesting issues
+    cardSubtitle: (
+      <>
+        <span>Expected Start: {phase.expectedStartDate || ""}</span>
+        <br />
+        <span>Actual Start: {phase.startDate || ""}</span>
+      </>
+    ),
     cardDetailedText: (
-      <span className="inline-flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0 hover:cursor-pointer w-full">
+      <div className="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0 hover:cursor-pointer">
         <button
           onClick={() => {
             console.log(`Editing phase: ${phase.id}`);
@@ -44,7 +45,7 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
         >
           Delete
         </button>
-      </span>
+      </div>
     ),
   }));
 
@@ -52,7 +53,7 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
     <div className="w-full h-full my-10 px-4 sm:px-0">
       <Chrono
         items={items}
-        mode="VERTICAL_ALTERNATING"
+        mode="HORIZONTAL"
         slideShow
         slideItemDuration={4500}
         enableOutline={false}

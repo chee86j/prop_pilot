@@ -283,29 +283,6 @@ const PropertyDetails = ({ propertyId }) => {
     }
   };
 
-  // Ensure fetchPhases function is defined and correctly fetches phases for the property
-  const fetchPhases = async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:5000/api/phases/${propertyId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Error fetching phases");
-      }
-
-      const data = await response.json();
-      setPhases(data);
-    } catch (error) {
-      console.error("Error fetching phases:", error);
-    }
-  };
-
   const handleAddPhase = () => {
     setCurrentPhase({}); // Reset current phase to empty
     setIsAddingPhase(true);
