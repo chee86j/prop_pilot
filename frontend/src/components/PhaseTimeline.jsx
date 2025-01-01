@@ -16,15 +16,14 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
   const items = phases.map((phase) => ({
     title: phase.name,
     cardTitle: phase.name,
-    cardSubtitle: (
-      <>
-        <span>Expected Start: {phase.expectedStartDate || ""}</span>
-        <br />
-        <span>Actual Start: {phase.startDate || ""}</span>
-      </>
-    ),
+    // Use span with display block instead of br
+    cardSubtitle: [
+      `Expected Start: ${phase.expectedStartDate || ""}`,
+      `Actual Start: ${phase.startDate || ""}`,
+    ].join(" | "),
+    // Wrap buttons in span instead of div to avoid nesting issues
     cardDetailedText: (
-      <div className="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0 hover:cursor-pointer">
+      <span className="inline-flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0 hover:cursor-pointer w-full">
         <button
           onClick={() => {
             console.log(`Editing phase: ${phase.id}`);
@@ -45,7 +44,7 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
         >
           Delete
         </button>
-      </div>
+      </span>
     ),
   }));
 
