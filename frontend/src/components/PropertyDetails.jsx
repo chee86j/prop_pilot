@@ -33,6 +33,7 @@ const PropertyDetails = ({ propertyId }) => {
     lender: false,
     salesAndMarketing: false,
   });
+  const [isAddingPhase, setIsAddingPhase] = useState(false);
   // const [csvData, setCsvData] = useState(null);
   const financialAnalysisRef = useRef(null);
 
@@ -207,6 +208,7 @@ const PropertyDetails = ({ propertyId }) => {
   const handleEditPhase = (phase) => {
     setCurrentPhase(phase);
     setIsEditingPhase(true);
+    setIsAddingPhase(false); // Make sure we're not in adding mode
   };
 
   const handleDeletePhase = async (phaseId) => {
@@ -234,37 +236,47 @@ const PropertyDetails = ({ propertyId }) => {
   };
 
   const handleSavePhase = async (formData) => {
-    // Include propertyId in the formData
     const phaseData = {
       ...formData,
-      property_id: propertyId, // Add property_id to formData
+      property_id: propertyId,
     };
 
-    const method = phaseData.id ? "PUT" : "POST";
-    const url = phaseData.id
-      ? `http://localhost:5000/api/phases/${phaseData.id}`
-      : "http://localhost:5000/api/phases";
-
     try {
-      const response = await fetch(url, {
-        method: method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-        body: JSON.stringify(phaseData), // Send phaseData with property_id
-      });
+      const response = await fetch(
+        phaseData.id
+          ? `http://localhost:5000/api/phases/${phaseData.id}`
+          : "http://localhost:5000/api/phases",
+        {
+          method: phaseData.id ? "PUT" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          body: JSON.stringify(phaseData),
+        }
+      );
 
-      // Fetch phases to update the state after saving
-      if (response.ok) {
-        fetchPhases(); // Make sure fetchPhases() is defined to update the phases state
-      } else {
-        // If the request was not successful, throw an error
+      if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Error saving phase");
       }
 
-      setIsEditingPhase(false); // Close the editing form after saving
+      // Get the updated phase data from the response
+      const savedPhase = await response.json();
+
+      // Update the phases state immediately
+      setPhases((currentPhases) =>
+        phaseData.id
+          ? currentPhases.map((phase) =>
+              phase.id === phaseData.id ? savedPhase : phase
+            )
+          : [...currentPhases, savedPhase]
+      );
+
+      // Reset form state
+      setIsEditingPhase(false);
+      setIsAddingPhase(false);
+      setCurrentPhase({});
     } catch (error) {
       console.error("Error:", error);
       alert(error.message || "Error saving phase");
@@ -294,7 +306,15 @@ const PropertyDetails = ({ propertyId }) => {
     }
   };
 
-  const handleCancelEditPhase = () => {
+  const handleAddPhase = () => {
+    setCurrentPhase({}); // Reset current phase to empty
+    setIsAddingPhase(true);
+    setIsEditingPhase(false);
+  };
+
+  const handleCancelPhase = () => {
+    setCurrentPhase({});
+    setIsAddingPhase(false);
     setIsEditingPhase(false);
   };
 
@@ -323,21 +343,44 @@ const PropertyDetails = ({ propertyId }) => {
 
         {/* Phase Timeline Section */}
         <section className="mb-12 p-6 bg-gray-50 rounded-lg shadow-lg">
-          <h2 className="text-2xl font-bold text-blue-600 mb-6 border-b-2 border-blue-200 pb-2">
-            Project Timeline
-          </h2>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-blue-600 border-b-2 border-blue-200 pb-2">
+              Project Timeline
+            </h2>
+          </div>
           <PhaseTimeline
             phases={phases}
             onEdit={handleEditPhase}
             onDelete={handleDeletePhase}
           />
-          {isEditingPhase && (
+          {isEditingPhase || isAddingPhase ? (
             <div className="mt-6">
               <PhaseForm
                 initialData={currentPhase}
                 onSave={handleSavePhase}
-                onCancel={handleCancelEditPhase}
+                onCancel={handleCancelPhase}
               />
+            </div>
+          ) : (
+            <div className="mt-6 flex justify-center">
+              <button
+                onClick={handleAddPhase}
+                className="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transform transition-transform duration-200 hover:scale-105 flex items-center gap-2"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                Add New Phase
+              </button>
             </div>
           )}
         </section>
