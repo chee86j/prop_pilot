@@ -5,7 +5,7 @@ import { useReactToPrint } from "react-to-print";
 import { formatFullCurrency } from "../utils/formatting";
 
 const RentalAnalysis = ({ property }) => {
-  const printRef = useRef(null);
+  const componentRef = useRef(null);
 
   // State to manage expanded sections
   const [expandedSections, setExpandedSections] = useState({
@@ -16,8 +16,9 @@ const RentalAnalysis = ({ property }) => {
   });
 
   const handlePrint = useReactToPrint({
-    content: () => printRef.current,
+    content: () => componentRef.current,
     documentTitle: "Rental Analysis Report",
+    removeAfterPrint: true,
   });
 
   if (!property) {
@@ -107,12 +108,12 @@ const RentalAnalysis = ({ property }) => {
     <div className="bg-white shadow-md rounded-lg p-4 max-w-4xl mx-auto">
       <button
         onClick={handlePrint}
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4 no-print"
       >
         Print Rental Analysis Report
       </button>
 
-      <div ref={printRef}>
+      <div className="print-content" ref={componentRef}>
         {renderDetails(
           financialDetails,
           "Financial Details",

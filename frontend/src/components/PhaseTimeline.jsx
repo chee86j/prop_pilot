@@ -1,9 +1,20 @@
 /* eslint-disable react/prop-types */
-/* https://www.npmjs.com/package/react-chrono#media */
 import { Chrono } from "react-chrono";
+import { useEffect, useState, useRef } from "react";
 
 const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
-  // Check if phases are empty and display a message if so
+  const [mounted, setMounted] = useState(false);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    // Wait for component to be fully mounted
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   if (!phases || phases.length === 0) {
     return (
       <div className="text-center text-red-500 mb-5">
@@ -12,59 +23,68 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
     );
   }
 
-  // Map phases to items for the Chrono component
   const items = phases.map((phase) => ({
     title: phase.name,
     cardTitle: phase.name,
-    cardSubtitle: (
-      <>
-        <span>Expected Start: {phase.expectedStartDate || ""}</span>
-        <br />
-        <span>Actual Start: {phase.startDate || ""}</span>
-      </>
-    ),
+    cardSubtitle: `Expected Start: ${
+      phase.expectedStartDate || ""
+    }\nActual Start: ${phase.startDate || ""}`,
     cardDetailedText: (
-      <div className="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0 hover:cursor-pointer">
+      <span className="inline-block">
+        {" "}
+        {/* Changed from div to span */}
         <button
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             console.log(`Editing phase: ${phase.id}`);
             onEdit(phase);
           }}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full sm:w-auto sm:mr-2"
-          aria-label={`Edit ${phase.name}`}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
         >
           Edit
         </button>
         <button
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             console.log(`Deleting phase: ${phase.id}`);
             onDelete(phase.id);
           }}
-          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full sm:w-auto"
-          aria-label={`Delete ${phase.name}`}
+          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         >
           Delete
         </button>
-      </div>
+      </span>
     ),
   }));
 
   return (
-    <div className="w-full h-full my-10 px-4 sm:px-0">
-      <Chrono
-        items={items}
-        mode="HORIZONTAL"
-        slideShow
-        slideItemDuration={4500}
-        enableOutline={false}
-        theme={{
-          secondary: "rgb(239, 246, 255)", // Tailwind's blue-50 for backgrounds
-          cardBgColor: "rgb(255, 255, 255)", // white background for cards
-          cardForeColor: "rgb(55, 65, 81)", // Tailwind's gray-800 for text color
-        }}
-        cardHeight={250}
-        scrollable={{ scrollbar: true }}
-      />
+    <div
+      ref={containerRef}
+      className="w-full my-10 px-4 sm:px-0"
+      style={{ minHeight: "400px", height: "400px" }} // Fixed height container
+    >
+      {mounted ? (
+        <Chrono
+          items={items}
+          mode="HORIZONTAL"
+          slideItemDuration={4500}
+          enableOutline={false}
+          theme={{
+            primary: "rgb(59, 130, 246)",
+            secondary: "rgb(239, 246, 255)",
+            cardBgColor: "rgb(255, 255, 255)",
+            cardForeColor: "rgb(55, 65, 81)",
+            titleColor: "rgb(55, 65, 81)",
+          }}
+          cardHeight={150}
+          scrollable
+          useReadMore={false}
+        />
+      ) : (
+        <div className="flex items-center justify-center h-full">
+          Loading timeline...
+        </div>
+      )}
     </div>
   );
 };

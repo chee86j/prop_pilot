@@ -2,18 +2,28 @@
 import { useState, useEffect } from "react";
 
 const PhaseForm = ({ onSave, onCancel, initialData }) => {
-  const [formData, setFormData] = useState({
+  const initialFormState = {
     name: "",
     expectedStartDate: "",
     startDate: "",
     expectedEndDate: "",
     endDate: "",
-  });
+  };
+
+  const [formData, setFormData] = useState(initialFormState);
 
   // Update form data when initialData changes
   useEffect(() => {
-    if (initialData) {
-      setFormData(initialData);
+    if (initialData && Object.keys(initialData).length > 0) {
+      setFormData({
+        name: initialData.name || "",
+        expectedStartDate: initialData.expectedStartDate || "",
+        startDate: initialData.startDate || "",
+        expectedEndDate: initialData.expectedEndDate || "",
+        endDate: initialData.endDate || "",
+      });
+    } else {
+      setFormData(initialFormState);
     }
   }, [initialData]);
 
@@ -33,21 +43,8 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validateFormData(formData)) {
-      onSave(formData)
-        .then(() => {
-          setFormData({
-            name: "",
-            expectedStartDate: "",
-            startDate: "",
-            expectedEndDate: "",
-            endDate: "",
-          }); // Reset form or manage state to reflect changes
-          // Optionally notify user of success
-        })
-        .catch((error) => {
-          console.error("Save error:", error);
-          // Optionally notify user of failure
-        });
+      onSave(formData);
+      setFormData(initialFormState);
     }
   };
 

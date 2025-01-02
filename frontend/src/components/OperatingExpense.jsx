@@ -5,8 +5,8 @@ import { useReactToPrint } from "react-to-print";
 import { formatFullCurrency } from "../utils/formatting";
 
 const OperatingExpense = ({ property }) => {
+  const componentRef = useRef(null);
   // Reference for printing
-  const printRef = useRef(null);
 
   // State to manage expanded sections
   const [expandedSections, setExpandedSections] = useState({
@@ -14,8 +14,9 @@ const OperatingExpense = ({ property }) => {
   });
 
   const handlePrint = useReactToPrint({
-    content: () => printRef.current,
+    content: () => componentRef.current,
     documentTitle: "Operating Expense Report",
+    removeAfterPrint: true,
   });
 
   const toggleSection = () => {
@@ -80,12 +81,12 @@ const OperatingExpense = ({ property }) => {
     <div className="bg-white shadow-md rounded-lg p-4 max-w-4xl mx-auto">
       <button
         onClick={handlePrint}
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4 no-print"
       >
         Print to PDF
       </button>
 
-      <div ref={printRef}>
+      <div className="print-content" ref={componentRef}>
         {renderDetails()}
         <div className="text-right text-green-600">
           Total Operating Expenses: {formatFullCurrency(totalExpenses)}
