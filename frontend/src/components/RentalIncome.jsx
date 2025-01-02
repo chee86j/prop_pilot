@@ -1,23 +1,21 @@
 /* eslint-disable react/prop-types */
 import { useState, useRef } from "react";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
-import { useReactToPrint } from "react-to-print";
 import { formatFullCurrency } from "../utils/formatting";
 
 const RentalIncome = ({ property }) => {
-  // Reference for printing
-  const componentRef = useRef(null);
+  const printableRef = useRef(null);
 
   // State to manage expanded sections
   const [expandedSections, setExpandedSections] = useState({
     rentalIncome: false,
   });
 
-  const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
-    documentTitle: "Rental Income Report",
-    removeAfterPrint: true,
-  });
+  const handlePrint = () => {
+    if (printableRef.current) {
+      window.print();
+    }
+  };
 
   // Toggle function for expanding/collapsing sections
   const toggleSection = () => {
@@ -85,7 +83,7 @@ const RentalIncome = ({ property }) => {
         Print to PDF
       </button>
 
-      <div className="print-content" ref={componentRef}>
+      <div className="print-content" ref={printableRef}>
         {renderDetails()}
         <div className="text-right text-green-600">
           Total Rental Income: {formatFullCurrency(totalRentalIncome)}

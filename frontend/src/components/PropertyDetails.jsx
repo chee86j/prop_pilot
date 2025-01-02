@@ -16,7 +16,8 @@ import { ChevronsUp, ChevronsDown } from "lucide-react";
 import { Download } from "lucide-react"; // Add this import
 
 const PropertyDetails = ({ propertyId }) => {
-  const printRef = useRef(null);
+  const detailsPrintRef = useRef(null);
+  const financialsPrintRef = useRef(null);
   const [propertyDetails, setPropertyDetails] = useState(null);
   const [phases, setPhases] = useState([]);
   const [isEditingPhase, setIsEditingPhase] = useState(false);
@@ -157,17 +158,17 @@ const PropertyDetails = ({ propertyId }) => {
     );
   };
 
-  const handlePrint = useReactToPrint({
-    content: () => printRef.current,
-    documentTitle: "Property Details",
-    onAfterPrint: () => console.log("Printed Property Details"),
-  });
+  const handlePrintDetails = () => {
+    if (detailsPrintRef.current) {
+      window.print();
+    }
+  };
 
-  const handlePrintFinancials = useReactToPrint({
-    content: () => financialAnalysisRef.current,
-    documentTitle: "Financial Analysis",
-    onAfterPrint: () => console.log("Printed Financial Analysis"),
-  });
+  const handlePrintFinancials = () => {
+    if (financialsPrintRef.current) {
+      window.print();
+    }
+  };
 
   const exportToCSV = (data, filename) => {
     const csvContent = "data:text/csv;charset=utf-8," + data;
@@ -302,14 +303,14 @@ const PropertyDetails = ({ propertyId }) => {
   return (
     <div className="property-details-container bg-white shadow-md rounded-lg p-4 max-w-4xl mx-auto">
       <button
-        onClick={handlePrint}
+        onClick={handlePrintDetails}
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
       >
         Print Property Details
       </button>
 
       {/* Wrap all content you want to print in a div with the printRef */}
-      <div ref={printRef}>
+      <div ref={detailsPrintRef}>
         {/* Construction Draw Section */}
         <section className="mb-12 p-6 bg-gray-50 rounded-lg shadow-lg">
           <h2 className="text-2xl font-bold text-blue-600 mb-6 border-b-2 border-blue-200 pb-2">
@@ -1203,7 +1204,7 @@ const PropertyDetails = ({ propertyId }) => {
       {/* Financial Analysis Section */}
       <section
         className="mb-12 p-6 bg-gray-50 rounded-lg shadow-lg"
-        ref={financialAnalysisRef}
+        ref={financialsPrintRef}
       >
         <div className="flex justify-between items-center mb-6 border-b-2 border-blue-200 pb-2">
           <h2 className="text-2xl font-bold text-blue-600">

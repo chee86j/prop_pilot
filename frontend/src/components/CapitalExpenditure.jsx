@@ -1,27 +1,26 @@
 /* eslint-disable react/prop-types */
 import { useState, useRef } from "react";
-import { useReactToPrint } from "react-to-print";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
 import { formatFullCurrency } from "../utils/formatting";
 
 const CapitalExpenditure = ({ property }) => {
-  // Reference for printing
-  const printRef = useRef(null);
+  const printableRef = useRef(null);
 
   // State to manage expanded sections
   const [expandedSections, setExpandedSections] = useState({
     capitalExpenditure: false,
   });
 
-  const handlePrint = useReactToPrint({
-    content: () => printRef.current,
-    documentTitle: "Capital Expenditure Report",
-  });
+  const handlePrint = () => {
+    if (printableRef.current) {
+      window.print();
+    }
+  };
 
   // Toggle function for expanding/collapsing sections
   const toggleSection = () => {
-    setExpandedSections((prev) => ({
-      capitalExpenditure: !prev.capitalExpenditure,
+    setExpandedSections((prevState) => ({
+      capitalExpenditure: !prevState.capitalExpenditure,
     }));
   };
 
@@ -44,13 +43,15 @@ const CapitalExpenditure = ({ property }) => {
     0
   );
 
-  const renderDetails = (details, sectionTitle) => (
+  const renderDetails = () => (
     <div
       className="bg-gray-50 p-4 shadow-sm rounded-md my-2 cursor-pointer"
       onClick={toggleSection}
     >
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-bold text-blue-700">{sectionTitle}</h3>
+        <h3 className="text-lg font-bold text-blue-700">
+          Capital Expenditure Details
+        </h3>
         {expandedSections.capitalExpenditure ? (
           <ChevronsUp size={24} className="text-gray-700" />
         ) : (
@@ -59,7 +60,7 @@ const CapitalExpenditure = ({ property }) => {
       </div>
       {expandedSections.capitalExpenditure && (
         <ul className="list-disc pl-5">
-          {Object.entries(details).map(([key, value]) => (
+          {Object.entries(capexDetails).map(([key, value]) => (
             <li key={key} className="flex justify-between">
               <span>
                 {key
@@ -79,13 +80,13 @@ const CapitalExpenditure = ({ property }) => {
     <div className="bg-white shadow-md rounded-lg p-4 max-w-4xl mx-auto">
       <button
         onClick={handlePrint}
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4 no-print"
       >
         Print to PDF
       </button>
 
-      <div ref={printRef}>
-        {renderDetails(capexDetails, "Capital Expenditure Details")}
+      <div className="print-content" ref={printableRef}>
+        {renderDetails()}
         <div className="text-right text-green-600">
           Total Capital Expenditure: {formatFullCurrency(totalCapex)}
         </div>

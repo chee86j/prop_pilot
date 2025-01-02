@@ -1,11 +1,10 @@
 /* eslint-disable react/prop-types */
 import { useState, useRef } from "react";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
-import { useReactToPrint } from "react-to-print";
 import { formatFullCurrency } from "../utils/formatting";
 
 const RentalAnalysis = ({ property }) => {
-  const componentRef = useRef(null);
+  const printableRef = useRef(null);
 
   // State to manage expanded sections
   const [expandedSections, setExpandedSections] = useState({
@@ -15,11 +14,11 @@ const RentalAnalysis = ({ property }) => {
     summary: false,
   });
 
-  const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
-    documentTitle: "Rental Analysis Report",
-    removeAfterPrint: true,
-  });
+  const handlePrint = () => {
+    if (printableRef.current) {
+      window.print();
+    }
+  };
 
   if (!property) {
     return <div>Loading...</div>;
@@ -110,10 +109,10 @@ const RentalAnalysis = ({ property }) => {
         onClick={handlePrint}
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4 no-print"
       >
-        Print Rental Analysis Report
+        Print to PDF
       </button>
 
-      <div className="print-content" ref={componentRef}>
+      <div className="print-content" ref={printableRef}>
         {renderDetails(
           financialDetails,
           "Financial Details",

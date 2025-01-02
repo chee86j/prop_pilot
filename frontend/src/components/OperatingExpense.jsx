@@ -1,28 +1,26 @@
 /* eslint-disable react/prop-types */
 import { useState, useRef } from "react";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
-import { useReactToPrint } from "react-to-print";
 import { formatFullCurrency } from "../utils/formatting";
 
 const OperatingExpense = ({ property }) => {
-  const componentRef = useRef(null);
-  // Reference for printing
+  const printableRef = useRef(null);
 
   // State to manage expanded sections
   const [expandedSections, setExpandedSections] = useState({
     expenseBreakdown: false,
   });
 
-  const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
-    documentTitle: "Operating Expense Report",
-    removeAfterPrint: true,
-  });
-
   const toggleSection = () => {
-    setExpandedSections((prevState) => ({
-      expenseBreakdown: !prevState.expenseBreakdown,
+    setExpandedSections((prev) => ({
+      expenseBreakdown: !prev.expenseBreakdown,
     }));
+  };
+
+  const handlePrint = () => {
+    if (printableRef.current) {
+      window.print();
+    }
   };
 
   if (!property) {
@@ -86,7 +84,7 @@ const OperatingExpense = ({ property }) => {
         Print to PDF
       </button>
 
-      <div className="print-content" ref={componentRef}>
+      <div className="print-content" ref={printableRef}>
         {renderDetails()}
         <div className="text-right text-green-600">
           Total Operating Expenses: {formatFullCurrency(totalExpenses)}

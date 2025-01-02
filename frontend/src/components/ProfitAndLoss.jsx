@@ -2,7 +2,6 @@
 import { useState, useRef } from "react";
 import { formatFullCurrency } from "../utils/formatting";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
-import { useReactToPrint } from "react-to-print";
 
 const keyDisplayMapping = {
   arvSalePrice: "ARV Sale Price",
@@ -10,7 +9,7 @@ const keyDisplayMapping = {
 
 const ProfitAndLoss = ({ property }) => {
   // Reference for printing
-  const printRef = useRef(null);
+  const printableRef = useRef(null);
 
   // State to manage expanded sections
   const [expandedSections, setExpandedSections] = useState({
@@ -19,11 +18,11 @@ const ProfitAndLoss = ({ property }) => {
     combinedStrategy: false,
   });
 
-  const handlePrint = useReactToPrint({
-    content: () => printRef.current,
-    documentTitle: "Profit and Loss Statement",
-    onAfterPrint: () => console.log("Printed successfully!"),
-  });
+  const handlePrint = () => {
+    if (printableRef.current) {
+      window.print();
+    }
+  };
 
   if (!property) {
     return <div>Error: Property data not found</div>;
@@ -163,69 +162,72 @@ const ProfitAndLoss = ({ property }) => {
     <div className="bg-white shadow-md rounded-lg p-4 max-w-4xl mx-auto">
       <button
         onClick={handlePrint}
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4 no-print"
       >
         Print to PDF
       </button>
 
-      <div
-        ref={printRef}
-        className="flex flex-col md:flex-row justify-between space-y-4 md:space-x-4 md:space-y-0"
-      >
-        {/* Rental Strategy */}
-        <div className="flex-1">
-          {renderDetails(expensesDetails, "Rental Strategy", "rentalStrategy")}
-          {renderDetails(
-            rentalIncomeDetails,
-            "Rental Income Details",
-            "rentalStrategy"
-          )}
-          {expandedSections.rentalStrategy && (
-            <div className="text-right text-green-600">
-              Total Expenses: {formatFullCurrency(totalExpenses)}
-              <br />
-              Total Rental Income: {formatFullCurrency(totalRentalIncome)}
-              <br />
-              Net Profit from Rentals:{" "}
-              {formatFullCurrency(netProfitFromRentals)}
-            </div>
-          )}
-        </div>
-        {/* Sale Strategy */}
-        <div className="flex-1">
-          {renderDetails(expensesDetails, "Sale Strategy", "saleStrategy")}
-          {renderDetails(
-            saleIncomeDetails,
-            "Sale Income Details",
-            "saleStrategy"
-          )}
-          {expandedSections.saleStrategy && (
-            <div className="text-right text-green-600">
-              Total Sale Income: {formatFullCurrency(totalSaleIncome)}
-              <br />
-              Net Profit from Sale: {formatFullCurrency(netProfitFromSale)}
-            </div>
-          )}
-        </div>
-        {/* Combined Strategy */}
-        <div className="flex-1">
-          {renderDetails(
-            expensesDetails,
-            "Combined Strategy",
-            "combinedStrategy"
-          )}
-          {renderDetails(
-            combinedIncomeDetails,
-            "Combined Income Details",
-            "combinedStrategy"
-          )}
-          {expandedSections.combinedStrategy && (
-            <div className="text-right text-green-600">
-              Total Combined Income: {formatFullCurrency(totalIncome)}
-              <br />
-              Net Profit Combined: {formatFullCurrency(combinedNetProfit)}
-            </div>
-          )}
+      <div className="print-content" ref={printableRef}>
+        <div className="flex flex-col md:flex-row justify-between space-y-4 md:space-x-4 md:space-y-0">
+          {/* Rental Strategy */}
+          <div className="flex-1">
+            {renderDetails(
+              expensesDetails,
+              "Rental Strategy",
+              "rentalStrategy"
+            )}
+            {renderDetails(
+              rentalIncomeDetails,
+              "Rental Income Details",
+              "rentalStrategy"
+            )}
+            {expandedSections.rentalStrategy && (
+              <div className="text-right text-green-600">
+                Total Expenses: {formatFullCurrency(totalExpenses)}
+                <br />
+                Total Rental Income: {formatFullCurrency(totalRentalIncome)}
+                <br />
+                Net Profit from Rentals:{" "}
+                {formatFullCurrency(netProfitFromRentals)}
+              </div>
+            )}
+          </div>
+          {/* Sale Strategy */}
+          <div className="flex-1">
+            {renderDetails(expensesDetails, "Sale Strategy", "saleStrategy")}
+            {renderDetails(
+              saleIncomeDetails,
+              "Sale Income Details",
+              "saleStrategy"
+            )}
+            {expandedSections.saleStrategy && (
+              <div className="text-right text-green-600">
+                Total Sale Income: {formatFullCurrency(totalSaleIncome)}
+                <br />
+                Net Profit from Sale: {formatFullCurrency(netProfitFromSale)}
+              </div>
+            )}
+          </div>
+          {/* Combined Strategy */}
+          <div className="flex-1">
+            {renderDetails(
+              expensesDetails,
+              "Combined Strategy",
+              "combinedStrategy"
+            )}
+            {renderDetails(
+              combinedIncomeDetails,
+              "Combined Income Details",
+              "combinedStrategy"
+            )}
+            {expandedSections.combinedStrategy && (
+              <div className="text-right text-green-600">
+                Total Combined Income: {formatFullCurrency(totalIncome)}
+                <br />
+                Net Profit Combined: {formatFullCurrency(combinedNetProfit)}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
