@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect, useRef } from "react";
-import { useReactToPrint } from "react-to-print";
 import ConstructionDraw from "./ConstructionDraw";
 import PhaseTimeline from "./PhaseTimeline";
 import PhaseForm from "./PhaseForm";
@@ -36,8 +35,6 @@ const PropertyDetails = ({ propertyId }) => {
   });
   const [isAddingPhase, setIsAddingPhase] = useState(false);
   // const [csvData, setCsvData] = useState(null);
-  const financialAnalysisRef = useRef(null);
-
   // const handleFileUpload = (data) => {
   //   setCsvData(data); // Store the parsed CSV data
   // };
@@ -343,21 +340,28 @@ const PropertyDetails = ({ propertyId }) => {
             <div className="mt-6 flex justify-center">
               <button
                 onClick={handleAddPhase}
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transform transition-transform duration-200 hover:scale-105 flex items-center gap-2"
+                className="rounded-lg relative w-32 h-10 mb-5 cursor-pointer flex items-center border border-blue-500 bg-blue-500 group hover:bg-blue-500 active:bg-blue-500 active:border-blue-500"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                Add New Phase
+                <span className="text-white font-semibold ml-5 transform group-hover:translate-x-10 transition-all duration-300">
+                  Phase
+                </span>
+                <span className="absolute right-0 h-full w-12 rounded-lg bg-blue-500 flex items-center justify-center transform group-hover:translate-x-0 group-hover:w-full transition-all duration-300">
+                  <svg
+                    className="svg w-8 text-white"
+                    fill="none"
+                    height="24"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <line x1="12" x2="12" y1="5" y2="19"></line>
+                    <line x1="5" x2="19" y1="12" y2="12"></line>
+                  </svg>
+                </span>
               </button>
             </div>
           )}

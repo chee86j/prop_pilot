@@ -7,13 +7,13 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
   const containerRef = useRef(null);
 
   useEffect(() => {
-    // Wait for component to be fully mounted
+    setMounted(false);
     const timer = setTimeout(() => {
       setMounted(true);
-    }, 300);
+    }, 100); // Reduced timeout for better responsiveness
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [phases]); // Add phases as dependency to remount when phases change
 
   if (!phases || phases.length === 0) {
     return (
@@ -65,6 +65,7 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
     >
       {mounted ? (
         <Chrono
+          key={phases.length} // Add key prop to force re-render
           items={items}
           mode="HORIZONTAL"
           slideItemDuration={4500}
