@@ -12,7 +12,9 @@ import RentalAnalysis from "./RentalAnalysis";
 // import CsvReader from "./CsvReader";
 import { formatFullCurrency } from "../utils/formatting";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
-import { Download } from "lucide-react"; // Add this import
+import { Download } from "lucide-react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const PropertyDetails = ({ propertyId }) => {
   const detailsPrintRef = useRef(null);
@@ -118,8 +120,10 @@ const PropertyDetails = ({ propertyId }) => {
       const data = await response.json();
       setPropertyDetails(data);
       toggleEditMode();
+      toast.success("Property details saved successfully!");
     } catch (error) {
       console.error("Error saving property details:", error);
+      toast.error("Failed to save property details.");
     }
   };
 
@@ -275,9 +279,10 @@ const PropertyDetails = ({ propertyId }) => {
       setIsEditingPhase(false);
       setIsAddingPhase(false);
       setCurrentPhase({});
+      toast.success("Phase saved successfully!");
     } catch (error) {
       console.error("Error:", error);
-      alert(error.message || "Error saving phase");
+      toast.error(error.message || "Failed to save phase.");
     }
   };
 
@@ -299,6 +304,8 @@ const PropertyDetails = ({ propertyId }) => {
 
   return (
     <div className="property-details-container bg-white shadow-md rounded-lg p-4 max-w-4xl mx-auto">
+      {/* Render ToastContainer for displaying notifications */}
+      <ToastContainer position="top-left" autoClose={5000} />
       <button
         onClick={handlePrintDetails}
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
