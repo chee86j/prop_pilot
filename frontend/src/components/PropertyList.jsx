@@ -79,10 +79,11 @@ const PropertyList = () => {
       headerName: "Actions",
       field: "actions",
       cellRenderer: (params) => (
-        <div className="flex space-x-2">
+        <div className="flex flex-wrap space-x-2">
           <button
-            className="flex items-center justify-center bg-blue-500 text-white px-2 py-1 rounded"
+            className="flex items-center justify-center bg-blue-500 text-white px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-300"
             onClick={() => handleDetails(params.data.id)}
+            aria-label="View Property Details"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -90,7 +91,7 @@ const PropertyList = () => {
               viewBox="0 0 24 24"
               strokeWidth="1.5"
               stroke="currentColor"
-              className="h-4 w-4"
+              className="h-5 w-5"
             >
               <path
                 strokeLinecap="round"
@@ -100,8 +101,9 @@ const PropertyList = () => {
             </svg>
           </button>
           <button
-            className="flex items-center justify-center bg-red-500 text-white px-2 py-1 rounded"
+            className="flex items-center justify-center bg-red-500 text-white px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-300"
             onClick={() => handleDelete(params.data.id)}
+            aria-label="Delete Property"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -109,7 +111,7 @@ const PropertyList = () => {
               viewBox="0 0 24 24"
               strokeWidth="1.5"
               stroke="currentColor"
-              className="h-4 w-4"
+              className="h-5 w-5"
             >
               <path
                 strokeLinecap="round"
@@ -125,41 +127,42 @@ const PropertyList = () => {
 
   return (
     <div
-      className="ag-theme-alpine"
-      style={{ height: "100vh", width: "100%", padding: "1rem" }}
+      className="ag-theme-alpine max-w-full mx-auto p-4"
+      style={{ height: "100vh" }}
     >
-      <div className="mb-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <img
-                        src={SkyScrapers}
-                        alt="SkyScrapers"
-                        className="w-24 h-24"
-                      />
-                      <div>
-                        <h1 className="text-xl font-semibold text-gray-700">
-                          Displaying Properties
-                        </h1>
-                        {user && (
-                          <h2 className="text-lg font-medium text-green-500">
-                            {`for ${user.first_name} ${user.last_name}`}
-                          </h2>
-                        )}
-                      </div>
-                      <img
-                        src={SkyScrapers}
-                        alt="SkyScrapers"
-                        className="w-24 h-24"
-                      />
-                    </div>
-                    <button
-                      onClick={goToAddPropertyPage}
-                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition ease-in-out duration-300"
-                    >
-                      Add New Property
-                    </button>
-                  </div>
-                </div>
+      <header className="mb-6">
+        <div className="flex flex-wrap items-center justify-between space-y-4 sm:space-y-0">
+          <div className="flex items-center space-x-4">
+            <img
+              src={SkyScrapers}
+              alt="SkyScrapers"
+              className="w-16 h-16 sm:w-24 sm:h-24"
+              aria-hidden="true"
+            />
+            <div>
+              <h1 className="text-lg sm:text-xl font-semibold text-gray-700">
+                Displaying Properties
+              </h1>
+              {user && (
+                <h2 className="text-sm sm:text-lg font-medium text-green-500">
+                  {`for ${user.first_name} ${user.last_name}`}
+                </h2>
+              )}
+            </div>
+            <img
+              src={SkyScrapers}
+              alt="SkyScrapers"
+              className="w-24 h-24"
+            />
+          </div>
+          <button
+            onClick={goToAddPropertyPage}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition ease-in-out duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
+          >
+            Add New Property
+          </button>
+        </div>
+      </header>
       <AgGridReact
         rowData={rowData}
         columnDefs={columns}
