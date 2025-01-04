@@ -27,7 +27,9 @@ through Flask-SQLAlchemy with PostgreSQL as the database, ensuring secure and
 scalable storage. Authentication and security are managed using Flask-JWT-Extended.
 Flask-CORS is utilized to handle Cross-Origin Resource Sharing (CORS), facilitating
 secure and flexible interactions between the frontend and backend. Werkzeug provides
-comprehensive WSGI web application library support.
+comprehensive WSGI web application library support. AG Grid is used in Prop Pilot to provide a powerful and flexible data grid component for displaying and managing property data. It offers features such as sorting, filtering, pagination, and inline editing, making it easy to handle large datasets efficiently. The grid is integrated into the React frontend and styled using Tailwind CSS to ensure a consistent look and feel with the rest of the application.
+
+
 
 ## Project Setup
 
