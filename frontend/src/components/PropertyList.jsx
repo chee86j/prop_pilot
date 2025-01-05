@@ -13,6 +13,10 @@ import SkyScrapers from "../assets/icons/skyscrapers.png";
 
 const PropertyList = () => {
   const [rowData, setRowData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [filterText, setFilterText] = useState("");
+  const [filterAddress, setFilterAddress] = useState("");
+  const [filterCity, setFilterCity] = useState("");
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
 
@@ -23,10 +27,36 @@ const PropertyList = () => {
       },
     })
       .then((response) => response.json())
-      .then((data) => setRowData(data))
+      .then((data) => {
+        setRowData(data);
+        setFilteredData(data);
+      })
       .catch((error) => console.error("Error fetching properties:", error));
     fetchUserProfile(setUser);
   }, []);
+
+  useEffect(() => {
+    setFilteredData(
+      rowData.filter(
+        (property) =>
+          (property.propertyName?.toLowerCase() || "").includes(filterText.toLowerCase()) &&
+          (property.address?.toLowerCase() || "").includes(filterAddress.toLowerCase()) &&
+          (property.city?.toLowerCase() || "").includes(filterCity.toLowerCase())
+      )
+    );
+  }, [filterText, filterAddress, filterCity, rowData]);
+
+  const handleFilterChange = (e) => {
+    setFilterText(e.target.value);
+  };
+
+  const handleFilterAddressChange = (e) => {
+    setFilterAddress(e.target.value);
+  };
+
+  const handleFilterCityChange = (e) => {
+    setFilterCity(e.target.value);
+  };
 
   const goToAddPropertyPage = () => {
     navigate("/addproperty");
@@ -131,7 +161,7 @@ const PropertyList = () => {
       style={{ height: "100vh" }}
     >
       <header className="mb-6">
-        <div className="flex flex-wrap items-center justify-between space-y-4 sm:space-y-0">
+        <div className="flex flex-wrap items-center justify-between">
           <div className="flex items-center space-x-4">
             <img
               src={SkyScrapers}
@@ -157,14 +187,37 @@ const PropertyList = () => {
           </div>
           <button
             onClick={goToAddPropertyPage}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition ease-in-out duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:ring-2 focus:ring-blue-300"
           >
             Add New Property
           </button>
         </div>
+        <div className="mt-4 flex flex-wrap space-y-2 sm:space-y-0 sm:space-x-4">
+          <input
+            type="text"
+            placeholder="Filter by Property Name"
+            value={filterText}
+            onChange={handleFilterChange}
+            className="w-full sm:w-auto border rounded px-4 py-2"
+          />
+          <input
+            type="text"
+            placeholder="Filter by Address"
+            value={filterAddress}
+            onChange={handleFilterAddressChange}
+            className="w-full sm:w-auto border rounded px-4 py-2"
+          />
+          <input
+            type="text"
+            placeholder="Filter by City"
+            value={filterCity}
+            onChange={handleFilterCityChange}
+            className="w-full sm:w-auto border rounded px-4 py-2"
+          />
+        </div>
       </header>
       <AgGridReact
-        rowData={rowData}
+        rowData={filteredData}
         columnDefs={columns}
         pagination={true}
         paginationPageSize={10}
