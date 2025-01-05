@@ -9,6 +9,12 @@ import SkyScrapers from "../assets/icons/skyscrapers.png";
 const PropertyList = () => {
   const [rowData, setRowData] = useState([]);
   const [user, setUser] = useState(null);
+  const [gridApi, setGridApi] = useState(null);
+  const [filterValues, setFilterValues] = useState({
+    purchaseCost: { min: "", max: "" },
+    totalRehabCost: { min: "", max: "" },
+    arvSalePrice: { min: "", max: "" },
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -51,6 +57,71 @@ const PropertyList = () => {
     }
   };
 
+  const handleFilterChange = (field, type, value) => {
+    setFilterValues((prev) => ({
+      ...prev,
+      [field]: { ...prev[field], [type]: value },
+    }));
+  };
+
+  const applyFilters = () => {
+    if (gridApi) {
+      gridApi.setFilterModel({}); // Clear existing filters
+      gridApi.onFilterChanged(); // Force refresh
+    }
+  };
+
+  const resetFilters = () => {
+    setFilterValues({
+      purchaseCost: { min: "", max: "" },
+      totalRehabCost: { min: "", max: "" },
+      arvSalePrice: { min: "", max: "" },
+    });
+    if (gridApi) {
+      gridApi.setFilterModel({});
+      gridApi.onFilterChanged();
+    }
+  };
+
+  const isExternalFilterPresent = () => {
+    return Object.values(filterValues).some(
+      (filter) => filter.min !== "" || filter.max !== ""
+    );
+  };
+
+  const doesExternalFilterPass = (node) => {
+    const data = node.data;
+
+    const inRange = (value, min, max) => {
+      const numValue = Number(value);
+      const numMin = Number(min);
+      const numMax = Number(max);
+
+      if (min && max) return numValue >= numMin && numValue <= numMax;
+      if (min) return numValue >= numMin;
+      if (max) return numValue <= numMax;
+      return true;
+    };
+
+    return (
+      inRange(
+        data.purchaseCost,
+        filterValues.purchaseCost.min,
+        filterValues.purchaseCost.max
+      ) &&
+      inRange(
+        data.totalRehabCost,
+        filterValues.totalRehabCost.min,
+        filterValues.totalRehabCost.max
+      ) &&
+      inRange(
+        data.arvSalePrice,
+        filterValues.arvSalePrice.min,
+        filterValues.arvSalePrice.max
+      )
+    );
+  };
+
   const columns = [
     {
       headerName: "Property Name",
@@ -70,7 +141,7 @@ const PropertyList = () => {
     {
       headerName: "Purchase Cost",
       field: "purchaseCost",
-      filter: "agNumberColumnFilter",
+      filter: false,
       floatingFilter: false,
       valueFormatter: (params) => {
         return new Intl.NumberFormat("en-US", {
@@ -82,7 +153,7 @@ const PropertyList = () => {
     {
       headerName: "Total Rehab Cost",
       field: "totalRehabCost",
-      filter: "agNumberColumnFilter",
+      filter: false,
       floatingFilter: false,
       valueFormatter: (params) => {
         return new Intl.NumberFormat("en-US", {
@@ -94,7 +165,7 @@ const PropertyList = () => {
     {
       headerName: "ARV Sale Price",
       field: "arvSalePrice",
-      filter: "agNumberColumnFilter",
+      filter: false,
       floatingFilter: false,
       valueFormatter: (params) => {
         return new Intl.NumberFormat("en-US", {
@@ -188,6 +259,102 @@ const PropertyList = () => {
           </button>
         </div>
       </header>
+
+      <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Purchase Cost Filter
+          </label>
+          <div className="flex space-x-2">
+            <input
+              type="number"
+              placeholder="Min"
+              className="w-1/2 px-3 py-2 border rounded"
+              value={filterValues.purchaseCost.min}
+              onChange={(e) =>
+                handleFilterChange("purchaseCost", "min", e.target.value)
+              }
+            />
+            <input
+              type="number"
+              placeholder="Max"
+              className="w-1/2 px-3 py-2 border rounded"
+              value={filterValues.purchaseCost.max}
+              onChange={(e) =>
+                handleFilterChange("purchaseCost", "max", e.target.value)
+              }
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Rehab Cost Filter
+          </label>
+          <div className="flex space-x-2">
+            <input
+              type="number"
+              placeholder="Min"
+              className="w-1/2 px-3 py-2 border rounded"
+              value={filterValues.totalRehabCost.min}
+              onChange={(e) =>
+                handleFilterChange("totalRehabCost", "min", e.target.value)
+              }
+            />
+            <input
+              type="number"
+              placeholder="Max"
+              className="w-1/2 px-3 py-2 border rounded"
+              value={filterValues.totalRehabCost.max}
+              onChange={(e) =>
+                handleFilterChange("totalRehabCost", "max", e.target.value)
+              }
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            ARV Sale Price Filter
+          </label>
+          <div className="flex space-x-2">
+            <input
+              type="number"
+              placeholder="Min"
+              className="w-1/2 px-3 py-2 border rounded"
+              value={filterValues.arvSalePrice.min}
+              onChange={(e) =>
+                handleFilterChange("arvSalePrice", "min", e.target.value)
+              }
+            />
+            <input
+              type="number"
+              placeholder="Max"
+              className="w-1/2 px-3 py-2 border rounded"
+              value={filterValues.arvSalePrice.max}
+              onChange={(e) =>
+                handleFilterChange("arvSalePrice", "max", e.target.value)
+              }
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-4 flex space-x-2">
+        <button
+          onClick={applyFilters}
+          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Apply Filters
+        </button>
+        <button
+          onClick={resetFilters}
+          className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Reset Filters
+        </button>
+      </div>
+
       <AgGridReact
         rowData={rowData}
         columnDefs={columns}
@@ -203,6 +370,9 @@ const PropertyList = () => {
         paginationPageSizeSelector={[10, 25, 50, 100]}
         domLayout="autoHeight"
         aria-label="Property Data Grid"
+        onGridReady={(params) => setGridApi(params.api)}
+        isExternalFilterPresent={isExternalFilterPresent}
+        doesExternalFilterPass={doesExternalFilterPass}
       />
     </div>
   );
