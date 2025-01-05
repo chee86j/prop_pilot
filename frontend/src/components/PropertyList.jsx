@@ -4,11 +4,6 @@ import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { fetchUserProfile } from "../utils/fetchUserProfile";
-import {
-  formatCurrency,
-  formatCurrencyDetailed,
-  formatFullCurrency,
-} from "../utils/formatting";
 import SkyScrapers from "../assets/icons/skyscrapers.png";
 
 const PropertyList = () => {
@@ -75,20 +70,35 @@ const PropertyList = () => {
     {
       headerName: "Purchase Cost",
       field: "purchaseCost",
-      valueFormatter: (params) => formatCurrency(params.value),
       filter: "agNumberColumnFilter",
+      valueFormatter: (params) => {
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
+        }).format(params.value);
+      },
     },
     {
       headerName: "Total Rehab Cost",
       field: "totalRehabCost",
-      valueFormatter: (params) => formatCurrencyDetailed(params.value),
       filter: "agNumberColumnFilter",
+      valueFormatter: (params) => {
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
+        }).format(params.value);
+      },
     },
     {
       headerName: "ARV Sale Price",
       field: "arvSalePrice",
-      valueFormatter: (params) => formatFullCurrency(params.value),
       filter: "agNumberColumnFilter",
+      valueFormatter: (params) => {
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
+        }).format(params.value);
+      },
     },
     {
       headerName: "Actions",
