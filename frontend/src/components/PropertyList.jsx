@@ -13,12 +13,8 @@ import SkyScrapers from "../assets/icons/skyscrapers.png";
 
 const PropertyList = () => {
   const [rowData, setRowData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
-  const [filterText, setFilterText] = useState("");
-  const [filterAddress, setFilterAddress] = useState("");
-  const [filterCity, setFilterCity] = useState("");
-  const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch("http://localhost:5000/api/properties", {
@@ -27,36 +23,10 @@ const PropertyList = () => {
       },
     })
       .then((response) => response.json())
-      .then((data) => {
-        setRowData(data);
-        setFilteredData(data);
-      })
+      .then((data) => setRowData(data))
       .catch((error) => console.error("Error fetching properties:", error));
     fetchUserProfile(setUser);
   }, []);
-
-  useEffect(() => {
-    setFilteredData(
-      rowData.filter(
-        (property) =>
-          (property.propertyName?.toLowerCase() || "").includes(filterText.toLowerCase()) &&
-          (property.address?.toLowerCase() || "").includes(filterAddress.toLowerCase()) &&
-          (property.city?.toLowerCase() || "").includes(filterCity.toLowerCase())
-      )
-    );
-  }, [filterText, filterAddress, filterCity, rowData]);
-
-  const handleFilterChange = (e) => {
-    setFilterText(e.target.value);
-  };
-
-  const handleFilterAddressChange = (e) => {
-    setFilterAddress(e.target.value);
-  };
-
-  const handleFilterCityChange = (e) => {
-    setFilterCity(e.target.value);
-  };
 
   const goToAddPropertyPage = () => {
     navigate("/addproperty");
@@ -87,23 +57,38 @@ const PropertyList = () => {
   };
 
   const columns = [
-    { headerName: "Property Name", field: "propertyName" },
-    { headerName: "Address", field: "address" },
-    { headerName: "City", field: "city" },
+    {
+      headerName: "Property Name",
+      field: "propertyName",
+      filter: "agTextColumnFilter",
+    },
+    {
+      headerName: "Address",
+      field: "address",
+      filter: "agTextColumnFilter",
+    },
+    {
+      headerName: "City",
+      field: "city",
+      filter: "agTextColumnFilter",
+    },
     {
       headerName: "Purchase Cost",
       field: "purchaseCost",
       valueFormatter: (params) => formatCurrency(params.value),
+      filter: "agNumberColumnFilter",
     },
     {
       headerName: "Total Rehab Cost",
       field: "totalRehabCost",
       valueFormatter: (params) => formatCurrencyDetailed(params.value),
+      filter: "agNumberColumnFilter",
     },
     {
       headerName: "ARV Sale Price",
       field: "arvSalePrice",
       valueFormatter: (params) => formatFullCurrency(params.value),
+      filter: "agNumberColumnFilter",
     },
     {
       headerName: "Actions",
@@ -152,6 +137,7 @@ const PropertyList = () => {
           </button>
         </div>
       ),
+      filter: false, // Disable filter for actions column
     },
   ];
 
@@ -192,33 +178,16 @@ const PropertyList = () => {
             Add New Property
           </button>
         </div>
-        <div className="mt-4 flex flex-wrap space-y-2 sm:space-y-0 sm:space-x-4">
-          <input
-            type="text"
-            placeholder="Filter by Property Name"
-            value={filterText}
-            onChange={handleFilterChange}
-            className="w-full sm:w-auto border rounded px-4 py-2"
-          />
-          <input
-            type="text"
-            placeholder="Filter by Address"
-            value={filterAddress}
-            onChange={handleFilterAddressChange}
-            className="w-full sm:w-auto border rounded px-4 py-2"
-          />
-          <input
-            type="text"
-            placeholder="Filter by City"
-            value={filterCity}
-            onChange={handleFilterCityChange}
-            className="w-full sm:w-auto border rounded px-4 py-2"
-          />
-        </div>
       </header>
       <AgGridReact
-        rowData={filteredData}
+        rowData={rowData}
         columnDefs={columns}
+        defaultColDef={{
+          filter: true,
+          floatingFilter: true, // Enable quick filters
+          sortable: true,
+          resizable: true,
+        }}
         pagination={true}
         paginationPageSize={10}
         domLayout="autoHeight"
