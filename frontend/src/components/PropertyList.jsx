@@ -71,10 +71,11 @@ const PropertyList = () => {
       headerName: "Purchase Cost",
       field: "purchaseCost",
       filter: "agNumberColumnFilter",
+      floatingFilter: false,
       valueFormatter: (params) => {
-        return new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'USD',
+        return new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
         }).format(params.value);
       },
     },
@@ -82,10 +83,11 @@ const PropertyList = () => {
       headerName: "Total Rehab Cost",
       field: "totalRehabCost",
       filter: "agNumberColumnFilter",
+      floatingFilter: false,
       valueFormatter: (params) => {
-        return new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'USD',
+        return new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
         }).format(params.value);
       },
     },
@@ -93,10 +95,11 @@ const PropertyList = () => {
       headerName: "ARV Sale Price",
       field: "arvSalePrice",
       filter: "agNumberColumnFilter",
+      floatingFilter: false,
       valueFormatter: (params) => {
-        return new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'USD',
+        return new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
         }).format(params.value);
       },
     },
@@ -175,11 +178,7 @@ const PropertyList = () => {
                 </h2>
               )}
             </div>
-            <img
-              src={SkyScrapers}
-              alt="SkyScrapers"
-              className="w-24 h-24"
-            />
+            <img src={SkyScrapers} alt="SkyScrapers" className="w-24 h-24" />
           </div>
           <button
             onClick={goToAddPropertyPage}
@@ -197,9 +196,11 @@ const PropertyList = () => {
           floatingFilter: true, // Enable quick filters
           sortable: true,
           resizable: true,
+          minWidth: 100,
         }}
         pagination={true}
-        paginationPageSize={10}
+        paginationPageSize={25}
+        paginationPageSizeSelector={[10, 25, 50, 100]}
         domLayout="autoHeight"
         aria-label="Property Data Grid"
       />

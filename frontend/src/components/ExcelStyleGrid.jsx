@@ -129,42 +129,42 @@ const ExcelStyleGrid = () => {
       style={{ height: "100vh", width: "100%", padding: "1rem" }}
     >
       <div className="mb-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <img
-                        src={SkyScrapers}
-                        alt="SkyScrapers"
-                        className="w-24 h-24"
-                      />
-                      <div>
-                        <h1 className="text-xl font-semibold text-gray-700">
-                          Displaying Properties
-                        </h1>
-                        {user && (
-                          <h2 className="text-lg font-medium text-green-500">
-                            {`for ${user.first_name} ${user.last_name}`}
-                          </h2>
-                        )}
-                      </div>
-                      <img
-                        src={SkyScrapers}
-                        alt="SkyScrapers"
-                        className="w-24 h-24"
-                      />
-                    </div>
-                    <button
-                      onClick={goToAddPropertyPage}
-                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition ease-in-out duration-300"
-                    >
-                      Add New Property
-                    </button>
-                  </div>
-                </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <img src={SkyScrapers} alt="SkyScrapers" className="w-24 h-24" />
+            <div>
+              <h1 className="text-xl font-semibold text-gray-700">
+                Displaying Properties
+              </h1>
+              {user && (
+                <h2 className="text-lg font-medium text-green-500">
+                  {`for ${user.first_name} ${user.last_name}`}
+                </h2>
+              )}
+            </div>
+            <img src={SkyScrapers} alt="SkyScrapers" className="w-24 h-24" />
+          </div>
+          <button
+            onClick={goToAddPropertyPage}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition ease-in-out duration-300"
+          >
+            Add New Property
+          </button>
+        </div>
+      </div>
       <AgGridReact
         rowData={rowData}
         columnDefs={columns}
+        defaultColDef={{
+          filter: true,
+          floatingFilter: true, // Enable quick filters
+          sortable: true,
+          resizable: true,
+          minWidth: 100,
+        }}
         pagination={true}
-        paginationPageSize={10}
+        paginationPageSize={25}
+        paginationPageSizeSelector={[10, 25, 50, 100]}
         domLayout="autoHeight"
         aria-label="Property Data Grid"
       />
