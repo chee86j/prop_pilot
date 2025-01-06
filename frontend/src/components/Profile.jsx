@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchUserProfile } from "../utils/fetchUserProfile";
 import { emailValidator, passwordValidator } from "../utils/validation";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, UserCircle } from "lucide-react";
+import AvatarUpload from "./AvatarUpload";
 
 const Profile = () => {
   const [userDetails, setUserDetails] = useState({});
@@ -118,6 +119,10 @@ const Profile = () => {
     setShowPassword(!showPassword);
   };
 
+  const handleAvatarChange = (avatarData) => {
+    setUserDetails({ ...userDetails, avatar: avatarData });
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen p-4">
       <div className="bg-white/30 backdrop-blur-lg rounded-xl shadow-lg p-6 md:p-8 border border-gray-200/50 max-w-full md:max-w-md w-full">
@@ -152,6 +157,12 @@ const Profile = () => {
         </h1>
         {editing ? (
           <>
+            <div className="mb-6 flex justify-center">
+              <AvatarUpload
+                currentAvatar={userDetails.avatar}
+                onAvatarChange={handleAvatarChange}
+              />
+            </div>
             <form onSubmit={handleSaveProfile}>
               <div className="relative mb-4">
                 <input
@@ -292,6 +303,37 @@ const Profile = () => {
           </>
         ) : (
           <>
+            <div className="mb-6 flex justify-center">
+              <div
+                className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center"
+                role="img"
+                aria-label={
+                  userDetails.avatar
+                    ? `${userDetails.first_name}'s profile picture`
+                    : "Default profile picture"
+                }
+              >
+                {userDetails.avatar ? (
+                  <img
+                    src={userDetails.avatar}
+                    alt={`${
+                      userDetails.first_name || "User"
+                    }'s profile picture`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.src = "";
+                      e.target.parentElement.innerHTML =
+                        '<svg class="w-20 h-20 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>';
+                    }}
+                  />
+                ) : (
+                  <UserCircle
+                    className="w-20 h-20 text-gray-400"
+                    aria-hidden="true"
+                  />
+                )}
+              </div>
+            </div>
             <p className="text-md mb-2">
               <strong>Email:</strong> {userDetails.email}
             </p>

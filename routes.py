@@ -57,7 +57,8 @@ def get_profile():
         return jsonify({
             'first_name': user.first_name,
             'last_name': user.last_name,
-            'email': user.email
+            'email': user.email,
+            'avatar': user.avatar
         }), 200
     else:
         return jsonify({"message": "User not found"}), 404
@@ -73,6 +74,7 @@ def update_profile():
         user.first_name = data.get('first_name', user.first_name)
         user.last_name = data.get('last_name', user.last_name)
         user.email = data.get('email', user.email)
+        user.avatar = data.get('avatar', user.avatar)
         try:
             db.session.commit()
             return jsonify({"message": "Profile updated successfully"}), 200

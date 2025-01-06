@@ -2,6 +2,7 @@ import random
 from app import app
 from models import db, User, Property
 from werkzeug.security import generate_password_hash
+from images import avatar_image_base64
 
 def seed_data():
     with app.app_context():
@@ -14,7 +15,8 @@ def seed_data():
             first_name="Harry",
             last_name="Potter",
             email="hpotter@gmail.com",
-            password_hash=generate_password_hash("Qwe123!!")
+            password_hash=generate_password_hash("Qwe123!!"),
+            avatar=avatar_image_base64 
         )
         db.session.add(user)
         db.session.commit()

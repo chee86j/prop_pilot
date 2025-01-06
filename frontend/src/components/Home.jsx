@@ -9,6 +9,7 @@ import LogoIcon from "../assets/icons/logo.svg";
 
 const Home = () => {
   const [user, setUser] = useState(null);
+  const [showFallbackAvatar, setShowFallbackAvatar] = useState(!user?.avatar);
 
   useEffect(() => {
     fetchUserProfile(setUser);
@@ -18,6 +19,40 @@ const Home = () => {
     <div className="home-container">
       {/* Hero Section */}
       <div className="hero-section bg-white shadow-lg rounded-lg text-center p-6 md:p-10 mb-6 md:mb-10">
+        {/* User Avatar */}
+        <div className="inline-block">
+          {!showFallbackAvatar && user?.avatar ? (
+            <img
+              src={user.avatar}
+              alt={`${user?.first_name || "User"}'s profile picture`}
+              className="inline-block rounded-full align-middle object-cover"
+              style={{
+                width: "clamp(60px, 12vw, 80px)",
+                height: "clamp(60px, 12vw, 80px)",
+                marginRight: "12px",
+              }}
+              onError={() => setShowFallbackAvatar(true)}
+            />
+          ) : (
+            <svg
+              className="inline-block w-16 h-16 text-gray-400 align-middle"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              style={{ marginRight: "12px" }}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
+            </svg>
+          )}
+        </div>
+
+        {/* Landing welcome */}
         <h1 className="text-4xl md:text-5xl font-bold text-gray-700 mb-0">
           Welcome{" "}
           <span className="italic text-green-500">
