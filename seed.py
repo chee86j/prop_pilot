@@ -93,26 +93,28 @@ def seed_data():
             ]
         }
 
-
         property_prefixes = [
             "Cozy", "Spacious", "Modern", "Luxurious", "Charming",
             "Elegant", "Stylish", "Classic", "Affordable", "Grand"
         ]
 
-
-        # Create 100 randomized properties for the user
+        # Create 500 randomized properties for the user
         properties = []
         for i in range(1, 501):
             property_name = f"{random.choice(property_prefixes)} {random.choice(architectural_styles)} {i}"
 
-            # Randomly select a borough and street from the mapping
+            # Randomly select a borough and street
             borough = random.choice(list(borough_street_map.keys()))
             street = random.choice(borough_street_map[borough])
             address = f"{random.randint(1, 999)} {street}"
 
-            purchase_cost = random.randint(600000, 15400000)
-            total_rehab_cost = random.randint(50000, 5350000)
-            arv_sale_price = random.randint(1700000, 25800000)
+            # Generate ARV and rehab costs
+            arv_sale_price = random.randint(1700000, 25800000)  # ARV
+            total_rehab_cost = random.randint(50000, 5350000)   # Rehab costs
+
+            # Calculate purchase cost adhering to the 70% Rule with 25%-100% variability
+            max_purchase_price = (arv_sale_price * 0.70) - total_rehab_cost
+            purchase_cost = max(0, round(random.uniform(0.25, 1.0) * max_purchase_price))
 
             property = Property(
                 user_id=user.id,
@@ -121,10 +123,11 @@ def seed_data():
                 purchaseCost=purchase_cost,
                 totalRehabCost=total_rehab_cost,
                 arvSalePrice=arv_sale_price,
-                city=borough  # added the city/borough here
+                city=borough
             )
             properties.append(property)
 
+        # Save properties to the database
         db.session.bulk_save_objects(properties)
         db.session.commit()
 
@@ -132,3 +135,80 @@ def seed_data():
 
 if __name__ == "__main__":
     seed_data()
+
+######## Real Estate Flipping: The 70% Rule ########
+
+    # The core rule for real estate flippers, although not a hard-and-fast law, revolves 
+    # around making a profit. This profit depends heavily on a careful calculation of 
+    # purchase price, renovation costs (also known as rehab costs), and the after-repair 
+    # value (ARV). Here's a breakdown of the general rule and the factors involved:
+
+### The General Rule: The 70% Rule (Often Used as a Starting Point) ###
+
+    # The most commonly cited rule is the 70% Rule. It suggests that a flipper should aim to:
+
+    # Pay no more than 70% of the After-Repair Value (ARV), minus the estimated cost of 
+    # repairs (rehab).
+
+
+### Formula: ###
+
+# Maximum Purchase Price = (ARV * 0.70) - Rehab Costs
+
+
+### Let's Break It Down: ###
+
+    # ARV (After-Repair Value): This is the estimated market value of the property after all 
+    # planned renovations have been completed. It's crucial to get an accurate ARV from 
+    # reliable sources (comparable sales, real estate agents, appraisers).
+
+    # Rehab Costs (Renovation Costs): These are all expenses related to fixing, improving, 
+    # or modernizing the property. This includes materials, labor, permits, and any 
+    # unexpected costs (which should always be factored in).
+
+    # 70%: The 70% rule is an initial target, not a strict rule. It's a buffer to help 
+    # ensure there is a profit margin, accounting for holding costs, selling costs, and 
+    # a safety net for unforeseen issues.
+
+
+### Why This Rule? ###
+
+    # Profit Margin: The difference between the total cost (purchase + rehab) and the ARV 
+    # is your potential profit. The 70% rule helps to ensure a decent profit margin after 
+    # accounting for the aforementioned costs.
+
+    # Safety Net: Real estate investing involves risks. This buffer helps cover holding 
+    # costs (taxes, insurance, utilities), selling costs (agent fees, closing costs), and 
+    # any unexpected expenses during the rehab process.
+
+    # Market Fluctuations: The real estate market can be volatile, so having a cushion 
+    # helps protect against potential price drops.
+
+
+### Important Considerations Beyond the 70% Rule: ###
+
+    # Market Conditions: The 70% rule is more of a guideline and may need to be adjusted 
+    # based on the specific market you are investing in. A hot market might allow for a 
+    # slightly higher purchase percentage. A slower market would likely call for a stricter 
+    # interpretation.
+
+    # Investor Experience: Experienced flippers may be comfortable with a more aggressive 
+    # approach. However, beginners are generally advised to follow the 70% rule (or even 
+    # a more conservative approach) until they gain expertise.
+
+    # Type of Rehab: The scope of the rehab will heavily influence the expenses and 
+    # potential profit. A basic cosmetic refresh will cost less than a full structural 
+    # overhaul.
+
+    # Holding Costs: These costs are incurred while you own the property. Interest 
+    # payments, insurance, property taxes, utilities, and any HOA fees will chip away 
+    # at your profit. They need to be factored into the overall cost.
+
+    # Selling Costs: These include real estate agent commissions, closing costs, and 
+    # marketing expenses.
+
+    # Profit Goals: Investors have different financial goals. Some may be happy with 
+    # a smaller, consistent profit, while others are looking for larger gains.
+
+    # Financing: Your financing terms and interest rates can impact the overall cost 
+    # of the project.
