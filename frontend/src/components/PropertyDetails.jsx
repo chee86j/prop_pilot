@@ -306,6 +306,26 @@ const PropertyDetails = ({ propertyId }) => {
     <div className="property-details-container bg-white shadow-md rounded-lg p-4 max-w-4xl mx-auto">
       {/* Render ToastContainer for displaying notifications */}
       <ToastContainer position="top-left" autoClose={5000} />
+      <header
+        className="mb-8 px-4 sm:px-6 lg:px-8"
+        role="banner"
+        aria-label="Property Details Header"
+      >
+        <div className="text-center sm:text-left">
+          <h1
+            className="text-2xl sm:text-3xl md:text-4xl font-bold break-words"
+            aria-label={`Property Name: ${propertyDetails.propertyName}`}
+          >
+            {propertyDetails.propertyName}
+          </h1>
+          <p
+            className="text-xl sm:text-2xl text-gray-600 mt-2 break-words"
+            aria-label={`Address: ${propertyDetails.address}`}
+          >
+            {propertyDetails.address}
+          </p>
+        </div>
+      </header>
       <button
         onClick={handlePrintDetails}
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
