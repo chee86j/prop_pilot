@@ -835,11 +835,9 @@ def delete_receipt(receipt_id):
 def get_phases(property_id):
     try:
         phases = Phase.query.filter_by(property_id=property_id).all()
-        if not phases:
-            return jsonify({"message": "No phases found for the given property"}), 404
         return jsonify([phase.serialize() for phase in phases]), 200
     except Exception as e:
-        return jsonify({'error': 'Failed to fetch phases: ' + str(e)}), 500
+        return jsonify({'error': str(e)}), 500
 
 # Add a new phase for a property
 @api.route('/phases', methods=['POST'])
