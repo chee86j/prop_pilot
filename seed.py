@@ -1,39 +1,23 @@
 import random
 from app import app
-from models import db, User, Property
+from models import db, User, Property, Phase
 from werkzeug.security import generate_password_hash
 from images import avatar_image_base64
 
-def seed_data():
-    with app.app_context():
-        # Drop all tables and recreate them
-        db.drop_all()
-        db.create_all()
+# Constants
+PROPERTY_PREFIXES = ["Cozy", "Spacious", "Modern", "Luxurious", "Charming",
+                     "Elegant", "Stylish", "Classic", "Affordable", "Grand"]
 
-        # Create a default user
-        user = User(
-            first_name="Harry",
-            last_name="Potter",
-            email="hpotter@gmail.com",
-            password_hash=generate_password_hash("Qwe123!!"),
-            avatar=avatar_image_base64 
-        )
-        db.session.add(user)
-        db.session.commit()
+ARCHITECTURAL_STYLES = ["Tudor Revival", "Colonial Revival", "Cape Cod", "Craftsman",
+                       "Victorian", "Ranch", "Split-Level", "Minimal Traditional",
+                       "Contemporary", "Modern Townhouse", "Modern Condo", "Row House",
+                       "Brownstone", "Federal", "Greek Revival", "Queen Anne",
+                       "Neo-Grec", "Romanesque Revival", "Italianate", "Beaux-Arts",
+                       "Art Deco", "Ranch", "Mid-Century Modern", "Loft",
+                       "Industrial", "Penthouse Apartment", "Dutch Colonial"]
 
-        # Define random values for property attributes
-        architectural_styles = [
-            "Tudor Revival", "Colonial Revival", "Cape Cod", "Craftsman",
-            "Victorian", "Ranch", "Split-Level", "Minimal Traditional",
-            "Contemporary", "Modern Townhouse", "Modern Condo", "Row House",
-            "Brownstone", "Federal", "Greek Revival", "Queen Anne",
-            "Neo-Grec", "Romanesque Revival", "Italianate", "Beaux-Arts",
-            "Art Deco", "Ranch", "Mid-Century Modern", "Loft",
-            "Industrial", "Penthouse Apartment", "Dutch Colonial"
-        ]
-
-        borough_street_map = {
-            "Queens": [
+BOROUGH_STREET_MAP = {
+    "Queens": [
                  "Horace Harding Expwy", "Grand Central Pkwy", "Northern Blvd",
                  "73rd Ave", "168th St", "188th St", "Steinway St",
                  "Ditmars Blvd", "Astoria Blvd", "Queens Blvd", "Jamaica Ave",
@@ -93,44 +77,73 @@ def seed_data():
                 "East Tremont Ave", "Bruckner Blvd", "Hunts Point Ave",
                 "Southern Blvd", "Webster Ave", "Westchester Ave"
             ]
-        }
+}
 
-        property_prefixes = [
-            "Cozy", "Spacious", "Modern", "Luxurious", "Charming",
-            "Elegant", "Stylish", "Classic", "Affordable", "Grand"
-        ]
+def create_default_user():
+    """Create and return a default user"""
+    user = User(
+        first_name="Harry",
+        last_name="Potter",
+        email="hpotter@gmail.com",
+        password_hash=generate_password_hash("Qwe123!!"),
+        avatar=avatar_image_base64
+    )
+    db.session.add(user)
+    db.session.commit()
+    return user
 
-        # Create 500 randomized properties for the user
-        properties = []
-        for i in range(1, 501):
-            property_name = f"{random.choice(property_prefixes)} {random.choice(architectural_styles)} {i}"
+def generate_property_data(user_id):
+    """Generate a single property with random data"""
+    borough = random.choice(list(BOROUGH_STREET_MAP.keys()))
+    street = random.choice(BOROUGH_STREET_MAP[borough])
+    property_name = f"{random.choice(PROPERTY_PREFIXES)} {random.choice(ARCHITECTURAL_STYLES)} {random.randint(1, 999)}"
+    
+    # Generate ARV and rehab costs
+    arv_sale_price = random.randint(1700000, 25800000)
+    total_rehab_cost = random.randint(50000, 5350000)
+    # Calculate purchase cost adhering to the 70% Rule with 25%-100% variability
+    max_purchase_price = (arv_sale_price * 0.70) - total_rehab_cost
+    purchase_cost = max(0, round(random.uniform(0.25, 1.0) * max_purchase_price))
 
-            # Randomly select a borough and street
-            borough = random.choice(list(borough_street_map.keys()))
-            street = random.choice(borough_street_map[borough])
-            address = f"{random.randint(1, 999)} {street}"
+    return Property(
+        user_id=user_id,
+        propertyName=property_name,
+        address=f"{random.randint(1, 999)} {street}",
+        purchaseCost=purchase_cost,
+        totalRehabCost=total_rehab_cost,
+        arvSalePrice=arv_sale_price,
+        city=borough
+    )
 
-            # Generate ARV and rehab costs
-            arv_sale_price = random.randint(1700000, 25800000)  # ARV
-            total_rehab_cost = random.randint(50000, 5350000)   # Rehab costs
+def create_initial_phase(property_id):
+    """Create an initial phase for a property"""
+    return Phase(
+        property_id=property_id,
+        name="Initial Phase",
+        startDate=None,
+        expectedStartDate=None,
+        endDate=None,
+        expectedEndDate=None
+    )
 
-            # Calculate purchase cost adhering to the 70% Rule with 25%-100% variability
-            max_purchase_price = (arv_sale_price * 0.70) - total_rehab_cost
-            purchase_cost = max(0, round(random.uniform(0.25, 1.0) * max_purchase_price))
+def seed_data():
+    """Main function to seed the database"""
+    with app.app_context():
+        # Reset database
+        db.drop_all()
+        db.create_all()
 
-            property = Property(
-                user_id=user.id,
-                propertyName=property_name,
-                address=address,
-                purchaseCost=purchase_cost,
-                totalRehabCost=total_rehab_cost,
-                arvSalePrice=arv_sale_price,
-                city=borough
-            )
-            properties.append(property)
+        # Create user
+        user = create_default_user()
 
-        # Save properties to the database
+        # Create properties
+        properties = [generate_property_data(user.id) for _ in range(500)]
         db.session.bulk_save_objects(properties)
+        db.session.commit()
+
+        # Create phases
+        phases = [create_initial_phase(prop.id) for prop in properties]
+        db.session.bulk_save_objects(phases)
         db.session.commit()
 
         print("Seed data inserted successfully.")
@@ -138,7 +151,8 @@ def seed_data():
 if __name__ == "__main__":
     seed_data()
 
-######## Real Estate Flipping: The 70% Rule ########
+"""
+### Real Estate Flipping: The 70% Rule
 
     # The core rule for real estate flippers, although not a hard-and-fast law, revolves 
     # around making a profit. This profit depends heavily on a careful calculation of 
@@ -214,3 +228,5 @@ if __name__ == "__main__":
 
     # Financing: Your financing terms and interest rates can impact the overall cost 
     # of the project.
+    
+"""
