@@ -1,5 +1,6 @@
 import random
 from app import app
+from datetime import date
 from models import db, User, Property, Phase
 from werkzeug.security import generate_password_hash
 from images import avatar_image_base64
@@ -119,11 +120,11 @@ def create_initial_phase(property_id):
     """Create an initial phase for a property"""
     return Phase(
         property_id=property_id,
-        name="Initial Phase",
-        startDate=None,
-        expectedStartDate=None,
-        endDate=None,
-        expectedEndDate=None
+        name="Initial Phase - Start Adding Phases Here",
+        startDate=date(2025, 1, 2),
+        expectedStartDate=date(2025, 1, 1),
+        endDate=date(2025, 1, 2),
+        expectedEndDate=date(2025, 1, 1)
     )
 
 def seed_data():
@@ -136,13 +137,28 @@ def seed_data():
         # Create user
         user = create_default_user()
 
-        # Create properties
+        # Create Properties
         properties = [generate_property_data(user.id) for _ in range(500)]
         db.session.bulk_save_objects(properties)
         db.session.commit()
 
-        # Create phases
-        phases = [create_initial_phase(prop.id) for prop in properties]
+        # Commit all Properties to Establish IDs
+        all_properties = Property.query.all()
+        
+        # Create Initial Phases for all Properties based on IDs
+        phases = []
+        for property in all_properties:
+            phase = Phase(
+                property_id=property.id,
+                name="Initial Phase",
+                startDate=date(2025, 1, 2),
+                expectedStartDate=date(2025, 1, 1),
+                endDate=date(2025, 1, 2),
+                expectedEndDate=date(2025, 1, 1)
+            )
+            phases.append(phase)
+
+        # Bulk Save Phases
         db.session.bulk_save_objects(phases)
         db.session.commit()
 
@@ -162,7 +178,6 @@ if __name__ == "__main__":
 ### The General Rule: The 70% Rule (Often Used as a Starting Point) ###
 
     # The most commonly cited rule is the 70% Rule. It suggests that a flipper should aim to:
-
     # Pay no more than 70% of the After-Repair Value (ARV), minus the estimated cost of 
     # repairs (rehab).
 
@@ -228,5 +243,4 @@ if __name__ == "__main__":
 
     # Financing: Your financing terms and interest rates can impact the overall cost 
     # of the project.
-    
 """
