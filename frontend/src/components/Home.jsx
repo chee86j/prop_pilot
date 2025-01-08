@@ -9,10 +9,27 @@ import LogoIcon from "../assets/icons/logo.svg";
 
 const Home = () => {
   const [user, setUser] = useState(null);
-  const [showFallbackAvatar, setShowFallbackAvatar] = useState(!user?.avatar);
+  const [showFallbackAvatar, setShowFallbackAvatar] = useState(true);
 
   useEffect(() => {
-    fetchUserProfile(setUser);
+    const loadUserData = async () => {
+      try {
+        await fetchUserProfile((userData) => {
+          setUser(userData);
+          if (userData?.avatar) {
+            setShowFallbackAvatar(false);
+          } else {
+            console.log("No avatar URL in user data");
+            setShowFallbackAvatar(true);
+          }
+        });
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        setShowFallbackAvatar(true);
+      }
+    };
+
+    loadUserData();
   }, []);
 
   return (
