@@ -228,9 +228,9 @@ const PropertyList = () => {
   return (
     <div
       className="ag-theme-alpine max-w-full mx-auto p-4"
-      style={{ height: "100vh" }}
+      style={{ height: "100vh", willChange: "transform" }} // will-change error boundary fix
     >
-      <header className="mb-6">
+      <header className="mb-6" style={{ willChange: "transform" }}>
         <div className="flex flex-wrap items-center justify-between">
           <div className="flex items-center space-x-4">
             <img
@@ -238,6 +238,7 @@ const PropertyList = () => {
               alt="SkyScrapers"
               className="w-16 h-16 sm:w-24 sm:h-24"
               aria-hidden="true"
+              style={{ willChange: "transform" }}
             />
             <div>
               <h1 className="text-lg sm:text-xl font-semibold text-gray-700">
