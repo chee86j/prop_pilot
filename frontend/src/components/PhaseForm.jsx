@@ -1,5 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const PhaseForm = ({ onSave, onCancel, initialData }) => {
   const initialFormState = {
@@ -34,7 +36,7 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
   const validateFormData = (data) => {
     // Basic validation example
     if (!data.name || !data.startDate || !data.endDate) {
-      alert("Please fill in all required fields.");
+      toast.error("Please fill in all required fields.");
       return false;
     }
     return true;
@@ -45,11 +47,13 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
     if (validateFormData(formData)) {
       onSave(formData);
       setFormData(initialFormState);
+      toast.success("Phase saved successfully!");
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="max-w-md mx-auto">
+      <ToastContainer />
       <div className="mb-4">
         <label
           htmlFor="name"

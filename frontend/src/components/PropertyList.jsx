@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { fetchUserProfile } from "../utils/fetchUserProfile";
 import SkyScrapers from "../assets/icons/skyscrapers.png";
 

@@ -1,6 +1,8 @@
 /* eslint-disable react/prop-types */
 import { Chrono } from "react-chrono";
 import { useEffect, useState, useRef } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
   const [mounted, setMounted] = useState(false);
@@ -38,6 +40,9 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
             e.stopPropagation();
             console.log(`Editing phase: ${phase.id}`);
             onEdit(phase);
+            toast.success("Phase edit initiated!", {
+              autoClose: 3000,
+            });
           }}
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
         >
@@ -48,6 +53,9 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
             e.stopPropagation();
             console.log(`Deleting phase: ${phase.id}`);
             onDelete(phase.id);
+            toast.success("Phase deleted successfully!", {
+              autoClose: 3000,
+            });
           }}
           className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         >
@@ -63,6 +71,7 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
       className="w-full my-10 px-4 sm:px-0"
       style={{ minHeight: "400px", height: "400px" }} // Fixed height container
     >
+      <ToastContainer />
       {mounted ? (
         <Chrono
           key={phases.length} // Add key prop to force re-render

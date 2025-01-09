@@ -8,6 +8,8 @@ import {
   ChevronsUp,
   ChevronsDown,
 } from "lucide-react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Receipt = ({ drawId }) => {
   const [receipts, setReceipts] = useState([]);
@@ -48,8 +50,10 @@ const Receipt = ({ drawId }) => {
           (a, b) => new Date(a.date) - new Date(b.date)
         );
         setReceipts(sortedReceipts);
+        toast.success("Receipts fetched successfully!");
       } catch (err) {
         setError(err.message);
+        toast.error("Failed to fetch receipts.");
       }
     };
 
@@ -192,9 +196,10 @@ const Receipt = ({ drawId }) => {
       );
       setEditReceiptId(null);
       setEditedReceipt({});
-      window.location.reload();
+      toast.success("Receipt updated successfully!");
     } catch (err) {
       setError(err.message);
+      toast.error("Failed to update receipt.");
     }
   };
 
@@ -223,9 +228,10 @@ const Receipt = ({ drawId }) => {
       setReceipts([...receipts, addedReceipt]);
       setNewReceipt({ date: "", vendor: "", amount: "", description: "" });
       setShowAddForm(false);
-      window.location.reload();
+      toast.success("Receipt added successfully!");
     } catch (err) {
       setError(err.message);
+      toast.error("Failed to add receipt.");
     }
   };
 
@@ -246,8 +252,10 @@ const Receipt = ({ drawId }) => {
       }
 
       setReceipts(receipts.filter((receipt) => receipt.id !== receiptId));
+      toast.success("Receipt deleted successfully!");
     } catch (err) {
       setError(err.message);
+      toast.error("Failed to delete receipt.");
     }
   };
 
@@ -277,6 +285,7 @@ const Receipt = ({ drawId }) => {
 
   return (
     <div className="max-w-4xl mx-auto p-1 bg-transparent rounded-lg text-sm">
+      <ToastContainer />
       <h1 className="text-lg md:text-md font-bold text-gray-700 my-2">
         Receipts
       </h1>

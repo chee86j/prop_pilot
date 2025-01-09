@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Contact = () => {
   // Temporary data for the contact form
@@ -18,10 +20,17 @@ const Contact = () => {
     e.preventDefault();
     console.log("Form data:", contactData);
     // Form submission logic goes here
+    try {
+      // Simulate form submission success
+      toast.success("Message sent successfully");
+    } catch (error) {
+      toast.error("Failed to send message");
+    }
   };
 
   return (
     <div className="contact-form-container mx-auto p-4 md:p-6 max-w-3xl bg-white rounded-lg shadow-md">
+      <ToastContainer />
       <h2 className="text-xl md:text-2xl font-bold text-gray-700 text-center mb-6">
         Contact Us
       </h2>

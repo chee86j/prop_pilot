@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import { formatCurrency } from "../utils/formatting";
 import Receipt from "./Receipt";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ConstructionDraw = ({ propertyId }) => {
   const [draws, setDraws] = useState([]);
@@ -38,8 +40,10 @@ const ConstructionDraw = ({ propertyId }) => {
           (a, b) => new Date(a.release_date) - new Date(b.release_date)
         );
         setDraws(sortedDraws);
+        console.log("Construction draws fetched successfully", {});
       } catch (error) {
         setError(error.message);
+        console.log("Failed to fetch construction draws", {});
       }
     };
 
@@ -91,16 +95,20 @@ const ConstructionDraw = ({ propertyId }) => {
       );
       setEditDrawId(null);
       setEditedDraw({});
-      window.location.reload();
+      toast.success("Draw updated successfully", {
+        autoClose: 3000,
+      });
     } catch (error) {
       setError(error.message);
+      toast.error("Failed to update draw", {
+        autoClose: 3000,
+      });
     }
   };
 
   const cancelEdit = () => {
     setEditDrawId(null);
     setEditedDraw({});
-    window.location.reload();
   };
 
   const handleAddDrawChange = (e) => {
@@ -140,9 +148,14 @@ const ConstructionDraw = ({ propertyId }) => {
         is_approved: false,
       });
       setShowAddDrawForm(false);
-      window.location.reload();
+      toast.success("Construction draw added successfully", {
+        autoClose: 3000,
+      });
     } catch (error) {
       setError(error.message);
+      toast.error("Failed to add construction draw", {
+        autoClose: 3000,
+      });
     }
   };
 
@@ -163,8 +176,14 @@ const ConstructionDraw = ({ propertyId }) => {
       }
 
       setDraws(draws.filter((draw) => draw.id !== drawId));
+      toast.success("Construction draw deleted successfully", {
+        autoClose: 3000,
+      });
     } catch (error) {
       setError(error.message);
+      toast.error("Failed to delete construction draw", {
+        autoClose: 3000,
+      });
     }
   };
 
@@ -180,6 +199,7 @@ const ConstructionDraw = ({ propertyId }) => {
 
   return (
     <div className="max-w-4xl mx-auto p-3 bg-white shadow-lg rounded-lg text-sm">
+      <ToastContainer autoClose={3000} />
       <h2 className="text-xl md:text-2xl font-bold text-gray-700 mb-6">
         Construction Draws
       </h2>

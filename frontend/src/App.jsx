@@ -24,6 +24,8 @@ import ExcelStyleGrid from "./components/ExcelStyleGrid";
 import { fetchUserProfile } from "./utils/fetchUserProfile";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   const [auth, setAuth] = useState({
@@ -60,30 +62,33 @@ function App() {
 
   return (
     <Router>
-      <Navbar auth={auth} />
-      <Routes>
-        <Route path="/" element={<Navigate to="/home" />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/profile" element={<Profile auth={auth} />} />
-        <Route path="/propertylist" element={<PropertyList auth={auth} />} />
-        <Route path="/addproperty" element={<AddProperty auth={auth} />} />
-        <Route
-          path="/property/:propertyId"
-          element={<PropertyDetailsWrapper auth={auth} />}
-        />
-        <Route
-          path="/constructiondraw/:propertyId"
-          element={<ConstructionDrawWrapper />}
-        />
-        <Route path="/excelstylegrid" element={<ExcelStyleGrid />} />
-        <Route path="/receipts/:drawId" element={<ReceiptsWrapper />} />
-        <Route path="/testimonials" element={<Testimonials />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/authform" element={<AuthForm />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/faq" element={<Faq />} />
-        <Route path="/lender" element={<Lender />} />
-      </Routes>
+      <div>
+        <Navbar auth={auth} />
+        <ToastContainer />
+        <Routes>
+          <Route path="/" element={<Navigate to="/home" />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/profile" element={<Profile auth={auth} />} />
+          <Route path="/propertylist" element={<PropertyList auth={auth} />} />
+          <Route path="/addproperty" element={<AddProperty auth={auth} />} />
+          <Route
+            path="/property/:propertyId"
+            element={<PropertyDetailsWrapper auth={auth} />}
+          />
+          <Route
+            path="/constructiondraw/:propertyId"
+            element={<ConstructionDrawWrapper />}
+          />
+          <Route path="/excelstylegrid" element={<ExcelStyleGrid />} />
+          <Route path="/receipts/:drawId" element={<ReceiptsWrapper />} />
+          <Route path="/testimonials" element={<Testimonials />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/authform" element={<AuthForm />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/faq" element={<Faq />} />
+          <Route path="/lender" element={<Lender />} />
+        </Routes>
+      </div>
     </Router>
   );
 }

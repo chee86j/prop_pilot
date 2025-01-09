@@ -4,6 +4,8 @@ import { fetchUserProfile } from "../utils/fetchUserProfile";
 import { emailValidator, passwordValidator } from "../utils/validation";
 import { Eye, EyeOff, UserCircle } from "lucide-react";
 import AvatarUpload from "./AvatarUpload";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Profile = () => {
   const [userDetails, setUserDetails] = useState({});
@@ -53,12 +55,15 @@ const Profile = () => {
       if (response.ok) {
         setEditing(false);
         navigate("/profile");
+        toast.success("Profile updated successfully");
       } else {
         setErrorMessage(data.message || "Update failed.");
+        toast.error(data.message || "Update failed.");
       }
     } catch (error) {
       console.error("Error updating profile:", error);
       setErrorMessage("An error occurred while updating the profile.");
+      toast.error("An error occurred while updating the profile.");
     }
   };
 
@@ -68,10 +73,12 @@ const Profile = () => {
     // Validate passwords
     if (passwords.newPassword !== passwords.confirmNewPassword) {
       setErrorMessage("New passwords do not match.");
+      toast.error("New passwords do not match.");
       return;
     }
     if (!passwordValidator(passwords.newPassword)) {
       setErrorMessage("New password does not meet requirements.");
+      toast.error("New password does not meet requirements.");
       return;
     }
 
@@ -98,12 +105,15 @@ const Profile = () => {
           confirmNewPassword: "",
         });
         navigate("/profile");
+        toast.success("Password updated successfully");
       } else {
         setErrorMessage(data.message || "Password update failed.");
+        toast.error(data.message || "Password update failed.");
       }
     } catch (error) {
       console.error("Error updating password:", error);
       setErrorMessage("An error occurred while updating the password.");
+      toast.error("An error occurred while updating the password.");
     }
   };
 
@@ -125,6 +135,7 @@ const Profile = () => {
 
   return (
     <div className="flex justify-center items-center min-h-screen p-4">
+      <ToastContainer />
       <div className="bg-white/30 backdrop-blur-lg rounded-xl shadow-lg p-6 md:p-8 border border-gray-200/50 max-w-full md:max-w-md w-full">
         {editing && (
           <button
