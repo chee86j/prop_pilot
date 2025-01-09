@@ -36,6 +36,17 @@ const ProfitAndLoss = ({ property }) => {
     }));
   };
 
+  const toggleAllSections = () => {
+    const allExpanded = Object.values(expandedSections).every((val) => val);
+    setExpandedSections((prevSections) => {
+      const newSections = {};
+      for (const section in prevSections) {
+        newSections[section] = !allExpanded;
+      }
+      return newSections;
+    });
+  };
+
   const formatKey = (key) =>
     keyDisplayMapping[key] ||
     key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase());
@@ -160,12 +171,22 @@ const ProfitAndLoss = ({ property }) => {
 
   return (
     <div className="bg-white shadow-md rounded-lg p-4 max-w-4xl mx-auto">
-      <button
-        onClick={handlePrint}
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4 no-print"
-      >
-        Print to PDF
-      </button>
+      <div className="flex justify-between items-center mb-4">
+        <button
+          onClick={handlePrint}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded no-print"
+        >
+          Print to PDF
+        </button>
+        <button
+          onClick={toggleAllSections}
+          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+        >
+          {Object.values(expandedSections).every((val) => val)
+            ? "Collapse All"
+            : "Expand All"}
+        </button>
+      </div>
 
       <div className="print-content" ref={printableRef}>
         <div className="flex flex-col md:flex-row justify-between space-y-4 md:space-x-4 md:space-y-0">

@@ -189,6 +189,17 @@ const PropertyDetails = ({ propertyId }) => {
     });
   };
 
+  const toggleAllSections = () => {
+    const allExpanded = Object.values(expandedSections).every((val) => val);
+    setExpandedSections((prevSections) => {
+      const newSections = {};
+      for (const section in prevSections) {
+        newSections[section] = !allExpanded;
+      }
+      return newSections;
+    });
+  };
+
   const renderSectionTitle = (title, sectionName) => (
     <div
       className="flex justify-between items-center mb-2 cursor-pointer"
@@ -396,9 +407,19 @@ const PropertyDetails = ({ propertyId }) => {
 
         {/* Property Details Grid */}
         <section className="mb-12 p-6 bg-gray-50 rounded-lg shadow-lg">
-          <h2 className="text-2xl font-bold text-blue-600 mb-6 border-b-2 border-blue-200 pb-2">
-            Property Information
-          </h2>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-blue-600 border-b-2 border-blue-200 pb-2">
+              Property Information
+            </h2>
+            <button
+              onClick={toggleAllSections}
+              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+            >
+              {Object.values(expandedSections).every((val) => val)
+                ? "Collapse All"
+                : "Expand All"}
+            </button>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Location Section */}
             <div className="propLocation hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
