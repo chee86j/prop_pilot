@@ -202,17 +202,17 @@ const PropertyDetails = ({ propertyId }) => {
 
   const renderSectionTitle = (title, sectionName) => (
     <div
-      className="flex justify-between items-center mb-2 cursor-pointer"
+      className="flex justify-between items-center mb-2 cursor-pointer group"
       onClick={() => toggleSection(sectionName)}
     >
       <h2 className="text-lg font-bold text-blue-700 cursor-pointer">
         {title}
       </h2>
-      <button className="focus:outline-none">
+      <button className="focus:outline-none transition-transform duration-200 transform group-hover:scale-110">
         {expandedSections[sectionName] ? (
-          <ChevronsUp size={24} className="text-gray-700" />
+          <ChevronsUp size={20} className="text-blue-600" />
         ) : (
-          <ChevronsDown size={24} className="text-gray-700" />
+          <ChevronsDown size={20} className="text-blue-600" />
         )}
       </button>
     </div>
@@ -308,6 +308,27 @@ const PropertyDetails = ({ propertyId }) => {
     setIsAddingPhase(false);
     setIsEditingPhase(false);
   };
+
+  const renderExpandAllButton = () => (
+    <button
+      onClick={toggleAllSections}
+      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-all duration-200 
+      bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 
+      rounded-lg shadow hover:shadow-lg transform hover:scale-105 active:scale-95"
+    >
+      {Object.values(expandedSections).every((val) => val) ? (
+        <>
+          <ChevronsUp size={18} className="transition-transform duration-200" />
+          <span>Collapse All</span>
+        </>
+      ) : (
+        <>
+          <ChevronsDown size={18} className="transition-transform duration-200" />
+          <span>Expand All</span>
+        </>
+      )}
+    </button>
+  );
 
   if (!propertyDetails) {
     return <div>Loading...</div>;
@@ -411,14 +432,7 @@ const PropertyDetails = ({ propertyId }) => {
             <h2 className="text-2xl font-bold text-blue-600 border-b-2 border-blue-200 pb-2">
               Property Information
             </h2>
-            <button
-              onClick={toggleAllSections}
-              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-            >
-              {Object.values(expandedSections).every((val) => val)
-                ? "Collapse All"
-                : "Expand All"}
-            </button>
+            {renderExpandAllButton()}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Location Section */}

@@ -135,26 +135,28 @@ const ProfitAndLoss = ({ property }) => {
 
   const renderDetails = (details, title, sectionKey) => (
     <div
-      className="bg-gray-50 p-4 shadow-sm rounded-md my-2 cursor-pointer"
+      className="bg-gray-50 p-4 shadow-sm rounded-md my-2 cursor-pointer group"
       onClick={() => toggleSection(sectionKey)}
       aria-expanded={expandedSections[sectionKey]}
     >
       {/* Aria Expanded is to help screen readers understand if the section is expanded or collapsed */}
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-bold text-blue-700">{title}</h3>
-        {expandedSections[sectionKey] ? (
-          <ChevronsUp
-            size={24}
-            className="text-gray-700"
-            aria-label="Collapse section"
-          />
-        ) : (
-          <ChevronsDown
-            size={24}
-            className="text-gray-700"
-            aria-label="Expand section"
-          />
-        )}
+        <button className="focus:outline-none transition-transform duration-200 transform group-hover:scale-110">
+          {expandedSections[sectionKey] ? (
+            <ChevronsUp
+              size={20}
+              className="text-blue-600"
+              aria-label="Collapse section"
+            />
+          ) : (
+            <ChevronsDown
+              size={20}
+              className="text-blue-600"
+              aria-label="Expand section"
+            />
+          )}
+        </button>
       </div>
       {expandedSections[sectionKey] && (
         <ul className="list-disc pl-5">
@@ -174,17 +176,29 @@ const ProfitAndLoss = ({ property }) => {
       <div className="flex justify-between items-center mb-4">
         <button
           onClick={handlePrint}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded no-print"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-all duration-200 
+          bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 
+          rounded-lg shadow hover:shadow-lg transform hover:scale-105 active:scale-95 no-print"
         >
           Print to PDF
         </button>
         <button
           onClick={toggleAllSections}
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-all duration-200 
+          bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 
+          rounded-lg shadow hover:shadow-lg transform hover:scale-105 active:scale-95"
         >
-          {Object.values(expandedSections).every((val) => val)
-            ? "Collapse All"
-            : "Expand All"}
+          {Object.values(expandedSections).every((val) => val) ? (
+            <>
+              <ChevronsUp size={18} className="transition-transform duration-200" />
+              <span>Collapse All</span>
+            </>
+          ) : (
+            <>
+              <ChevronsDown size={18} className="transition-transform duration-200" />
+              <span>Expand All</span>
+            </>
+          )}
         </button>
       </div>
 
