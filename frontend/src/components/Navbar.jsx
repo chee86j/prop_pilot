@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import LogoIcon from "../assets/icons/logo.svg";
+import { LogOutIcon } from "lucide-react";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -58,7 +59,7 @@ const Navbar = () => {
         </div>
 
         <div className={`${isMobileMenuOpen ? "block" : "hidden"} md:block`}>
-          <div className="flex flex-col md:flex-row md:mx-6">
+          <div className="flex flex-col items-center md:flex-row md:mx-6">
             <Link
               to="/home"
               className="my-1 text-sm text-gray-700 leading-5 hover:text-blue-600 md:mx-4 md:my-0"
@@ -122,9 +123,10 @@ const Navbar = () => {
             {isAuthenticated && (
               <button
                 onClick={handleLogout}
-                className="my-1 text-sm text-gray-700 leading-5 hover:text-blue-600 md:mx-4 md:my-0"
+                className="my-1 text-sm text-gray-700 leading-5 hover:text-blue-600 md:mx-4 md:my-0 flex items-center"
+                aria-label="Logout"
               >
-                Logout
+                Logout <LogOutIcon size={16} className="ml-1" />
               </button>
             )}
             {!isAuthenticated && (

@@ -26,7 +26,7 @@ const AvatarUpload = ({ currentAvatar, onAvatarChange }) => {
 
   const validateFile = (file) => {
     const validTypes = ["image/jpeg", "image/png", "image/gif"];
-    const maxSize = 5 * 1024 * 1024; // 1MB max
+    const maxSize = 5 * 1024 * 1024; // 5MB max
     if (!validTypes.includes(file.type)) {
       throw new Error("Invalid file type. Please upload a JPEG, PNG or GIF");
     }

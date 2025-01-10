@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { fetchUserProfile } from "../utils/fetchUserProfile";
 import SkyScrapers from "../assets/icons/skyscrapers.png";
 
@@ -16,6 +18,8 @@ const PropertyList = () => {
     arvSalePrice: { min: "", max: "" },
   });
   const navigate = useNavigate();
+
+  const isMobile = window.innerWidth <= 768;
 
   useEffect(() => {
     fetch("http://localhost:5000/api/properties", {
@@ -356,25 +360,31 @@ const PropertyList = () => {
         </button>
       </div>
 
-      <AgGridReact
-        rowData={rowData}
-        columnDefs={columns}
-        defaultColDef={{
-          filter: true,
-          floatingFilter: true, // Enable quick filters
-          sortable: true,
-          resizable: true,
-          minWidth: 100,
-        }}
-        pagination={true}
-        paginationPageSize={25}
-        paginationPageSizeSelector={[10, 25, 50, 100]}
-        domLayout="autoHeight"
-        aria-label="Property Data Grid"
-        onGridReady={(params) => setGridApi(params.api)}
-        isExternalFilterPresent={isExternalFilterPresent}
-        doesExternalFilterPass={doesExternalFilterPass}
-      />
+      <div
+        className="ag-theme-alpine max-w-full mx-auto p-4"
+        style={{ height: "100vh", willChange: "transform" }}
+      >
+        <AgGridReact
+          rowData={rowData}
+          columnDefs={columns}
+          defaultColDef={{
+            filter: true,
+            floatingFilter: true, // Enable quick filters
+            sortable: true,
+            resizable: true,
+            minWidth: 100,
+            cellStyle: { fontSize: isMobile ? "12px" : "14px" },
+          }}
+          pagination={true}
+          paginationPageSize={25}
+          paginationPageSizeSelector={[10, 25, 50, 100]}
+          domLayout="autoHeight"
+          aria-label="Property Data Grid"
+          onGridReady={(params) => setGridApi(params.api)}
+          isExternalFilterPresent={isExternalFilterPresent}
+          doesExternalFilterPass={doesExternalFilterPass}
+        />
+      </div>
     </div>
   );
 };
