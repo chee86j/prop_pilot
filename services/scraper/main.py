@@ -20,6 +20,7 @@ def format_zillow_url(address):
     except Exception as e:
         logging.error(f"Error formatting Zillow URL for {address}: {e}")
         return None
+    
 
 def format_for_frontend(data):
     """Format scraped data for frontend PropertyDetails component."""

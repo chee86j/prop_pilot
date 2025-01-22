@@ -29,8 +29,6 @@ Flask-CORS is utilized to handle Cross-Origin Resource Sharing (CORS), facilitat
 secure and flexible interactions between the frontend and backend. Werkzeug provides
 comprehensive WSGI web application library support. AG Grid is used in Prop Pilot to provide a powerful and flexible data grid component for displaying and managing property data. It offers features such as sorting, filtering, pagination, and inline editing, making it easy to handle large datasets efficiently. The grid is integrated into the React frontend and styled using Tailwind CSS to ensure a consistent look and feel with the rest of the application.
 
-
-
 ## Project Setup
 
 ### Install Dependencies
@@ -38,7 +36,7 @@ comprehensive WSGI web application library support. AG Grid is used in Prop Pilo
 1. Install frontend dependencies by running `npm install` within the `/frontend` folder.
 2. Install backend dependencies by running the following commands in the root folder:
    - `python -m venv venv` on Mac
-   -  `.\venv\Scripts\activate` on Windows
+   - `.\venv\Scripts\activate` on Windows
    - `pip3 install -r requirements.txt`
    - _(Note: you may need to upgrade pip3 to the latest version by running `pip3 install --upgrade pip`.)_
 3. Google OAuth Setup
@@ -48,9 +46,9 @@ comprehensive WSGI web application library support. AG Grid is used in Prop Pilo
    - Configure OAuth consent screen
    - Create OAuth 2.0 credentials
    - Add authorized origins:
-      http://localhost:5173
+     http://localhost:5173
    - Add authorized redirect URIs:
-      http://localhost:5000/api/google/callback
+     http://localhost:5000/api/google/callback
 
 ### Environment Variables Setup
 
@@ -81,10 +79,11 @@ Windows - `pgAdmin` or `DBeaver` or `HeidiSQL`as your db management tool
    a. add the bin path in your `Advanced System Settings`-->`Environment Variables`-->`System Variables`-->Select `Edit` for your path and add the path to your PostgreSQL /bin folder
 
 # Database Setup
+
 1. Run the following in the root folder:
-`psql -U postgres`
-`CREATE DATABASE prop_pilot_db;`
-`\q`
+   `psql -U postgres`
+   `CREATE DATABASE prop_pilot_db;`
+   `\q`
 
 `psql -U postgres -d prop_pilot_db -h localhost -p 5432`
 
@@ -156,3 +155,16 @@ db.create_all()
    Windows - `python app.py` in the root directory.
 
    The backend server will be accessible at `http://localhost:5000`.
+
+### Running Separate Foreclosure Listing Scraper
+
+1. ChromeDriver: Download the ChromeDriver that matches your Chrome version (https://googlechromelabs.github.io/chrome-for-testing/)
+   By default the Win64 version when you clone this repo is used in the services\scraper folder
+2. Match with your OS.
+3. After downloading, extract the file and note the path to the chromedriver executable.
+4. Make sure the chromedriver file has executable permissions (on macOS/Linux, run chmod +x /path/to/chromedriver).
+5. Update the `CHROMEDRIVER_PATH` variable in the `services/scraper/scraper.py` file to point to the chromedriver executable.
+6. Run the scraper by executing the following command in the root directory:
+   MacOs - `python3 services/scraper/main.py`
+   Windows - `python services/scraper/main.py`
+7. Follow the User Prompts in the Terminal.
