@@ -17,7 +17,7 @@ frontend/.vite/
 node_modules/
 
 # Python specific
-__pycache__/
+*__pycache__/
 *.py[cod]
 *.pyo
 *.pyc
@@ -49,5 +49,7 @@ venv/
 *.tmp
 *.csv
 *.db
+*.json
 
 /migrations/
+scraped/
