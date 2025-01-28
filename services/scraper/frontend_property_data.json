@@ -770,6 +770,34 @@
     "yearlyPropertyTaxes": 0
   },
   {
+    "propertyName": "135 Elm Street Dover NJ 07801",
+    "address": "135 Elm Street Dover NJ 07801",
+    "city": "",
+    "state": "",
+    "zipCode": "",
+    "county": "",
+    "purchaseCost": 0,
+    "arvSalePrice": 0,
+    "propertyType": "",
+    "bedroomsDescription": "",
+    "bathroomsDescription": "",
+    "yearlyPropertyTaxes": 0
+  },
+  {
+    "propertyName": "8 Park Lane Jefferson NJ 07438",
+    "address": "8 Park Lane Jefferson NJ 07438",
+    "city": "",
+    "state": "",
+    "zipCode": "",
+    "county": "",
+    "purchaseCost": 0,
+    "arvSalePrice": 0,
+    "propertyType": "",
+    "bedroomsDescription": "",
+    "bathroomsDescription": "",
+    "yearlyPropertyTaxes": 0
+  },
+  {
     "propertyName": "11 Huron Place Denville NJ 07834",
     "address": "11 Huron Place Denville NJ 07834",
     "city": "",
