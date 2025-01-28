@@ -154,20 +154,6 @@
     "yearlyPropertyTaxes": 0
   },
   {
-    "propertyName": "13 North Cape Trail Rockaway NJ 07866",
-    "address": "13 North Cape Trail Rockaway NJ 07866",
-    "city": "",
-    "state": "",
-    "zipCode": "",
-    "county": "",
-    "purchaseCost": 0,
-    "arvSalePrice": 0,
-    "propertyType": "",
-    "bedroomsDescription": "",
-    "bathroomsDescription": "",
-    "yearlyPropertyTaxes": 0
-  },
-  {
     "propertyName": "115 Mount Olive Road Flanders NJ 07836",
     "address": "115 Mount Olive Road Flanders NJ 07836",
     "city": "",
@@ -476,20 +462,6 @@
     "yearlyPropertyTaxes": 0
   },
   {
-    "propertyName": "121 Mount Pleasant Avenue Rockaway NJ 07866",
-    "address": "121 Mount Pleasant Avenue Rockaway NJ 07866",
-    "city": "",
-    "state": "",
-    "zipCode": "",
-    "county": "",
-    "purchaseCost": 0,
-    "arvSalePrice": 0,
-    "propertyType": "",
-    "bedroomsDescription": "",
-    "bathroomsDescription": "",
-    "yearlyPropertyTaxes": 0
-  },
-  {
     "propertyName": "28-30 Western Avenue Butler NJ 07405",
     "address": "28-30 Western Avenue Butler NJ 07405",
     "city": "",
@@ -562,6 +534,20 @@
   {
     "propertyName": "105 Kings Highway Washington NJ",
     "address": "105 Kings Highway Washington NJ",
+    "city": "",
+    "state": "",
+    "zipCode": "",
+    "county": "",
+    "purchaseCost": 0,
+    "arvSalePrice": 0,
+    "propertyType": "",
+    "bedroomsDescription": "",
+    "bathroomsDescription": "",
+    "yearlyPropertyTaxes": 0
+  },
+  {
+    "propertyName": "13 North Cape Trail Rockaway NJ 07866",
+    "address": "13 North Cape Trail Rockaway NJ 07866",
     "city": "",
     "state": "",
     "zipCode": "",
@@ -756,6 +742,20 @@
     "yearlyPropertyTaxes": 0
   },
   {
+    "propertyName": "121 Mount Pleasant Avenue Rockaway NJ 07866",
+    "address": "121 Mount Pleasant Avenue Rockaway NJ 07866",
+    "city": "",
+    "state": "",
+    "zipCode": "",
+    "county": "",
+    "purchaseCost": 0,
+    "arvSalePrice": 0,
+    "propertyType": "",
+    "bedroomsDescription": "",
+    "bathroomsDescription": "",
+    "yearlyPropertyTaxes": 0
+  },
+  {
     "propertyName": "170 Quaker Church Road Randolph NJ 07869",
     "address": "170 Quaker Church Road Randolph NJ 07869",
     "city": "",
@@ -772,6 +772,20 @@
   {
     "propertyName": "11 Huron Place Denville NJ 07834",
     "address": "11 Huron Place Denville NJ 07834",
+    "city": "",
+    "state": "",
+    "zipCode": "",
+    "county": "",
+    "purchaseCost": 0,
+    "arvSalePrice": 0,
+    "propertyType": "",
+    "bedroomsDescription": "",
+    "bathroomsDescription": "",
+    "yearlyPropertyTaxes": 0
+  },
+  {
+    "propertyName": "21 Crimson Lane Mine Hill NJ 07803",
+    "address": "21 Crimson Lane Mine Hill NJ 07803",
     "city": "",
     "state": "",
     "zipCode": "",
@@ -1192,20 +1206,6 @@
   {
     "propertyName": "72 Summit Drive Denville NJ 07834",
     "address": "72 Summit Drive Denville NJ 07834",
-    "city": "",
-    "state": "",
-    "zipCode": "",
-    "county": "",
-    "purchaseCost": 0,
-    "arvSalePrice": 0,
-    "propertyType": "",
-    "bedroomsDescription": "",
-    "bathroomsDescription": "",
-    "yearlyPropertyTaxes": 0
-  },
-  {
-    "propertyName": "21 Crimson Lane Mine Hill NJ 07803",
-    "address": "21 Crimson Lane Mine Hill NJ 07803",
     "city": "",
     "state": "",
     "zipCode": "",
