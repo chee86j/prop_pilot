@@ -17,7 +17,7 @@ def connect_db():
         return None
 
 def create_table(conn):
-    """Create the auctions table if it doesn't exist, with unique constraints on the address."""
+    """Create the auctions table if it doesn't exist, with additional columns."""
     try:
         cursor = conn.cursor()
         cursor.execute('''
@@ -29,11 +29,17 @@ def create_table(conn):
                 plaintiff TEXT,
                 defendant TEXT,
                 address TEXT UNIQUE,
-                price INTEGER
+                price INTEGER,
+                court_case TEXT,
+                sale_date TEXT,
+                description TEXT,
+                upset_amount TEXT,
+                attorney TEXT,
+                last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
         conn.commit()
-        logging.info("Auctions table created or already exists with unique constraint on address.")
+        logging.info("Auctions table created or already exists with additional columns.")
     except sqlite3.Error as e:
         logging.error(f"Error creating table: {e}")
 
@@ -50,6 +56,32 @@ def insert_data(conn, data):
         logging.info(f"Inserted or ignored {cursor.rowcount} rows into the auctions table.")
     except sqlite3.Error as e:
         logging.error(f"Error inserting data: {e}")
+
+def update_auction_details(conn, detail_link, details):
+    """Update an auction entry with additional details."""
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE auctions 
+            SET court_case = ?, 
+                sale_date = ?,
+                description = ?,
+                upset_amount = ?,
+                attorney = ?,
+                last_updated = CURRENT_TIMESTAMP
+            WHERE detail_link = ?
+        ''', (
+            details.get('court_case'),
+            details.get('sale_date'),
+            details.get('description'),
+            details.get('upset_amount'),
+            details.get('attorney'),
+            detail_link
+        ))
+        conn.commit()
+        logging.info(f"Updated details for auction with detail_link: {detail_link}")
+    except sqlite3.Error as e:
+        logging.error(f"Error updating auction details: {e}")
 
 def close_db(conn):
     """Close the database connection."""

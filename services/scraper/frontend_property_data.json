@@ -1,5 +1,19 @@
 [
   {
+    "propertyName": "115 Mount Olive Road Flanders NJ 07836",
+    "address": "115 Mount Olive Road Flanders NJ 07836",
+    "city": "",
+    "state": "",
+    "zipCode": "",
+    "county": "",
+    "purchaseCost": 0,
+    "arvSalePrice": 0,
+    "propertyType": "",
+    "bedroomsDescription": "",
+    "bathroomsDescription": "",
+    "yearlyPropertyTaxes": 0
+  },
+  {
     "propertyName": "60 Ann Road Long Valley NJ 07853",
     "address": "60 Ann Road Long Valley NJ 07853",
     "city": "",
@@ -142,20 +156,6 @@
   {
     "propertyName": "340 Marcella Road Parsippany-Troy Hills NJ",
     "address": "340 Marcella Road Parsippany-Troy Hills NJ",
-    "city": "",
-    "state": "",
-    "zipCode": "",
-    "county": "",
-    "purchaseCost": 0,
-    "arvSalePrice": 0,
-    "propertyType": "",
-    "bedroomsDescription": "",
-    "bathroomsDescription": "",
-    "yearlyPropertyTaxes": 0
-  },
-  {
-    "propertyName": "115 Mount Olive Road Flanders NJ 07836",
-    "address": "115 Mount Olive Road Flanders NJ 07836",
     "city": "",
     "state": "",
     "zipCode": "",
