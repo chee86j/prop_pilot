@@ -88,6 +88,14 @@ const Navbar = () => {
                 Excel Style Grid
               </Link>
             )}
+            {isAuthenticated && (
+              <Link
+                to="/scraper-control"
+                className="my-1 text-sm text-gray-700 leading-5 hover:text-blue-600 md:mx-4 md:my-0"
+              >
+                Scraper Control
+              </Link>
+            )}
             <Link
               to="/lender"
               className="my-1 text-sm text-gray-700 leading-5 hover:text-blue-600 md:mx-4 md:my-0"

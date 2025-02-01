@@ -24,6 +24,8 @@ node_modules/
 
 # Virtual Environment
 venv/
+frontend/.venv
+services/scraper/frontend_property_data.json
 
 # Environment variables
 .env

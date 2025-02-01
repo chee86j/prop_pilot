@@ -35,7 +35,7 @@ comprehensive WSGI web application library support. AG Grid is used in Prop Pilo
 
 1. Install frontend dependencies by running `npm install` within the `/frontend` folder.
 2. Install backend dependencies by running the following commands in the root folder:
-   - `python -m venv venv` on Mac
+   - `source .venv/bin/activate` on Mac
    - `.\venv\Scripts\activate` on Windows
    - `pip3 install -r requirements.txt`
    - _(Note: you may need to upgrade pip3 to the latest version by running `pip3 install --upgrade pip`.)_

@@ -1,33 +1,5 @@
 [
   {
-    "propertyName": "115 Mount Olive Road Flanders NJ 07836",
-    "address": "115 Mount Olive Road Flanders NJ 07836",
-    "city": "",
-    "state": "",
-    "zipCode": "",
-    "county": "",
-    "purchaseCost": 0,
-    "arvSalePrice": 0,
-    "propertyType": "",
-    "bedroomsDescription": "",
-    "bathroomsDescription": "",
-    "yearlyPropertyTaxes": 0
-  },
-  {
-    "propertyName": "60 Ann Road Long Valley NJ 07853",
-    "address": "60 Ann Road Long Valley NJ 07853",
-    "city": "",
-    "state": "",
-    "zipCode": "",
-    "county": "",
-    "purchaseCost": 0,
-    "arvSalePrice": 0,
-    "propertyType": "",
-    "bedroomsDescription": "",
-    "bathroomsDescription": "",
-    "yearlyPropertyTaxes": 0
-  },
-  {
     "propertyName": "17 Ramsey Way Long Valley NJ 07853",
     "address": "17 Ramsey Way Long Valley NJ 07853",
     "city": "",
@@ -58,20 +30,6 @@
   {
     "propertyName": "29 Ironia Road Flanders NJ 07836",
     "address": "29 Ironia Road Flanders NJ 07836",
-    "city": "",
-    "state": "",
-    "zipCode": "",
-    "county": "",
-    "purchaseCost": 0,
-    "arvSalePrice": 0,
-    "propertyType": "",
-    "bedroomsDescription": "",
-    "bathroomsDescription": "",
-    "yearlyPropertyTaxes": 0
-  },
-  {
-    "propertyName": "108 Woodcrest Drive Morristown NJ 07960",
-    "address": "108 Woodcrest Drive Morristown NJ 07960",
     "city": "",
     "state": "",
     "zipCode": "",
@@ -142,20 +100,6 @@
   {
     "propertyName": "1 Candice Way East Hanover NJ 07936",
     "address": "1 Candice Way East Hanover NJ 07936",
-    "city": "",
-    "state": "",
-    "zipCode": "",
-    "county": "",
-    "purchaseCost": 0,
-    "arvSalePrice": 0,
-    "propertyType": "",
-    "bedroomsDescription": "",
-    "bathroomsDescription": "",
-    "yearlyPropertyTaxes": 0
-  },
-  {
-    "propertyName": "340 Marcella Road Parsippany-Troy Hills NJ",
-    "address": "340 Marcella Road Parsippany-Troy Hills NJ",
     "city": "",
     "state": "",
     "zipCode": "",
@@ -434,20 +378,6 @@
     "yearlyPropertyTaxes": 0
   },
   {
-    "propertyName": "151 MOUNTAINSIDE ROAD Mendham NJ 07945",
-    "address": "151 MOUNTAINSIDE ROAD Mendham NJ 07945",
-    "city": "",
-    "state": "",
-    "zipCode": "",
-    "county": "",
-    "purchaseCost": 0,
-    "arvSalePrice": 0,
-    "propertyType": "",
-    "bedroomsDescription": "",
-    "bathroomsDescription": "",
-    "yearlyPropertyTaxes": 0
-  },
-  {
     "propertyName": "15 Brockden Drive Mendham NJ 07945",
     "address": "15 Brockden Drive Mendham NJ 07945",
     "city": "",
@@ -532,8 +462,36 @@
     "yearlyPropertyTaxes": 0
   },
   {
+    "propertyName": "108 Woodcrest Drive Morristown NJ 07960",
+    "address": "108 Woodcrest Drive Morristown NJ 07960",
+    "city": "",
+    "state": "",
+    "zipCode": "",
+    "county": "",
+    "purchaseCost": 0,
+    "arvSalePrice": 0,
+    "propertyType": "",
+    "bedroomsDescription": "",
+    "bathroomsDescription": "",
+    "yearlyPropertyTaxes": 0
+  },
+  {
     "propertyName": "105 Kings Highway Washington NJ",
     "address": "105 Kings Highway Washington NJ",
+    "city": "",
+    "state": "",
+    "zipCode": "",
+    "county": "",
+    "purchaseCost": 0,
+    "arvSalePrice": 0,
+    "propertyType": "",
+    "bedroomsDescription": "",
+    "bathroomsDescription": "",
+    "yearlyPropertyTaxes": 0
+  },
+  {
+    "propertyName": "340 Marcella Road Parsippany-Troy Hills NJ",
+    "address": "340 Marcella Road Parsippany-Troy Hills NJ",
     "city": "",
     "state": "",
     "zipCode": "",
@@ -672,20 +630,6 @@
     "yearlyPropertyTaxes": 0
   },
   {
-    "propertyName": "7-11 Adams Avenue Victory Gardens NJ 07801",
-    "address": "7-11 Adams Avenue Victory Gardens NJ 07801",
-    "city": "",
-    "state": "",
-    "zipCode": "",
-    "county": "",
-    "purchaseCost": 0,
-    "arvSalePrice": 0,
-    "propertyType": "",
-    "bedroomsDescription": "",
-    "bathroomsDescription": "",
-    "yearlyPropertyTaxes": 0
-  },
-  {
     "propertyName": "51 Springbrook Road East Montville NJ 07045",
     "address": "51 Springbrook Road East Montville NJ 07045",
     "city": "",
@@ -742,6 +686,20 @@
     "yearlyPropertyTaxes": 0
   },
   {
+    "propertyName": "151 MOUNTAINSIDE ROAD Mendham NJ 07945",
+    "address": "151 MOUNTAINSIDE ROAD Mendham NJ 07945",
+    "city": "",
+    "state": "",
+    "zipCode": "",
+    "county": "",
+    "purchaseCost": 0,
+    "arvSalePrice": 0,
+    "propertyType": "",
+    "bedroomsDescription": "",
+    "bathroomsDescription": "",
+    "yearlyPropertyTaxes": 0
+  },
+  {
     "propertyName": "121 Mount Pleasant Avenue Rockaway NJ 07866",
     "address": "121 Mount Pleasant Avenue Rockaway NJ 07866",
     "city": "",
@@ -786,6 +744,20 @@
   {
     "propertyName": "8 Park Lane Jefferson NJ 07438",
     "address": "8 Park Lane Jefferson NJ 07438",
+    "city": "",
+    "state": "",
+    "zipCode": "",
+    "county": "",
+    "purchaseCost": 0,
+    "arvSalePrice": 0,
+    "propertyType": "",
+    "bedroomsDescription": "",
+    "bathroomsDescription": "",
+    "yearlyPropertyTaxes": 0
+  },
+  {
+    "propertyName": "126 Sowers Drive Hackettstown NJ 07840",
+    "address": "126 Sowers Drive Hackettstown NJ 07840",
     "city": "",
     "state": "",
     "zipCode": "",
@@ -870,6 +842,20 @@
   {
     "propertyName": "18 Thomastown Road Mine Hill NJ 07803",
     "address": "18 Thomastown Road Mine Hill NJ 07803",
+    "city": "",
+    "state": "",
+    "zipCode": "",
+    "county": "",
+    "purchaseCost": 0,
+    "arvSalePrice": 0,
+    "propertyType": "",
+    "bedroomsDescription": "",
+    "bathroomsDescription": "",
+    "yearlyPropertyTaxes": 0
+  },
+  {
+    "propertyName": "7-11 Adams Avenue Victory Gardens NJ 07801",
+    "address": "7-11 Adams Avenue Victory Gardens NJ 07801",
     "city": "",
     "state": "",
     "zipCode": "",
@@ -1038,20 +1024,6 @@
   {
     "propertyName": "98 South 1st Avenue Kenvil NJ 07847",
     "address": "98 South 1st Avenue Kenvil NJ 07847",
-    "city": "",
-    "state": "",
-    "zipCode": "",
-    "county": "",
-    "purchaseCost": 0,
-    "arvSalePrice": 0,
-    "propertyType": "",
-    "bedroomsDescription": "",
-    "bathroomsDescription": "",
-    "yearlyPropertyTaxes": 0
-  },
-  {
-    "propertyName": "14 Highland Trail Denville NJ 07834",
-    "address": "14 Highland Trail Denville NJ 07834",
     "city": "",
     "state": "",
     "zipCode": "",

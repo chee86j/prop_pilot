@@ -8,7 +8,7 @@ import pandas as pd
 from merge_csv import merge_csv_files  # Import the merge_csv functionality
 import json
 
-# Configure logging
+# Configure logging 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 
 def format_zillow_url(address):
@@ -49,7 +49,7 @@ def format_for_frontend(data):
 
     return formatted_data
 
-def export_formatted_data(formatted_data, output_file='frontend_property_data.json'):
+def export_formatted_data(formatted_data, output_file):
     """Export formatted data as JSON for frontend consumption."""
     try:
         with open(output_file, 'w') as f:
@@ -59,81 +59,76 @@ def export_formatted_data(formatted_data, output_file='frontend_property_data.js
         logging.error(f"Error exporting frontend data: {e}")
 
 def main():
-    # Step 1: Scrape auction data
-    url = "https://salesweb.civilview.com/Sales/SalesSearch?countyId=9&page=1"
-    logging.info(f"Starting to scrape the page: {url}")
+    auto_confirm = os.environ.get('AUTO_CONFIRM', '').lower() == 'true'
     
-    data = parse_page_selenium(url)
-    
-    if data:
-        # Format data for frontend
-        frontend_formatted_data = [format_for_frontend(item) for item in data]
+    if len(sys.argv) < 2:
+        logging.error("Folder path argument is missing")
+        return
+
+    downloads_folder = sys.argv[1]
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    os.makedirs(downloads_folder, exist_ok=True)
+
+    try:
+        # Step 1: Scrape auction data
+        url = "https://salesweb.civilview.com/Sales/SalesSearch?countyId=9&page=1"
+        logging.info(f"Starting to scrape the page: {url}")
         
-        # Export formatted data for frontend
-        export_formatted_data(frontend_formatted_data)
-        
-        logging.info(f"Scraping completed. {len(data)} listings found.")
+        data = parse_page_selenium(url)
+        if not data:
+            logging.error("No data was found from scraping")
+            return
+
+        # Step 2: Save to database and export CSV
+        db_path = os.path.join(current_dir, "auction_data.db")
         conn = connect_db()
         if conn:
             create_table(conn)
             insert_data(conn, data)
+            
+            # Export initial data to CSV
+            exported_csv = os.path.join(downloads_folder, "exported_data.csv")
+            export_data_to_csv(db_path, exported_csv)
+            
             close_db(conn)
-        else:
-            logging.error("Failed to connect to the database.")
-    else:
-        logging.warning("No data scraped.")
-        return  # Exit if no data was scraped
-    
-    # Step 2: Export scraped data to CSV
-    user_input = input("Do you want to export the data to CSV? (yes/no): ").strip().lower()
-    if user_input == "yes":
-        db_path = "auction_data.db"
-        csv_file_path = "exported_data.csv"
-        
-        # Export data to CSV using the imported function from utils
-        export_data_to_csv(db_path, csv_file_path)
-        print(f"The data has been successfully exported to {csv_file_path}")
-    else:
-        print("Export to CSV skipped.")
+            logging.info(f"Data exported to {exported_csv}")
 
-    # Step 3: Generate Zillow URLs for the addresses in the exported data
-    user_input = input("Do you want to generate Zillow URLs for the addresses in the exported CSV? (yes/no): ").strip().lower()
-    if user_input == "yes":
-        try:
-            data = pd.read_csv(csv_file_path)
-            addresses = data['address'].tolist()
+            # Generate Zillow URLs
+            zillow_csv = os.path.join(downloads_folder, "exported_zillow_urls.csv")
+            df = pd.read_csv(exported_csv)
             
             results = []
-            for address in addresses:
+            for address in df['address']:
                 zillow_url = format_zillow_url(address)
                 if zillow_url:
                     results.append({'address': address, 'Zillow URL': zillow_url})
-                    logging.info(f"Successfully formatted URL for {address}")
-                else:
-                    logging.warning(f"Failed to format URL for {address}")
-
-            # Export Zillow URL results to CSV
-            csv_file_path_zillow = 'exported_zillow_urls.csv'
-            pd.DataFrame(results).to_csv(csv_file_path_zillow, index=False)
-            logging.info(f"Zillow URLs have been successfully exported to {csv_file_path_zillow}")
-            print(f"Zillow URLs have been successfully exported to {csv_file_path_zillow}")
             
-        except Exception as e:
-            logging.error(f"Failed to process addresses for Zillow URL generation: {e}")
-            sys.exit(f"Failed to process addresses for Zillow URL generation: {e}")
-    else:
-        print("Zillow URL generation skipped.")
+            pd.DataFrame(results).to_csv(zillow_csv, index=False)
+            logging.info(f"Zillow URLs exported to {zillow_csv}")
 
-    # Step 4: Merge the auction data with the Zillow URLs
-    user_input = input("Do you want to merge the auction data with the Zillow URLs? (yes/no): ").strip().lower()
-    if user_input == "yes":
-        try:
-            merge_csv_files(csv_file_path, csv_file_path_zillow)
-        except Exception as e:
-            logging.error(f"Failed to merge files: {e}")
-            sys.exit(f"Failed to merge files: {e}")
-    else:
-        print("Merging auction data and Zillow URLs skipped.")
+            # Merge the files
+            from merge_csv import merge_csv_files
+            try:
+                merge_csv_files(
+                    address_file=exported_csv,
+                    zillow_url_file=zillow_csv,
+                    output_file=os.path.join(downloads_folder, 'merged_data.csv')
+                )
+                logging.info("Files merged successfully")
+            except Exception as e:
+                logging.error(f"Error merging files: {e}")
+                raise
+
+            # Save formatted data for frontend
+            frontend_data = [format_for_frontend(item) for item in data]
+            frontend_file = os.path.join(downloads_folder, 'frontend_property_data.json')
+            export_formatted_data(frontend_data, frontend_file)
+
+            return True
+
+    except Exception as e:
+        logging.error(f"Error in main: {str(e)}")
+        raise
 
 if __name__ == "__main__":
     main()

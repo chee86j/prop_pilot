@@ -21,6 +21,7 @@ import AddProperty from "./components/AddProperty";
 import ConstructionDraw from "./components/ConstructionDraw";
 import Receipt from "./components/Receipt";
 import ExcelStyleGrid from "./components/ExcelStyleGrid";
+import ScraperControl from "./components/ScraperControl";
 import { fetchUserProfile } from "./utils/fetchUserProfile";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
@@ -87,6 +88,7 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/faq" element={<Faq />} />
           <Route path="/lender" element={<Lender />} />
+          <Route path="/scraper-control" element={<ScraperControl />} />
         </Routes>
       </div>
     </Router>
