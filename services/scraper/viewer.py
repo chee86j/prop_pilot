@@ -7,6 +7,7 @@ import pandas as pd
 import sqlite3
 import sys
 import logging
+import os
 
 class EditDialog(QDialog):
     def __init__(self, entry_data, parent=None):
@@ -54,6 +55,11 @@ class AuctionViewer(QMainWindow):
         self.setWindowTitle("Auction Data Viewer")
         self.setMinimumSize(1200, 800)
         
+        # Set up the data directory path
+        self.downloads_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'downloads')
+        if not os.path.exists(self.downloads_dir):
+            os.makedirs(self.downloads_dir)
+        
         # Load data
         self.load_data()
         
@@ -76,7 +82,14 @@ class AuctionViewer(QMainWindow):
     
     def load_data(self):
         try:
-            self.data = pd.read_csv("merged_data.csv")
+            # Use the correct path to merged_data.csv
+            csv_path = os.path.join(self.downloads_dir, "merged_data.csv")
+            if not os.path.exists(csv_path):
+                raise FileNotFoundError(f"Could not find merged_data.csv at {csv_path}")
+            
+            self.data = pd.read_csv(csv_path)
+            logging.info(f"Successfully loaded data from {csv_path}")
+            
             # Initialize database connection
             self.conn = sqlite3.connect('auction_data.db')
             self.cursor = self.conn.cursor()
@@ -98,6 +111,10 @@ class AuctionViewer(QMainWindow):
                 ))
             self.conn.commit()
             
+        except FileNotFoundError as e:
+            QMessageBox.critical(self, "File Error", 
+                f"Could not find merged_data.csv. Please run main.py first.\nDetails: {str(e)}")
+            raise SystemExit(1)
         except sqlite3.OperationalError as e:
             QMessageBox.critical(self, "Database Error", 
                 "Database schema is not initialized. Please run 'python migrate_db.py' first.")
@@ -150,7 +167,7 @@ class AuctionViewer(QMainWindow):
     
     def edit_selected(self):
         current_row = self.table.currentRow()
-        if current_row < 0:
+        if (current_row < 0):
             QMessageBox.warning(self, "Warning", "Please select a row to edit")
             return
         

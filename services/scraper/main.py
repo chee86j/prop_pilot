@@ -1,26 +1,34 @@
 import sys
 import os
 import logging
+import pandas as pd
 from scraper import parse_page_selenium
 from database import connect_db, create_table, insert_data, close_db
-from utils.export_to_csv import export_data_to_csv  # Importing the correct function from utils
-import pandas as pd
-from merge_csv import merge_csv_files  # Import the merge_csv functionality
-import json
+from merge_csv import merge_csv_files
 
 # Configure logging 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s:%(levelname)s:%(message)s',
+    handlers=[
+        logging.FileHandler('scraper.log'),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
 
 def format_zillow_url(address):
     """Convert the address to a Zillow URL format."""
     try:
-        formatted_address = address.replace(" ", "-").replace(",", "")
+        # Remove any unwanted characters and format the address
+        formatted_address = address.strip()
+        formatted_address = formatted_address.replace(" ", "-").replace(",", "").replace(".", "")
+        formatted_address = formatted_address.replace("--", "-")  # Replace double dashes
+        formatted_address = formatted_address.lower()
         zillow_url = f"https://www.zillow.com/homes/{formatted_address}_rb/"
         return zillow_url
     except Exception as e:
         logging.error(f"Error formatting Zillow URL for {address}: {e}")
         return None
-    
 
 def format_for_frontend(data):
     """Format scraped data for frontend PropertyDetails component."""
@@ -59,19 +67,13 @@ def export_formatted_data(formatted_data, output_file):
         logging.error(f"Error exporting frontend data: {e}")
 
 def main():
-    auto_confirm = os.environ.get('AUTO_CONFIRM', '').lower() == 'true'
-    
-    if len(sys.argv) < 2:
-        logging.error("Folder path argument is missing")
-        return
-
-    downloads_folder = sys.argv[1]
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    os.makedirs(downloads_folder, exist_ok=True)
-
     try:
+        # Ensure downloads folder exists
+        downloads_folder = os.path.join(os.getcwd(), 'downloads')
+        os.makedirs(downloads_folder, exist_ok=True)
+        
         # Step 1: Scrape auction data
-        url = "https://salesweb.civilview.com/Sales/SalesSearch?countyId=9&page=1"
+        url = "https://salesweb.civilview.com/Sales/SalesSearch?countyId=9"
         logging.info(f"Starting to scrape the page: {url}")
         
         data = parse_page_selenium(url)
@@ -79,24 +81,24 @@ def main():
             logging.error("No data was found from scraping")
             return
 
-        # Step 2: Save to database and export CSV
-        db_path = os.path.join(current_dir, "auction_data.db")
+        # Step 2: Save to database
         conn = connect_db()
-        if conn:
+        if not conn:
+            logging.error("Failed to connect to database")
+            return
+
+        try:
             create_table(conn)
             insert_data(conn, data)
             
-            # Export initial data to CSV
+            # Step 3: Export initial data to CSV
             exported_csv = os.path.join(downloads_folder, "exported_data.csv")
-            export_data_to_csv(db_path, exported_csv)
-            
-            close_db(conn)
+            df = pd.DataFrame(data)
+            df.to_csv(exported_csv, index=False)
             logging.info(f"Data exported to {exported_csv}")
 
-            # Generate Zillow URLs
+            # Step 4: Generate Zillow URLs
             zillow_csv = os.path.join(downloads_folder, "exported_zillow_urls.csv")
-            df = pd.read_csv(exported_csv)
-            
             results = []
             for address in df['address']:
                 zillow_url = format_zillow_url(address)
@@ -106,29 +108,34 @@ def main():
             pd.DataFrame(results).to_csv(zillow_csv, index=False)
             logging.info(f"Zillow URLs exported to {zillow_csv}")
 
-            # Merge the files
-            from merge_csv import merge_csv_files
-            try:
-                merge_csv_files(
-                    address_file=exported_csv,
-                    zillow_url_file=zillow_csv,
-                    output_file=os.path.join(downloads_folder, 'merged_data.csv')
-                )
-                logging.info("Files merged successfully")
-            except Exception as e:
-                logging.error(f"Error merging files: {e}")
-                raise
+            # Step 5: Merge the files
+            output_file = os.path.join(downloads_folder, 'merged_data.csv')
+            merge_csv_files(
+                address_file=exported_csv,
+                zillow_url_file=zillow_csv,
+                output_file=output_file
+            )
+            logging.info(f"Files merged successfully to {output_file}")
 
-            # Save formatted data for frontend
-            frontend_data = [format_for_frontend(item) for item in data]
-            frontend_file = os.path.join(downloads_folder, 'frontend_property_data.json')
-            export_formatted_data(frontend_data, frontend_file)
+        finally:
+            close_db(conn)
 
-            return True
+        return True
 
     except Exception as e:
         logging.error(f"Error in main: {str(e)}")
-        raise
+        return False
 
 if __name__ == "__main__":
-    main()
+    success = main()
+    if success:
+        logging.info("Script completed successfully")
+        sys.exit(0)
+    else:
+        logging.error("Script failed to complete")
+        sys.exit(1)
+        
+# In order to start the scraper you will need to run the following command:
+# 1. `python main.py`
+# 2. `viewer.py` to view the data in the frontend and add extra data from the Details
+#    links that you will have to manually click on.
