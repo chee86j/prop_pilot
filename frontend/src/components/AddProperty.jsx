@@ -1,5 +1,5 @@
 /* this component allows auth user to create a new single property */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -137,9 +137,60 @@ const AddProperty = () => {
     videographerPhone: "",
   });
 
+  const [scrapedProperties, setScrapedProperties] = useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [errorMessage, setErrorMessage] = useState("");
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Load scraped data when component mounts
+    fetchScrapedData();
+  }, []);
+
+  const fetchScrapedData = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/scraped-properties",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            "Content-Type": "application/json",
+          },
+          credentials: "same-origin",
+        }
+      );
+
+      if (response.status === 404) {
+        toast.info("No Scraped Data found. Run Foreclosure Scraper First.");
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP Error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setScrapedProperties(data);
+    } catch (error) {
+      console.error("Error fetching Scraped Data:", error);
+      toast.error(`Failed to Load Scraped Properties: ${error.message}`);
+    }
+  };
+
+  const handleUseScrapeData = (scrapedProperty) => {
+    // Map scraped data to property form fields
+    setProperty((prev) => ({
+      ...prev,
+      address: scrapedProperty.address || "",
+      propertyName: scrapedProperty.address || "", // Use address as property name
+      purchaseCost: parseFloat(scrapedProperty.price) || 0,
+      // Add other field mappings as needed
+    }));
+
+    toast.info("Property Details Pre-filled from Scraped Data");
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -221,6 +272,26 @@ const AddProperty = () => {
       <h1 className="text-xl md:text-2xl font-bold text-gray-700 mb-6">
         Add New Property
       </h1>
+      {scrapedProperties.length > 0 && (
+        <div className="mb-6">
+          <label className="block text-gray-700 text-sm font-bold mb-2">
+            Use Scraped Property Data:
+          </label>
+          <select
+            onChange={(e) =>
+              handleUseScrapeData(scrapedProperties[e.target.value])
+            }
+            className="w-full p-2 border rounded"
+          >
+            <option value="">Select a scraped property...</option>
+            {scrapedProperties.map((prop, index) => (
+              <option key={index} value={index}>
+                {prop.address} - ${prop.price}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       <form
         onSubmit={handleSubmit}
         className="grid grid-cols-1 md:grid-cols-2 gap-6"

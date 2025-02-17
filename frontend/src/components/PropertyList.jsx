@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+// eslint-disable-next-line no-unused-vars
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { fetchUserProfile } from "../utils/fetchUserProfile";
@@ -17,6 +18,7 @@ const PropertyList = () => {
     totalRehabCost: { min: "", max: "" },
     arvSalePrice: { min: "", max: "" },
   });
+  const [isScrapingData, setIsScrapingData] = useState(false);
   const navigate = useNavigate();
 
   const isMobile = window.innerWidth <= 768;
@@ -124,6 +126,28 @@ const PropertyList = () => {
         filterValues.arvSalePrice.max
       )
     );
+  };
+
+  const handleRunScraper = async () => {
+    setIsScrapingData(true);
+    try {
+      const response = await fetch("http://localhost:5000/api/run-scraper", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+
+      if (!response.ok) throw new Error("Failed to Run Foreclosure Scraper");
+
+      toast.success(
+        "Foreclosure List Scraped Successfully! You can now use the Data to Add New Property."
+      );
+    } catch (error) {
+      toast.error("Failed to Run Foreclosure Scraper: " + error.message);
+    } finally {
+      setIsScrapingData(false);
+    }
   };
 
   const columns = [
@@ -256,12 +280,12 @@ const PropertyList = () => {
             </div>
             <img src={SkyScrapers} alt="SkyScrapers" className="w-24 h-24" />
           </div>
-          <button
+          {/* <button
             onClick={goToAddPropertyPage}
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:ring-2 focus:ring-blue-300"
           >
             Add New Property
-          </button>
+          </button> */}
         </div>
       </header>
 
@@ -357,6 +381,22 @@ const PropertyList = () => {
           className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
         >
           Reset Filters
+        </button>
+      </div>
+
+      <div className="flex justify-between mb-4">
+        <button
+          onClick={goToAddPropertyPage}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:ring-2 focus:ring-blue-300"
+        >
+          Add New Property
+        </button>
+        <button
+          onClick={handleRunScraper}
+          disabled={isScrapingData}
+          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+        >
+          {isScrapingData ? "Scraping..." : "Run Foreclosure Scraper"}
         </button>
       </div>
 

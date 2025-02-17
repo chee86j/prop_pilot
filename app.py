@@ -1,7 +1,7 @@
 import sys  # Add this import at the top with other imports
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, jwt_required
 from flask_cors import CORS
 from flask_migrate import Migrate
 from dotenv import load_dotenv
@@ -33,15 +33,14 @@ migrate = Migrate(app, db)
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 jwt = JWTManager(app)
 
-# Enable CORS for all domains on all routes
-CORS(app, resources={r"/api/*": {"origins": "*"}})
-
-@app.after_request
-def after_request(response):
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    return response
+# Update CORS configuration
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ["http://localhost:5173"],  # Specify exact origin to avoid CSRF attacks
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
 @app.route('/api/run-scraper', methods=['POST'])
 def run_scraper():
@@ -100,6 +99,33 @@ def run_scraper():
     except Exception as e:
         logging.error(f"Unexpected error: {str(e)}")
         return jsonify({'error': f"Unexpected error: {str(e)}"}), 500
+
+@app.route('/api/scraped-properties', methods=['GET', 'OPTIONS'])
+@jwt_required()
+def get_scraped_properties():
+    # Handle OPTIONS request for CORS preflight
+    if request.method == 'OPTIONS':
+        return jsonify({}), 200
+        
+    try:
+        # Get the project root directory
+        project_root = os.path.dirname(os.path.abspath(__file__))
+        downloads_folder = os.path.join(project_root, 'services', 'scraper', 'downloads')
+        os.makedirs(downloads_folder, exist_ok=True)  # Create folder if it doesn't exist
+        
+        csv_path = os.path.join(downloads_folder, 'merged_data.csv')
+        
+        if not os.path.exists(csv_path):
+            return jsonify({'message': 'No scraped data available. Please run the scraper first.'}), 404
+            
+        # Read the CSV file
+        df = pd.read_csv(csv_path)
+        properties = df.to_dict('records')
+        return jsonify(properties), 200
+        
+    except Exception as e:
+        logging.error(f"Error retrieving scraped properties: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 # Register API blueprint
 
