@@ -29,6 +29,16 @@ class User(db.Model):
 class Property(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id')) # Many to one relationship w/User
+    
+    # Foreclosure Fields If Applicable
+    detail_link = db.Column(db.String(1024))  # For storing the civil view detail link
+    property_id = db.Column(db.String(256))   # From civil view
+    sheriff_number = db.Column(db.String(256))
+    status_date = db.Column(db.Date)
+    plaintiff = db.Column(db.Text)            # Using Text for potentially long names
+    defendant = db.Column(db.Text)            # Using Text for potentially long names
+    zillow_url = db.Column(db.String(1024))   # For storing the Zillow listing URL
+    
     # Location Section
     propertyName = db.Column(db.String(512))
     address = db.Column(db.String(1024))

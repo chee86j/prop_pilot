@@ -29,6 +29,26 @@ db.init_app(app)
 # Initialize Flask-Migrate
 migrate = Migrate(app, db)
 
+# Test database connection using a context manager
+def test_db_connection():
+    try:
+        with app.app_context():
+            db.engine.connect()
+            print("Database connection successful!")
+    except Exception as e:
+        print(f"Database connection failed: {e}")
+        raise e
+
+# Test connection immediately
+test_db_connection()
+
+# Create tables within app context if they don't exist
+with app.app_context():
+    try:
+        db.create_all()
+    except Exception as e:
+        print(f"Error creating tables: {e}")
+
 # Configure JWT
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 jwt = JWTManager(app)

@@ -179,14 +179,73 @@ const AddProperty = () => {
     }
   };
 
+  // Helper function to parse address into parts to fill form fields
+  const parseAddress = (fullAddress) => {
+    try {
+      // Example address format: "48 New Read Street Pequannock NJ 07440"
+      const parts = fullAddress.trim().split(" ");
+
+      // Get the ZIP code (last element)
+      const zipCode = parts.pop();
+
+      // Get the state (second to last element)
+      const state = parts.pop();
+
+      // Get the city (could be multiple words)
+      let city = "";
+      while (
+        parts.length > 0 &&
+        !parts[parts.length - 1].match(
+          /^(\d+|street|st|avenue|ave|road|rd|lane|ln|drive|dr|circle|cir|court|ct|boulevard|blvd|way|parkway|pkwy)$/i
+        )
+      ) {
+        if (city) {
+          city = parts.pop() + " " + city;
+        } else {
+          city = parts.pop();
+        }
+      }
+
+      // Remaining parts form the street address
+      const streetAddress = parts.join(" ");
+
+      return {
+        streetAddress,
+        city: city.trim(),
+        state,
+        zipCode,
+      };
+    } catch (error) {
+      console.error("Error parsing address:", error);
+      return {
+        streetAddress: fullAddress,
+        city: "",
+        state: "",
+        zipCode: "",
+      };
+    }
+  };
+
   const handleUseScrapeData = (scrapedProperty) => {
-    // Map scraped data to property form fields
+    // Map scaraped data to property form fields
+    const parsedAddress = parseAddress(scrapedProperty.address);
+
     setProperty((prev) => ({
       ...prev,
-      address: scrapedProperty.address || "",
-      propertyName: scrapedProperty.address || "", // Use address as property name
+      // Address fields
+      propertyName: `${parsedAddress.streetAddress} - Foreclosure Opportunity`, // Create meaningful property name
+      address: parsedAddress.streetAddress,
+      city: parsedAddress.city,
+      state: parsedAddress.state,
+      zipCode: parsedAddress.zipCode,
+
+      // Financial data
       purchaseCost: parseFloat(scrapedProperty.price) || 0,
-      // Add other field mappings as needed
+
+      // Additional fields from scraping
+      defendant: scrapedProperty.defendant || "",
+      plaintiff: scrapedProperty.plaintiff || "",
+      sheriff_number: scrapedProperty.sheriff_number || "",
     }));
 
     toast.info("Property Details Pre-filled from Scraped Data");
