@@ -31,13 +31,13 @@ class Property(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id')) # Many to one relationship w/User
     
     # Foreclosure Fields If Applicable
-    detail_link = db.Column(db.String(1024))  # For storing the civil view detail link
-    property_id = db.Column(db.String(256))   # From civil view
+    detail_link = db.Column(db.String(1024))  
+    property_id = db.Column(db.String(256))   
     sheriff_number = db.Column(db.String(256))
     status_date = db.Column(db.Date)
-    plaintiff = db.Column(db.Text)            # Using Text for potentially long names
-    defendant = db.Column(db.Text)            # Using Text for potentially long names
-    zillow_url = db.Column(db.String(1024))   # For storing the Zillow listing URL
+    plaintiff = db.Column(db.Text)            
+    defendant = db.Column(db.Text)            
+    zillow_url = db.Column(db.String(1024))  
     
     # Location Section
     propertyName = db.Column(db.String(512))

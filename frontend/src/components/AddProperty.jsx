@@ -6,6 +6,15 @@ import "react-toastify/dist/ReactToastify.css";
 
 const AddProperty = () => {
   const [property, setProperty] = useState({
+    // Foreclosure Information
+    detail_link: "",
+    property_id: "",
+    sheriff_number: "",
+    status_date: "",
+    plaintiff: "",
+    defendant: "",
+    zillow_url: "",
+
     // Location Section
     propertyName: "",
     address: "",
@@ -153,12 +162,10 @@ const AddProperty = () => {
       const response = await fetch(
         "http://localhost:5000/api/scraped-properties",
         {
-          method: "GET",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             "Content-Type": "application/json",
           },
-          credentials: "same-origin",
         }
       );
 
@@ -227,13 +234,20 @@ const AddProperty = () => {
   };
 
   const handleUseScrapeData = (scrapedProperty) => {
-    // Map scaraped data to property form fields
     const parsedAddress = parseAddress(scrapedProperty.address);
 
     setProperty((prev) => ({
       ...prev,
+      // Foreclosure Information
+      detail_link: scrapedProperty.detail_link || "",
+      property_id: scrapedProperty.property_id || "",
+      sheriff_number: scrapedProperty.sheriff_number || "",
+      status_date: scrapedProperty.status_date || "",
+      plaintiff: scrapedProperty.plaintiff || "",
+      defendant: scrapedProperty.defendant || "",
+      zillow_url: scrapedProperty["Zillow URL"] || "",
       // Address fields
-      propertyName: `${parsedAddress.streetAddress} - Foreclosure Opportunity`, // Create meaningful property name
+      propertyName: `${parsedAddress.streetAddress} - Foreclosure Opportunity`,
       address: parsedAddress.streetAddress,
       city: parsedAddress.city,
       state: parsedAddress.state,
@@ -241,11 +255,6 @@ const AddProperty = () => {
 
       // Financial data
       purchaseCost: parseFloat(scrapedProperty.price) || 0,
-
-      // Additional fields from scraping
-      defendant: scrapedProperty.defendant || "",
-      plaintiff: scrapedProperty.plaintiff || "",
-      sheriff_number: scrapedProperty.sheriff_number || "",
     }));
 
     toast.info("Property Details Pre-filled from Scraped Data");
@@ -355,6 +364,20 @@ const AddProperty = () => {
         onSubmit={handleSubmit}
         className="grid grid-cols-1 md:grid-cols-2 gap-6"
       >
+        {/* Foreclosure Information Section */}
+        <div className="foreclosureInfo bg-gray-50 p-4 shadow-sm rounded-md">
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">
+            Foreclosure Information
+          </h2>
+          {renderInputField("Detail Link", "detail_link")}
+          {renderInputField("Property ID", "property_id")}
+          {renderInputField("Sheriff Number", "sheriff_number")}
+          {renderInputField("Status Date", "status_date", "date")}
+          {renderInputField("Plaintiff", "plaintiff")}
+          {renderInputField("Defendant", "defendant")}
+          {renderInputField("Zillow URL", "zillow_url")}
+        </div>
+
         {/* Location Section */}
         <div className="propHeader bg-gray-50 p-4 shadow-sm rounded-md">
           <h2 className="text-lg font-semibold text-gray-700 mb-4">Location</h2>
@@ -672,9 +695,7 @@ const AddProperty = () => {
 
         {/* Lender Information Section */}
         <div className="lenderInformation bg-gray-50 p-4 shadow-sm rounded-md">
-          <h2 className="text-lg font-semibold text-gray-700 mb-4">
-            Utility Information
-          </h2>
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">Lender</h2>
           {renderInputField("Lender", "lender")}
           {renderInputField("Lender Phone", "lenderPhone", "number", true)}
           {renderInputField("Refinance Lender", "refinanceLender")}

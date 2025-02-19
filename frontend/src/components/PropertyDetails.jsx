@@ -26,6 +26,7 @@ const PropertyDetails = ({ propertyId }) => {
   const [editMode, setEditMode] = useState(false);
   const [editedDetails, setEditedDetails] = useState({});
   const [expandedSections, setExpandedSections] = useState({
+    foreclosureInfo: false,
     location: false,
     departments: false,
     outlayToDate: true,
@@ -323,7 +324,10 @@ const PropertyDetails = ({ propertyId }) => {
         </>
       ) : (
         <>
-          <ChevronsDown size={18} className="transition-transform duration-200" />
+          <ChevronsDown
+            size={18}
+            className="transition-transform duration-200"
+          />
           <span>Expand All</span>
         </>
       )}
@@ -435,6 +439,51 @@ const PropertyDetails = ({ propertyId }) => {
             {renderExpandAllButton()}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Foreclosure Information Section */}
+            <div className="foreclosureInfo hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
+              {renderSectionTitle("Foreclosure Information", "foreclosureInfo")}
+              {expandedSections.foreclosureInfo && (
+                <>
+                  {renderEditableField(
+                    "Detail Link",
+                    "detail_link",
+                    editedDetails.detail_link || ""
+                  )}
+                  {renderEditableField(
+                    "Property ID",
+                    "property_id",
+                    editedDetails.property_id || ""
+                  )}
+                  {renderEditableField(
+                    "Sheriff Number",
+                    "sheriff_number",
+                    editedDetails.sheriff_number || ""
+                  )}
+                  {renderEditableField(
+                    "Status Date",
+                    "status_date",
+                    editedDetails.status_date || "",
+                    "date"
+                  )}
+                  {renderEditableField(
+                    "Plaintiff",
+                    "plaintiff",
+                    editedDetails.plaintiff || ""
+                  )}
+                  {renderEditableField(
+                    "Defendant",
+                    "defendant",
+                    editedDetails.defendant || ""
+                  )}
+                  {renderEditableField(
+                    "Zillow URL",
+                    "zillow_url",
+                    editedDetails.zillow_url || ""
+                  )}
+                </>
+              )}
+            </div>
+
             {/* Location Section */}
             <div className="propLocation hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
               {renderSectionTitle("Location", "location")}
