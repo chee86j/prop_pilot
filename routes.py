@@ -8,6 +8,9 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 from werkzeug.security import check_password_hash
 from datetime import timedelta
 from sqlalchemy.exc import IntegrityError
+from google.oauth2 import id_token
+from google.auth.transport import requests
+import os
 
 api = Blueprint('api', __name__)
 
@@ -45,6 +48,57 @@ def login():
         access_token = create_access_token(identity=user.email, expires_delta=timedelta(days=1))
         return jsonify(access_token=access_token), 200
     return jsonify({"message": "Invalid credentials"}), 401
+
+# Google OAuth route
+@api.route('/auth/google', methods=['POST'])
+def google_auth():
+    try:
+        token = request.json.get('credential')
+        
+        # Verify the token with Google
+        idinfo = id_token.verify_oauth2_token(
+            token,
+            requests.Request(),
+            os.getenv('GOOGLE_CLIENT_ID')
+        )
+
+        # Get user info from the token
+        email = idinfo['email']
+        first_name = idinfo.get('given_name', '')
+        last_name = idinfo.get('family_name', '')
+
+        # Check if user exists
+        user = User.query.filter_by(email=email).first()
+        
+        if not user:
+            # Create new user if doesn't exist
+            user = User(
+                email=email,
+                first_name=first_name,
+                last_name=last_name
+            )
+            db.session.add(user)
+            db.session.commit()
+
+        # Create access token
+        access_token = create_access_token(
+            identity=email,
+            expires_delta=timedelta(days=1)
+        )
+        
+        return jsonify({
+            'access_token': access_token,
+            'user': {
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name
+            }
+        }), 200
+
+    except ValueError:
+        return jsonify({'error': 'Invalid token'}), 401
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # -----USER PROFILE ROUTES-----
 # Get user profile route

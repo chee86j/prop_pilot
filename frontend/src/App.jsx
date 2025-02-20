@@ -27,6 +27,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 function App() {
   const [auth, setAuth] = useState({
@@ -62,36 +63,41 @@ function App() {
   }, []);
 
   return (
-    <Router>
-      <div>
-        <Navbar auth={auth} />
-        <ToastContainer />
-        <Routes>
-          <Route path="/" element={<Navigate to="/home" />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/profile" element={<Profile auth={auth} />} />
-          <Route path="/propertylist" element={<PropertyList auth={auth} />} />
-          <Route path="/addproperty" element={<AddProperty auth={auth} />} />
-          <Route
-            path="/property/:propertyId"
-            element={<PropertyDetailsWrapper auth={auth} />}
-          />
-          <Route
-            path="/constructiondraw/:propertyId"
-            element={<ConstructionDrawWrapper />}
-          />
-          <Route path="/excelstylegrid" element={<ExcelStyleGrid />} />
-          <Route path="/receipts/:drawId" element={<ReceiptsWrapper />} />
-          <Route path="/testimonials" element={<Testimonials />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/authform" element={<AuthForm />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/faq" element={<Faq />} />
-          <Route path="/lender" element={<Lender />} />
-          <Route path="/scraper-control" element={<ScraperControl />} />
-        </Routes>
-      </div>
-    </Router>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <Router>
+        <div>
+          <Navbar auth={auth} />
+          <ToastContainer />
+          <Routes>
+            <Route path="/" element={<Navigate to="/home" />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/profile" element={<Profile auth={auth} />} />
+            <Route
+              path="/propertylist"
+              element={<PropertyList auth={auth} />}
+            />
+            <Route path="/addproperty" element={<AddProperty auth={auth} />} />
+            <Route
+              path="/property/:propertyId"
+              element={<PropertyDetailsWrapper auth={auth} />}
+            />
+            <Route
+              path="/constructiondraw/:propertyId"
+              element={<ConstructionDrawWrapper />}
+            />
+            <Route path="/excelstylegrid" element={<ExcelStyleGrid />} />
+            <Route path="/receipts/:drawId" element={<ReceiptsWrapper />} />
+            <Route path="/testimonials" element={<Testimonials />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/authform" element={<AuthForm />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/faq" element={<Faq />} />
+            <Route path="/lender" element={<Lender />} />
+            <Route path="/scraper-control" element={<ScraperControl />} />
+          </Routes>
+        </div>
+      </Router>
+    </GoogleOAuthProvider>
   );
 }
 

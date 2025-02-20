@@ -8,6 +8,7 @@ import PlaneIcon from "../assets/icons/plane.svg";
 import LogoIcon from "../assets/icons/logo.svg";
 import AuthFormImage from "../assets/images/authform02.jpeg";
 import { Eye, EyeOff } from "lucide-react";
+import { useGoogleLogin } from "@react-oauth/google";
 
 const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -41,6 +42,35 @@ const AuthForm = () => {
       }
     } catch (error) {
       console.error("Error during Google login:", error);
+    }
+  };
+
+  const handleGoogleSuccess = async (response) => {
+    try {
+      const backendResponse = await fetch(
+        "http://localhost:5000/api/auth/google",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            credential: response.credential,
+          }),
+        }
+      );
+
+      const data = await backendResponse.json();
+
+      if (backendResponse.ok) {
+        localStorage.setItem("accessToken", data.access_token);
+        navigate("/propertylist");
+      } else {
+        setErrorMessage(data.error || "Google authentication failed");
+      }
+    } catch (error) {
+      setErrorMessage("An error occurred during Google authentication");
+      console.error("Google auth error:", error);
     }
   };
 
