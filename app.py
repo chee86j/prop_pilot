@@ -9,6 +9,7 @@ import os
 import subprocess
 import pandas as pd
 import logging
+from pathlib import Path
 
 from models import db
 from routes import api
@@ -63,62 +64,54 @@ CORS(app, resources={
 })
 
 @app.route('/api/run-scraper', methods=['POST'])
+@jwt_required()  # Add JWT requirement
 def run_scraper():
     try:
-        # Get the Downloads folder path
-        downloads_folder = os.path.join(os.path.expanduser("~"), "Downloads")
-        os.makedirs(downloads_folder, exist_ok=True)
+        print("Starting scraper process...")  # Beginning of process
+        # Create downloads directory in the scraper folder
+        scraper_dir = Path(__file__).parent / 'services' / 'scraper'
+        downloads_dir = scraper_dir / 'downloads'
+        downloads_dir.mkdir(parents=True, exist_ok=True)
 
-        # Get the absolute paths
-        project_root = os.path.dirname(os.path.abspath(__file__))
-        scraper_dir = os.path.join(project_root, 'services', 'scraper')
-        scraper_path = os.path.join(scraper_dir, 'main.py')
-        
-        logging.info(f"Project root: {project_root}")
-        logging.info(f"Scraper directory: {scraper_dir}")
-        logging.info(f"Scraper path: {scraper_path}")
-
-        if not os.path.exists(scraper_path):
-            return jsonify({'error': f'Scraper script not found at: {scraper_path}'}), 500
-
-        # Set up environment variables
+        # Set up environment
         env = os.environ.copy()
-        env['AUTO_CONFIRM'] = 'true'
-        env['PYTHONPATH'] = os.pathsep.join([
-            project_root,
-            scraper_dir,
-            os.path.join(scraper_dir, 'utils'),
-            env.get('PYTHONPATH', '')
-        ])
+        env['PYTHONPATH'] = str(scraper_dir.parent)
 
-        # Run the scraper from its directory
-        result = subprocess.run(
-            [sys.executable, 'main.py', downloads_folder],
+        # Run the scraper
+        process = subprocess.Popen(
+            [sys.executable, str(scraper_dir / 'main.py')],
             env=env,
-            capture_output=True,
-            text=True,
-            cwd=scraper_dir  # Set working directory to scraper folder
+            cwd=str(scraper_dir),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
         )
+        
+        stdout, stderr = process.communicate()
+        print(f"Scraper stdout: {stdout}")  # Actual scraper output
+        
+        if process.returncode != 0:
+            print(f"Scraper failed with error: {stderr}")  # Error cases
+            logging.error(f"Scraper failed: {stderr}")
+            return jsonify({'error': 'Scraper failed', 'details': stderr}), 500
 
-        if result.stderr:
-            logging.error(f"Scraper stderr: {result.stderr}")
-        if result.stdout:
-            logging.info(f"Scraper stdout: {result.stdout}")
+        # Check for output file
+        output_file = downloads_dir / 'merged_data.csv'
+        if output_file.exists():
+            print("Successfully generated scraped data file")  # Success case
+            df = pd.read_csv(output_file)
+            return jsonify({
+                'message': 'Scraper completed successfully',
+                'data': df.to_dict(orient='records')
+            }), 200
+        
+        print("No data file was generated")  # Failure case
+        return jsonify({'error': 'No data file was generated'}), 500
 
-        # Check for the output file
-        csv_file_path = os.path.join(downloads_folder, 'merged_data.csv')
-        if os.path.exists(csv_file_path):
-            df = pd.read_csv(csv_file_path)
-            return jsonify(df.to_dict(orient='records')), 200
-        else:
-            return jsonify({'error': 'No data file was generated. Check the logs for details.'}), 500
-
-    except subprocess.CalledProcessError as e:
-        logging.error(f"Scraper process error: {e.stderr}")
-        return jsonify({'error': f"Scraper process error: {e.stderr}"}), 500
     except Exception as e:
-        logging.error(f"Unexpected error: {str(e)}")
-        return jsonify({'error': f"Unexpected error: {str(e)}"}), 500
+        print(f"Error in scraper: {str(e)}")  # Console log
+        logging.error(f"Error running scraper: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/scraped-properties', methods=['GET', 'OPTIONS'])
 @jwt_required()

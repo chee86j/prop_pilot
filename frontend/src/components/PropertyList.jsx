@@ -131,24 +131,30 @@ const PropertyList = () => {
   const handleRunScraper = async () => {
     setIsScrapingData(true);
     try {
-      const response = await fetch("http://localhost:5000/api/run-scraper", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      });
+        console.log("Starting Scraper...");
+        const response = await fetch("http://localhost:5000/api/run-scraper", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+                "Content-Type": "application/json"
+            }
+        });
 
-      if (!response.ok) throw new Error("Failed to Run Foreclosure Scraper");
+        const data = await response.json();
 
-      toast.success(
-        "Foreclosure List Scraped Successfully! You can now use the Data to Add New Property."
-      );
+        if (!response.ok) {
+            throw new Error(data.error || data.details || "Failed to Run Foreclosure Scraper");
+        }
+
+        console.log("Scraper Completed Successfully:", data);
+        toast.success("Foreclosure List Scraped Successfully!");
     } catch (error) {
-      toast.error("Failed to Run Foreclosure Scraper: " + error.message);
-    } finally {
-      setIsScrapingData(false);
+        console.error("Scraper Error:", error);
+        toast.error("Failed to Run Foreclosure Scraper: " + error.message);
+      } finally {
+        setIsScrapingData(false);
     }
-  };
+};
 
   const columns = [
     {

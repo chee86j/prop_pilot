@@ -69,7 +69,7 @@ def export_formatted_data(formatted_data, output_file):
 def main():
     try:
         # Ensure downloads folder exists
-        downloads_folder = os.path.join(os.getcwd(), 'downloads')
+        downloads_folder = os.path.join(os.path.dirname(__file__), 'downloads')
         os.makedirs(downloads_folder, exist_ok=True)
         
         # Step 1: Scrape auction data
