@@ -150,3 +150,40 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# ADDITIONAL SITES FOR SCRAPING (Northern Jersey)
+
+# ---General Statistics-----
+# https://www.propertyshark.com/mason/info/Property-Taxes/NJ/Sussex-County/
+# General Northern & Central Jersey County Assessment Records Search: https://taxrecords-nj.com/pub/cgi/prc6.cgi?district=1400&ms_user=ctb00
+# Demographics and Statistics: https://www.city-data.com/
+
+# ---Morris---
+# Morris County Clerk: https://mcclerksng.co.morris.nj.us/publicsearch/
+# Morris County Tax Records: https://mcweb1.co.morris.nj.us/MCTaxBoard/SearchTaxRecords.aspx
+# Morris County Assessment Records Search: https://taxrecords-nj.com/pub/cgi/prc6.cgi?district=1400&ms_user=ctb14
+
+# ---Sussex---
+# Sussex County Assessment Records Search: https://taxrecords-nj.com/pub/cgi/prc6.cgi?district=1901&ms_user=ctb19
+# Sussex County Clerk: https://cefile.sussex.nj.us/publicsearch/
+
+# ---Bergen---
+# Bergen County Clerk: https://bclrs.co.bergen.nj.us/browserview/
+# Bergen County Assessment Records Search: https://taxrecords-nj.com/pub/cgi/prc6.cgi?district=0200&ms_user=ctb02
+
+# ---Essex---
+# Essex County Clerk: https://press.essexregister.com/prodpress/clerk/ClerkHome.aspx?op=basic
+# Essex County Assessment Records Search: https://www.essexcountynj.gov/clerk/
+# Essex County Tax Data Hub: https://www.taxdatahub.com/6229fbf0ce4aef911f9de7bc/Essex%20County
+
+# ---Hudson---
+# Hudson County Clerk: https://acclaim.hcnj.us/AcclaimWeb/#
+# Hudson County Assessment Records Search: https://taxrecords-nj.com/pub/cgi/prc6.cgi?district=0901&ms_user=ctb09
+
+# ---Union---
+# Union County Clerk: https://clerk.ucnj.org/UCPA/DocIndex
+# Union County Assessment Records Search: https://taxrecords-nj.com/pub/cgi/prc6.cgi?district=2001&ms_user=ctb20
+
+# ---Warren---
+# Warren County Clerk: https://www.warrencountynj.gov/clerk/
+# Warren County Assessment Records Search: https://taxrecords-nj.com/pub/cgi/prc6.cgi?district=2101&ms_user=ctb21
