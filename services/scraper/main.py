@@ -5,16 +5,11 @@ import pandas as pd
 from scraper import parse_page_selenium
 from database import connect_db, create_table, insert_data, close_db
 from merge_csv import merge_csv_files
+from utils.logger import setup_logger
+from utils.exceptions import ScraperException, DatabaseException, NetworkException
+import traceback
 
-# Configure logging 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s:%(levelname)s:%(message)s',
-    handlers=[
-        logging.FileHandler('scraper.log'),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
+logger = setup_logger(__name__, 'logs/scraper.log')
 
 def format_zillow_url(address):
     """Convert the address to a Zillow URL format."""
@@ -66,7 +61,13 @@ def export_formatted_data(formatted_data, output_file):
     except Exception as e:
         logging.error(f"Error exporting frontend data: {e}")
 
-def main():
+def main() -> bool:
+    """
+    Main scraper execution function
+    
+    Returns:
+        bool: True if scraping completed successfully, False otherwise
+    """
     try:
         # Ensure downloads folder exists
         downloads_folder = os.path.join(os.path.dirname(__file__), 'downloads')
@@ -74,65 +75,82 @@ def main():
         
         # Step 1: Scrape auction data
         url = "https://salesweb.civilview.com/Sales/SalesSearch?countyId=9"
-        logging.info(f"Starting to scrape the page: {url}")
+        logger.info("🔄 Starting page scrape: %s", url)
         
         data = parse_page_selenium(url)
         if not data:
-            logging.error("No data was found from scraping")
-            return
+            raise ScraperException("No data returned from scraping")
 
-        # Step 2: Save to database
+        # Step 2: Database operations
+        logger.info("💾 Initializing database connection")
         conn = connect_db()
         if not conn:
-            logging.error("Failed to connect to database")
-            return
+            raise DatabaseException("Failed to establish database connection")
 
         try:
             create_table(conn)
             insert_data(conn, data)
             
-            # Step 3: Export initial data to CSV
+            # Step 3: Export data processing
+            logger.info("📊 Processing and exporting data")
+            
             exported_csv = os.path.join(downloads_folder, "exported_data.csv")
             df = pd.DataFrame(data)
             df.to_csv(exported_csv, index=False)
-            logging.info(f"Data exported to {exported_csv}")
+            logger.info("✅ Data exported to %s", exported_csv)
 
             # Step 4: Generate Zillow URLs
+            logger.info("🏠 Generating Zillow URLs")
             zillow_csv = os.path.join(downloads_folder, "exported_zillow_urls.csv")
             results = []
             for address in df['address']:
-                zillow_url = format_zillow_url(address)
-                if zillow_url:
-                    results.append({'address': address, 'Zillow URL': zillow_url})
-            
-            pd.DataFrame(results).to_csv(zillow_csv, index=False)
-            logging.info(f"Zillow URLs exported to {zillow_csv}")
+                try:
+                    zillow_url = format_zillow_url(address)
+                    if zillow_url:
+                        results.append({'address': address, 'Zillow URL': zillow_url})
+                except Exception as e:
+                    logger.warning("⚠️ Failed to generate Zillow URL for address %s: %s", address, e)
 
-            # Step 5: Merge the files
+            pd.DataFrame(results).to_csv(zillow_csv, index=False)
+            logger.info("✅ Zillow URLs exported to %s", zillow_csv)
+
+            # Step 5: Merge files
+            logger.info("🔄 Merging data files")
             output_file = os.path.join(downloads_folder, 'merged_data.csv')
             merge_csv_files(
                 address_file=exported_csv,
                 zillow_url_file=zillow_csv,
                 output_file=output_file
             )
-            logging.info(f"Files merged successfully to {output_file}")
+            logger.info("✅ Files merged successfully to %s", output_file)
 
+            return True
+
+        except Exception as e:
+            logger.error("❌ Database operation failed: %s\n%s", str(e), traceback.format_exc())
+            raise DatabaseException(f"Database operation failed: {str(e)}")
+            
         finally:
             close_db(conn)
+            logger.info("🔌 Database connection closed")
 
-        return True
-
+    except ScraperException as e:
+        logger.error("❌ Scraping failed: %s\n%s", str(e), traceback.format_exc())
+        return False
+    except DatabaseException as e:
+        logger.error("❌ Database error: %s\n%s", str(e), traceback.format_exc())
+        return False
     except Exception as e:
-        logging.error(f"Error in main: {str(e)}")
+        logger.error("❌ Unexpected error: %s\n%s", str(e), traceback.format_exc())
         return False
 
 if __name__ == "__main__":
     success = main()
     if success:
-        logging.info("Script completed successfully")
+        logger.info("✅ Script completed successfully")
         sys.exit(0)
     else:
-        logging.error("Script failed to complete")
+        logger.error("❌ Script failed to complete")
         sys.exit(1)
         
 # In order to start the scraper you will need to run the following command:

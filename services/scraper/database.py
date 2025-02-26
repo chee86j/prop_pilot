@@ -1,8 +1,11 @@
 import sqlite3
 import logging
+from utils.logger import setup_logger
+from utils.exceptions import DatabaseException
+import traceback
 
 # Configure logging
-logging.basicConfig(filename='database.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
+logger = setup_logger(__name__, 'logs/database.log')
 
 DATABASE_NAME = 'auction_data.db'
 
@@ -29,28 +32,42 @@ def migrate_database(conn):
             if column_name not in columns:
                 try:
                     cursor.execute(f"ALTER TABLE auctions ADD COLUMN {column_name} {column_type}")
-                    logging.info(f"Added new column: {column_name}")
+                    logger.info(f"Added new column: {column_name}")
                 except sqlite3.OperationalError as e:
-                    logging.warning(f"Column {column_name} already exists or error: {e}")
+                    logger.warning(f"Column {column_name} already exists or error: {e}")
         
         conn.commit()
-        logging.info("Database migration completed successfully")
+        logger.info("✅ Database migration completed successfully")
     except sqlite3.Error as e:
-        logging.error(f"Error during database migration: {e}")
+        logger.error(f"❌ Error during database migration: {e}")
 
-def connect_db():
-    """Establish a connection to the SQLite database and ensure schema is up to date."""
+def connect_db() -> sqlite3.Connection:
+    """
+    Establish a connection to the SQLite database and ensure schema is up to date
+    
+    Returns:
+        sqlite3.Connection: Database connection object
+        
+    Raises:
+        DatabaseException: If connection or migration fails
+    """
     try:
+        logger.info("🔄 Connecting to database: %s", DATABASE_NAME)
         conn = sqlite3.connect(DATABASE_NAME)
+        
         # Create table if it doesn't exist
         create_table(conn)
+        
         # Migrate database to add new columns
         migrate_database(conn)
-        logging.info(f"Connected to the database: {DATABASE_NAME}")
+        
+        logger.info("✅ Database connection and setup successful")
         return conn
+        
     except sqlite3.Error as e:
-        logging.error(f"Database connection error: {e}")
-        return None
+        error_msg = f"Database connection error: {str(e)}"
+        logger.error("❌ %s\n%s", error_msg, traceback.format_exc())
+        raise DatabaseException(error_msg)
 
 def create_table(conn):
     """Create the auctions table if it doesn't exist, with additional columns."""
@@ -75,9 +92,9 @@ def create_table(conn):
             )
         ''')
         conn.commit()
-        logging.info("Auctions table created or already exists with additional columns.")
+        logger.info("Auctions table created or already exists with additional columns.")
     except sqlite3.Error as e:
-        logging.error(f"Error creating table: {e}")
+        logger.error(f"Error creating table: {e}")
 
 def insert_data(conn, data):
     """Insert data into the auctions table, ignoring entries that would cause a unique constraint violation."""
@@ -89,9 +106,9 @@ def insert_data(conn, data):
             VALUES (?, ?, ?, ?, ?, ?, ?)
         ''', [(entry['detail_link'], entry['sheriff_number'], entry['status_date'], entry['plaintiff'], entry['defendant'], entry['address'], entry['price']) for entry in data])
         conn.commit()
-        logging.info(f"Inserted or ignored {cursor.rowcount} rows into the auctions table.")
+        logger.info(f"Inserted or ignored {cursor.rowcount} rows into the auctions table.")
     except sqlite3.Error as e:
-        logging.error(f"Error inserting data: {e}")
+        logger.error(f"Error inserting data: {e}")
 
 def update_auction_details(conn, detail_link, details):
     """Update an auction entry with additional details."""
@@ -119,9 +136,9 @@ def update_auction_details(conn, detail_link, details):
         # Sync changes to CSV
         sync_db_to_csv(conn)
         
-        logging.info(f"Updated details for auction with detail_link: {detail_link}")
+        logger.info(f"Updated details for auction with detail_link: {detail_link}")
     except sqlite3.Error as e:
-        logging.error(f"Error updating auction details: {e}")
+        logger.error(f"Error updating auction details: {e}")
 
 def sync_db_to_csv(conn, csv_file='merged_data.csv'):
     """Synchronize database contents to CSV file."""
@@ -160,13 +177,13 @@ def sync_db_to_csv(conn, csv_file='merged_data.csv'):
         
         # Save to CSV
         df.to_csv(csv_file, index=False)
-        logging.info(f"Database synchronized to {csv_file}")
+        logger.info(f"Database synchronized to {csv_file}")
     except Exception as e:
-        logging.error(f"Error synchronizing database to CSV: {e}")
+        logger.error(f"Error synchronizing database to CSV: {e}")
         raise
 
 def close_db(conn):
     """Close the database connection."""
     if conn:
         conn.close()
-        logging.info("Database connection closed.")
+        logger.info("Database connection closed.")

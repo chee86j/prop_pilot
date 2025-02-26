@@ -35,9 +35,9 @@ def test_db_connection():
     try:
         with app.app_context():
             db.engine.connect()
-            print("Database connection successful!")
+            print("✅ Database connection successful!")
     except Exception as e:
-        print(f"Database connection failed: {e}")
+        print(f"❌ Database connection failed: {e}")
         raise e
 
 # Test connection immediately
@@ -48,7 +48,7 @@ with app.app_context():
     try:
         db.create_all()
     except Exception as e:
-        print(f"Error creating tables: {e}")
+        print(f"❌ Error creating tables: {e}")
 
 # Configure JWT
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
@@ -67,7 +67,7 @@ CORS(app, resources={
 @jwt_required()  # Add JWT requirement
 def run_scraper():
     try:
-        print("Starting scraper process...")  # Beginning of process
+        print("✅ Starting scraper process...")  # Beginning of process
         # Create downloads directory in the scraper folder
         scraper_dir = Path(__file__).parent / 'services' / 'scraper'
         downloads_dir = scraper_dir / 'downloads'
@@ -88,29 +88,29 @@ def run_scraper():
         )
         
         stdout, stderr = process.communicate()
-        print(f"Scraper stdout: {stdout}")  # Actual scraper output
+        print(f"✅ Scraper stdout: {stdout}")  # Actual scraper output
         
         if process.returncode != 0:
-            print(f"Scraper failed with error: {stderr}")  # Error cases
-            logging.error(f"Scraper failed: {stderr}")
-            return jsonify({'error': 'Scraper failed', 'details': stderr}), 500
+            print(f"❌ Scraper failed with error: {stderr}")  # Error cases
+            logging.error(f"❌ Scraper failed: {stderr}")
+            return jsonify({'error': '❌ Scraper failed', 'details': stderr}), 500
 
         # Check for output file
         output_file = downloads_dir / 'merged_data.csv'
         if output_file.exists():
-            print("Successfully generated scraped data file")  # Success case
+            print("✅ Successfully generated scraped data file")  # Success case
             df = pd.read_csv(output_file)
             return jsonify({
-                'message': 'Scraper completed successfully',
+                'message': '✅ Scraper completed successfully',
                 'data': df.to_dict(orient='records')
             }), 200
         
-        print("No data file was generated")  # Failure case
-        return jsonify({'error': 'No data file was generated'}), 500
+        print("❌ No data file was generated")  # Failure case
+        return jsonify({'error': '❌ No data file was generated'}), 500
 
     except Exception as e:
-        print(f"Error in scraper: {str(e)}")  # Console log
-        logging.error(f"Error running scraper: {str(e)}")
+        print(f"❌ Error in scraper: {str(e)}")  # Console log
+        logging.error(f"❌ Error running scraper: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/scraped-properties', methods=['GET', 'OPTIONS'])
