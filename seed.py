@@ -1,9 +1,10 @@
 import random
 from app import app
-from datetime import date
+from datetime import date, timedelta
 from models import db, User, Property, Phase
 from werkzeug.security import generate_password_hash
 from images import avatar_image_base64
+import math
 
 # Constants
 PROPERTY_PREFIXES = ["Cozy", "Spacious", "Modern", "Luxurious", "Charming",
@@ -116,16 +117,123 @@ def generate_property_data(user_id):
         city=borough
     )
 
-def create_initial_phase(property_id):
-    """Create an initial phase for a property"""
-    return Phase(
-        property_id=property_id,
-        name="Initial Phase - Start Adding Phases Here",
-        startDate=date(2025, 1, 2),
-        expectedStartDate=date(2025, 1, 1),
-        endDate=date(2025, 1, 2),
-        expectedEndDate=date(2025, 1, 1)
-    )
+def calculate_rehab_category(purchase_cost, total_rehab_cost):
+    """Calculate the renovation category based on rehab cost as percentage of purchase price"""
+    if purchase_cost == 0:
+        return "light"
+    
+    rehab_percentage = (total_rehab_cost / purchase_cost) * 100
+    
+    if rehab_percentage <= 10:
+        return "light"
+    elif rehab_percentage <= 20:
+        return "medium"
+    elif rehab_percentage <= 30:
+        return "heavy"
+    else:
+        return "full_gut"
+
+def get_phase_duration(phase_name, rehab_category):
+    """Get the duration range for a phase based on the renovation category"""
+    # Base durations in days
+    durations = {
+        "Finding the Deal": (14, 21),  # 2-3 weeks
+        "Understanding Financials": (14, 21),  # 2-3 weeks
+        "Loan and Lender Consideration": (14, 21),  # 2-3 weeks
+        "Purchase and Renovation Costs": (5, 7),  # 1 week
+        "Due Diligence": (14, 21),  # 2-3 weeks
+        "Contract Negotiations": (10, 14),  # 2 weeks
+        "Legal and Compliance Steps": (10, 14),  # 2 weeks
+        "Renovation Preparation": (14, 21),  # 2-3 weeks
+        "Demolition (Operator)": {
+            "light": (5, 7),
+            "medium": (7, 14),
+            "heavy": (14, 21),
+            "full_gut": (21, 28)
+        },
+        "Rough-In (Operator)": {
+            "light": (14, 21),
+            "medium": (21, 35),
+            "heavy": (35, 42),
+            "full_gut": (42, 56)
+        },
+        "Rough-In Inspections (Municipal)": (5, 10),  # 1-2 weeks
+        "Utility Setup": (7, 14),  # 1-2 weeks
+        "Finals (Operator)": {
+            "light": (14, 21),
+            "medium": (21, 35),
+            "heavy": (35, 42),
+            "full_gut": (42, 56)
+        },
+        "Final Inspections (Municipal)": (5, 10),  # 1-2 weeks
+        "Listing and Marketing": (30, 60)  # 1-2 months
+    }
+    
+    if phase_name in ["Demolition (Operator)", "Rough-In (Operator)", "Finals (Operator)"]:
+        return durations[phase_name][rehab_category]
+    return durations.get(phase_name, (7, 14))  # Default 1-2 weeks if not specified
+
+def create_property_phases(property_id, purchase_cost, total_rehab_cost):
+    """Create realistic phases for a property based on its characteristics"""
+    phases = []
+    rehab_category = calculate_rehab_category(purchase_cost, total_rehab_cost)
+    
+    # Phase names in chronological order
+    phase_names = [
+        "Finding the Deal",
+        "Understanding Financials",
+        "Loan and Lender Consideration",
+        "Purchase and Renovation Costs",
+        "Due Diligence",
+        "Contract Negotiations",
+        "Legal and Compliance Steps",
+        "Renovation Preparation",
+        "Demolition (Operator)",
+        "Rough-In (Operator)",
+        "Rough-In Inspections (Municipal)",
+        "Utility Setup",
+        "Finals (Operator)",
+        "Final Inspections (Municipal)",
+        "Listing and Marketing"
+    ]
+    
+    # Start date will be slightly in the past to simulate ongoing projects
+    current_date = date.today() - timedelta(days=random.randint(30, 90))
+    
+    for phase_name in phase_names:
+        min_days, max_days = get_phase_duration(phase_name, rehab_category)
+        
+        # Add some buffer for expected dates (slightly optimistic)
+        expected_duration = random.randint(min_days, max_days)
+        actual_duration = expected_duration + random.randint(0, 7)  # 0-7 days delay
+        
+        expected_start = current_date
+        actual_start = current_date + timedelta(days=random.randint(0, 3))  # 0-3 days delay in starting
+        
+        expected_end = expected_start + timedelta(days=expected_duration)
+        actual_end = actual_start + timedelta(days=actual_duration)
+        
+        # Create the phase
+        phase = Phase(
+            property_id=property_id,
+            name=phase_name,
+            expectedStartDate=expected_start,
+            startDate=actual_start,
+            expectedEndDate=expected_end,
+            endDate=actual_end
+        )
+        phases.append(phase)
+        
+        # Update current_date for next phase
+        # Some phases can overlap, so we don't always move the full duration
+        if phase_name in ["Understanding Financials", "Legal and Compliance Steps", "Utility Setup"]:
+            # These phases can overlap with others, so move only 25% of the duration
+            current_date += timedelta(days=math.ceil(actual_duration * 0.25))
+        else:
+            # Regular phases move the full duration plus a small gap
+            current_date = actual_end + timedelta(days=random.randint(1, 3))
+    
+    return phases
 
 def seed_data():
     """Main function to seed the database"""
@@ -145,24 +253,107 @@ def seed_data():
         # Commit all Properties to Establish IDs
         all_properties = Property.query.all()
         
-        # Create Initial Phases for all Properties based on IDs
-        phases = []
+        # Create phases for each property
         for property in all_properties:
-            phase = Phase(
-                property_id=property.id,
-                name="Initial Phase",
-                startDate=date(2025, 1, 2),
-                expectedStartDate=date(2025, 1, 1),
-                endDate=date(2025, 1, 2),
-                expectedEndDate=date(2025, 1, 1)
-            )
-            phases.append(phase)
+            phases = create_property_phases(property.id, property.purchaseCost, property.totalRehabCost)
+            for phase in phases:
+                db.session.add(phase)
 
-        # Bulk Save Phases
-        db.session.bulk_save_objects(phases)
         db.session.commit()
 
         print("Seed data inserted successfully.")
+
+def seed_database():
+    """Seed the database with initial data"""
+    # Create test user
+    test_user = User(
+        email="test@example.com",
+        password_hash=generate_password_hash("password123"),
+        first_name="Test",
+        last_name="User"
+    )
+    db.session.add(test_user)
+    db.session.commit()
+
+    # Create some test properties
+    properties = []
+    for i in range(5):
+        # Generate realistic property values following the 70% Rule
+        arv = random.randint(200000, 500000)  # After Repair Value
+        max_purchase = arv * 0.7  # 70% of ARV
+        purchase_cost = max_purchase - random.randint(10000, 30000)  # Slightly below max for profit
+        total_rehab_cost = (max_purchase - purchase_cost) * random.uniform(0.8, 1.2)  # Variation in rehab costs
+        
+        property = Property(
+            user_id=test_user.id,
+            propertyName=f"Test Property {i+1}",
+            address=f"123 Test St #{i+1}",
+            city="Test City",
+            state="TS",
+            zipCode="12345",
+            purchaseCost=purchase_cost,
+            totalRehabCost=total_rehab_cost,
+            arvSalePrice=arv
+        )
+        properties.append(property)
+        db.session.add(property)
+    
+    db.session.commit()
+
+    # Create phases for each property
+    for property in properties:
+        phases = create_property_phases(property.id, property.purchaseCost, property.totalRehabCost)
+        for phase in phases:
+            db.session.add(phase)
+    
+    db.session.commit()
+
+# Real Estate Investment Logic Explanation
+"""
+The seeding logic above implements several key real estate investment principles:
+
+1. The 70% Rule:
+   - This fundamental rule in house flipping states that investors should pay no more than 
+     70% of the After Repair Value (ARV) minus repair costs.
+   - Formula: Maximum Purchase Price = (ARV × 70%) - Repair Costs
+   - This builds in a 30% margin for profit and other costs (closing costs, holding costs, etc.)
+
+2. Renovation Budget Categories (Standardized for Simplicity as Realistically Times Vary):
+   - Light Rehab (5-10% of purchase price): 2-3 months
+     * Cosmetic updates, paint, flooring, fixtures
+   - Medium Rehab (10-20% of purchase price): 4-6 months
+     * Kitchen/bath remodels, some systems updates
+   - Heavy Rehab (20-30% of purchase price): 6-8 months
+     * Major renovations, systems replacement
+   - Full Gut (>30% of purchase price): 8-12 months
+     * Complete property overhaul, structural changes
+
+3. Project Timeline Structure:
+   - Initial Phase (1-2 months):
+     * Deal finding, financial analysis, and lending
+   - Pre-Construction (1-1.5 months):
+     * Due diligence, contracts, legal compliance
+   - Construction Phases (varies by rehab category):
+     * Duration scales with renovation scope
+     * Includes buffer time for inspections and delays
+   - Marketing Phase (up to 2 months):
+     * Property listing and sale
+
+4. Timeline Realism:
+   - Includes parallel phases where appropriate
+   - Adds random delays to simulate real-world conditions
+   - More extensive renovations get longer timelines
+   - Builds in inspection and approval periods
+   - Accounts for potential weather delays in exterior work
+
+5. Financial Relationships:
+   - Purchase price and rehab costs are related to ARV
+   - Larger rehab budgets get longer timelines
+   - Includes buffer in both schedule and budget
+
+This seeding structure creates realistic property scenarios that follow
+industry best practices and common investment strategies in real estate.
+"""
 
 if __name__ == "__main__":
     seed_data()

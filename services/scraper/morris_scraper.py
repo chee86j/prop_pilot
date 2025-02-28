@@ -125,7 +125,7 @@ def main():
         search_query = extract_primary_name(defendant)
 
         while True:
-            logging.info(f"Starting search for defendant: {search_query}")
+            logging.info(f"🔄Starting search for defendant: {search_query}")
             print(f"Searching for: {search_query}")
 
             # Fetch the page HTML

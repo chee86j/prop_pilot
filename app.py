@@ -67,7 +67,7 @@ CORS(app, resources={
 @jwt_required()  # Add JWT requirement
 def run_scraper():
     try:
-        print("✅ Starting scraper process...")  # Beginning of process
+        print("🔄 Starting scraper process...")  # Beginning of process
         # Create downloads directory in the scraper folder
         scraper_dir = Path(__file__).parent / 'services' / 'scraper'
         downloads_dir = scraper_dir / 'downloads'

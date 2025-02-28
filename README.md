@@ -141,7 +141,14 @@ db.create_all()
 
 ### Running the Application
 
-1. To run the frontend, navigate to the `/frontend` directory
+1. To run the backend,
+   Execute
+   MacOs - `python3 app.py` or `flask run`
+   Windows - `python app.py` in the root directory.
+
+   The backend server will be accessible at `http://localhost:5000`.
+
+2. To run the frontend, navigate to the `/frontend` directory
    Execute
    MacOs - `npm start` or `vite`
    Windows - `npm run dev`
@@ -149,14 +156,11 @@ db.create_all()
    The frontend will typically be accessible at
    `http://localhost:3000` or `http://localhost:5173`.
 
-2. To run the backend,
-   Execute
-   MacOs - `python3 app.py` or `flask run`
-   Windows - `python app.py` in the root directory.
+3. Optionally, you can seed the database with data with an example user by running the following command in the root directory:
+   MacOs - `python3 seed.py`
+   Windows - `python seed.py`
 
-   The backend server will be accessible at `http://localhost:5000`.
-
-### Running Separate Foreclosure Listing Scraper
+### Running Separate Foreclosure Listing Scraper Manually vs through the Property List Page
 
 1. ChromeDriver: Download the ChromeDriver that matches your Chrome version (https://googlechromelabs.github.io/chrome-for-testing/)
    By default the Win64 version when you clone this repo is used in the services\scraper folder

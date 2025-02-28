@@ -7,6 +7,7 @@ import "ag-grid-community/styles/ag-theme-alpine.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { fetchUserProfile } from "../utils/fetchUserProfile";
+import { formatCurrency } from "../utils/formatting";
 import SkyScrapers from "../assets/icons/skyscrapers.png";
 
 const PropertyList = () => {
@@ -31,7 +32,7 @@ const PropertyList = () => {
     })
       .then((response) => response.json())
       .then((data) => setRowData(data))
-      .catch((error) => console.error("Error fetching properties:", error));
+      .catch((error) => console.error("🚫 Error fetching properties:", error));
     fetchUserProfile(setUser);
   }, []);
 
@@ -43,7 +44,7 @@ const PropertyList = () => {
     if (propertyId) {
       navigate(`/property/${propertyId}`);
     } else {
-      console.error("PropertyId is undefined");
+      console.error("🚫 PropertyId is undefined");
     }
   };
 
@@ -58,8 +59,12 @@ const PropertyList = () => {
         .then((response) => {
           if (!response.ok) throw new Error("Failed to delete property");
           setRowData((prevData) => prevData.filter((row) => row.id !== id));
+          toast.success("🗑️ Property deleted successfully!");
         })
-        .catch((error) => console.error("Error deleting property:", error));
+        .catch((error) => {
+          console.error("🚫 Error deleting property:", error);
+          toast.error("❌ Failed to delete property: " + error.message);
+        });
     }
   };
 
@@ -131,30 +136,32 @@ const PropertyList = () => {
   const handleRunScraper = async () => {
     setIsScrapingData(true);
     try {
-        console.log("Starting Scraper...");
-        const response = await fetch("http://localhost:5000/api/run-scraper", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
-                "Content-Type": "application/json"
-            }
-        });
+      console.log("🤖 Starting Scraper...");
+      const response = await fetch("http://localhost:5000/api/run-scraper", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          "Content-Type": "application/json",
+        },
+      });
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (!response.ok) {
-            throw new Error(data.error || data.details || "Failed to Run Foreclosure Scraper");
-        }
+      if (!response.ok) {
+        throw new Error(
+          data.error || data.details || "Failed to Run Foreclosure Scraper"
+        );
+      }
 
-        console.log("Scraper Completed Successfully:", data);
-        toast.success("Foreclosure List Scraped Successfully!");
+      console.log("✅ Scraper Completed Successfully:", data);
+      toast.success("🏠 Foreclosure List Scraped Successfully!");
     } catch (error) {
-        console.error("Scraper Error:", error);
-        toast.error("Failed to Run Foreclosure Scraper: " + error.message);
-      } finally {
-        setIsScrapingData(false);
+      console.error("🚫 Scraper Error:", error);
+      toast.error("❌ Failed to Run Foreclosure Scraper: " + error.message);
+    } finally {
+      setIsScrapingData(false);
     }
-};
+  };
 
   const columns = [
     {
@@ -177,36 +184,21 @@ const PropertyList = () => {
       field: "purchaseCost",
       filter: false,
       floatingFilter: false,
-      valueFormatter: (params) => {
-        return new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-        }).format(params.value);
-      },
+      valueFormatter: (params) => formatCurrency(params.value),
     },
     {
       headerName: "Total Rehab Cost",
       field: "totalRehabCost",
       filter: false,
       floatingFilter: false,
-      valueFormatter: (params) => {
-        return new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-        }).format(params.value);
-      },
+      valueFormatter: (params) => formatCurrency(params.value),
     },
     {
       headerName: "ARV Sale Price",
       field: "arvSalePrice",
       filter: false,
       floatingFilter: false,
-      valueFormatter: (params) => {
-        return new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-        }).format(params.value);
-      },
+      valueFormatter: (params) => formatCurrency(params.value),
     },
     {
       headerName: "Actions",

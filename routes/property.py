@@ -166,7 +166,10 @@ def get_properties():
             'city': property.city,
             'state': property.state,
             'zipCode': property.zipCode,
-            'county': property.county
+            'county': property.county,
+            'purchaseCost': property.purchaseCost,
+            'totalRehabCost': property.totalRehabCost,
+            'arvSalePrice': property.arvSalePrice
         } for property in properties]), 200
     return jsonify({"message": "User not found"}), 404
 
