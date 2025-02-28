@@ -15,6 +15,7 @@ import { ChevronsUp, ChevronsDown } from "lucide-react";
 import { Download } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ResearchDropdown from "./ResearchDropdown";
 
 const PropertyDetails = ({ propertyId }) => {
   const detailsPrintRef = useRef(null);
@@ -362,6 +363,10 @@ const PropertyDetails = ({ propertyId }) => {
           </p>
         </div>
       </header>
+
+      {/* Add Due Diligence Dropdown */}
+      <ResearchDropdown />
+
       <button
         onClick={handlePrintDetails}
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"

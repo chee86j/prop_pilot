@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ResearchDropdown from "./ResearchDropdown";
 
 const AddProperty = () => {
   const [property, setProperty] = useState({
@@ -189,38 +190,401 @@ const AddProperty = () => {
   // Helper function to parse address into parts to fill form fields
   const parseAddress = (fullAddress) => {
     try {
-      // Example address format: "48 New Read Street Pequannock NJ 07440"
-      const parts = fullAddress.trim().split(" ");
+      // Normalize the address string
+      const normalizedAddress = fullAddress.trim().replace(/\s+/g, " ");
 
-      // Get the ZIP code (last element)
-      const zipCode = parts.pop();
+      // Common state abbreviations
+      const stateAbbreviations = new Set([
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY",
+      ]);
 
-      // Get the state (second to last element)
-      const state = parts.pop();
+      // Northern New Jersey cities and neighborhoods
+      const northernNJCities = new Set([
+        // Bergen County
+        "Allendale",
+        "Alpine",
+        "Bergenfield",
+        "Bogota",
+        "Carlstadt",
+        "Cliffside Park",
+        "Closter",
+        "Cresskill",
+        "Demarest",
+        "Dumont",
+        "East Rutherford",
+        "Edgewater",
+        "Elmwood Park",
+        "Emerson",
+        "Englewood",
+        "Englewood Cliffs",
+        "Fair Lawn",
+        "Fairview",
+        "Fort Lee",
+        "Franklin Lakes",
+        "Garfield",
+        "Glen Rock",
+        "Hackensack",
+        "Harrington Park",
+        "Hasbrouck Heights",
+        "Haworth",
+        "Hillsdale",
+        "Ho-Ho-Kus",
+        "Leonia",
+        "Little Ferry",
+        "Lodi",
+        "Lyndhurst",
+        "Mahwah",
+        "Maywood",
+        "Midland Park",
+        "Montvale",
+        "Moonachie",
+        "New Milford",
+        "North Arlington",
+        "Northvale",
+        "Norwood",
+        "Oakland",
+        "Old Tappan",
+        "Oradell",
+        "Palisades Park",
+        "Paramus",
+        "Park Ridge",
+        "Ramsey",
+        "Ridgefield",
+        "Ridgefield Park",
+        "Ridgewood",
+        "River Edge",
+        "River Vale",
+        "Rochelle Park",
+        "Rockleigh",
+        "Rutherford",
+        "Saddle Brook",
+        "Saddle River",
+        "South Hackensack",
+        "Teaneck",
+        "Tenafly",
+        "Teterboro",
+        "Upper Saddle River",
+        "Waldwick",
+        "Wallington",
+        "Washington Township",
+        "Westwood",
+        "Wood-Ridge",
+        "Woodcliff Lake",
+        "Wyckoff",
 
-      // Get the city (could be multiple words)
-      let city = "";
-      while (
-        parts.length > 0 &&
-        !parts[parts.length - 1].match(
-          /^(\d+|street|st|avenue|ave|road|rd|lane|ln|drive|dr|circle|cir|court|ct|boulevard|blvd|way|parkway|pkwy)$/i
-        )
-      ) {
-        if (city) {
-          city = parts.pop() + " " + city;
+        // Essex County
+        "Belleville",
+        "Bloomfield",
+        "Caldwell",
+        "Cedar Grove",
+        "East Orange",
+        "Essex Fells",
+        "Fairfield",
+        "Glen Ridge",
+        "Irvington",
+        "Livingston",
+        "Maplewood",
+        "Millburn",
+        "Montclair",
+        "Newark",
+        "North Caldwell",
+        "Nutley",
+        "Orange",
+        "Roseland",
+        "South Orange",
+        "Verona",
+        "West Caldwell",
+        "West Orange",
+
+        // Hudson County
+        "Bayonne",
+        "East Newark",
+        "Guttenberg",
+        "Harrison",
+        "Hoboken",
+        "Jersey City",
+        "Kearny",
+        "North Bergen",
+        "Secaucus",
+        "Union City",
+        "Weehawken",
+        "West New York",
+
+        // Morris County
+        "Boonton",
+        "Butler",
+        "Chatham",
+        "Chester",
+        "Denville",
+        "Dover",
+        "East Hanover",
+        "Florham Park",
+        "Hanover",
+        "Harding",
+        "Jefferson",
+        "Kinnelon",
+        "Lincoln Park",
+        "Madison",
+        "Mendham",
+        "Mine Hill",
+        "Montville",
+        "Morris Plains",
+        "Morris Township",
+        "Morristown",
+        "Mountain Lakes",
+        "Mount Arlington",
+        "Mount Olive",
+        "Netcong",
+        "Parsippany-Troy Hills",
+        "Pequannock",
+        "Randolph",
+        "Riverdale",
+        "Rockaway",
+        "Roxbury",
+        "Victory Gardens",
+        "Washington",
+        "Wharton",
+
+        // Passaic County
+        "Bloomingdale",
+        "Clifton",
+        "Haledon",
+        "Hawthorne",
+        "Little Falls",
+        "North Haledon",
+        "Passaic",
+        "Paterson",
+        "Pompton Lakes",
+        "Prospect Park",
+        "Ringwood",
+        "Totowa",
+        "Wanaque",
+        "Wayne",
+        "West Milford",
+        "Woodland Park",
+
+        // Sussex County
+        "Andover",
+        "Franklin",
+        "Hamburg",
+        "Hopatcong",
+        "Newton",
+        "Ogdensburg",
+        "Sparta",
+        "Stanhope",
+        "Sussex",
+        "Vernon",
+      ]);
+
+      // Split the address into parts
+      const parts = normalizedAddress.split(" ");
+
+      // Extract ZIP code (looking for 5-digit number at the end)
+      let zipCode = "";
+      while (parts.length > 0 && !zipCode) {
+        const lastPart = parts[parts.length - 1];
+        if (/^\d{5}(-\d{4})?$/.test(lastPart)) {
+          zipCode = parts.pop();
         } else {
-          city = parts.pop();
+          break;
         }
       }
 
-      // Remaining parts form the street address
-      const streetAddress = parts.join(" ");
+      // Extract state
+      let state = "";
+      if (parts.length > 0) {
+        const lastPart = parts[parts.length - 1].toUpperCase();
+        if (stateAbbreviations.has(lastPart)) {
+          state = parts.pop();
+        }
+      }
 
+      // Extract city and county
+      let city = "";
+      let county = "";
+
+      // Look for county indicators
+      const countyIndex = parts.findIndex(
+        (part, i) =>
+          i < parts.length - 1 &&
+          (parts[i + 1].toLowerCase() === "county" ||
+            parts[i + 1].toLowerCase() === "co." ||
+            parts[i + 1].toLowerCase() === "co")
+      );
+
+      if (countyIndex !== -1) {
+        county = parts[countyIndex] + " County";
+        // Remove county parts from the array
+        parts.splice(countyIndex, 2);
+      }
+
+      // Common street suffixes to help identify the end of the street address
+      const streetSuffixes = new Set([
+        "street",
+        "st",
+        "avenue",
+        "ave",
+        "road",
+        "rd",
+        "lane",
+        "ln",
+        "drive",
+        "dr",
+        "circle",
+        "cir",
+        "court",
+        "ct",
+        "boulevard",
+        "blvd",
+        "way",
+        "parkway",
+        "pkwy",
+        "place",
+        "pl",
+        "terrace",
+        "ter",
+        "terr",
+        "trail",
+        "trl",
+        "highway",
+        "hwy",
+      ]);
+
+      // Find the last occurrence of a street suffix
+      let streetEndIndex = -1;
+      for (let i = parts.length - 1; i >= 0; i--) {
+        if (streetSuffixes.has(parts[i].toLowerCase())) {
+          streetEndIndex = i;
+          break;
+        }
+      }
+
+      // Try to find a known city name in the remaining parts
+      let cityStartIndex = -1;
+      if (parts.length > 0) {
+        for (let i = parts.length - 1; i >= 0; i--) {
+          // Try combinations of words to match city names
+          for (let j = 1; j <= 3 && i - j + 1 >= 0; j++) {
+            const possibleCity = parts
+              .slice(i - j + 1, i + 1)
+              .join(" ")
+              .replace(/,$/, ""); // Remove trailing comma if present
+            if (northernNJCities.has(possibleCity)) {
+              cityStartIndex = i - j + 1;
+              city = possibleCity;
+              break;
+            }
+          }
+          if (cityStartIndex !== -1) break;
+        }
+      }
+
+      // If we found both a street suffix and a city
+      if (streetEndIndex !== -1 && cityStartIndex !== -1) {
+        const streetAddress = parts.slice(0, streetEndIndex + 1).join(" ");
+        return {
+          streetAddress: streetAddress.trim(),
+          city: city.trim(),
+          state,
+          zipCode,
+          county,
+        };
+      }
+
+      // If we only found a street suffix
+      if (streetEndIndex !== -1) {
+        const streetAddress = parts.slice(0, streetEndIndex + 1).join(" ");
+        city = parts.slice(streetEndIndex + 1).join(" ");
+        return {
+          streetAddress: streetAddress.trim(),
+          city: city.trim(),
+          state,
+          zipCode,
+          county,
+        };
+      }
+
+      // If we only found a city
+      if (cityStartIndex !== -1) {
+        const streetAddress = parts.slice(0, cityStartIndex).join(" ");
+        return {
+          streetAddress: streetAddress.trim(),
+          city: city.trim(),
+          state,
+          zipCode,
+          county,
+        };
+      }
+
+      // Fallback: if we can't find either, assume last part is city
+      if (parts.length > 0) {
+        city = parts.pop();
+        const streetAddress = parts.join(" ");
+        return {
+          streetAddress: streetAddress.trim(),
+          city: city.trim(),
+          state,
+          zipCode,
+          county,
+        };
+      }
+
+      // If all else fails, return the original address as street address
       return {
-        streetAddress,
-        city: city.trim(),
+        streetAddress: fullAddress.trim(),
+        city,
         state,
         zipCode,
+        county,
       };
     } catch (error) {
       console.error("Error parsing address:", error);
@@ -229,6 +593,7 @@ const AddProperty = () => {
         city: "",
         state: "",
         zipCode: "",
+        county: "",
       };
     }
   };
@@ -247,11 +612,12 @@ const AddProperty = () => {
       defendant: scrapedProperty.defendant || "",
       zillow_url: scrapedProperty["Zillow URL"] || "",
       // Address fields
-      propertyName: `${parsedAddress.streetAddress} - Foreclosure Opportunity`,
+      propertyName: parsedAddress.streetAddress,
       address: parsedAddress.streetAddress,
       city: parsedAddress.city,
       state: parsedAddress.state,
       zipCode: parsedAddress.zipCode,
+      county: parsedAddress.county || "",
 
       // Financial data
       purchaseCost: parseFloat(scrapedProperty.price) || 0,
@@ -360,6 +726,10 @@ const AddProperty = () => {
           </select>
         </div>
       )}
+
+      {/* Add Due Diligence Dropdown */}
+      <ResearchDropdown />
+
       <form
         onSubmit={handleSubmit}
         className="grid grid-cols-1 md:grid-cols-2 gap-6"
