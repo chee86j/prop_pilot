@@ -11,7 +11,7 @@ import pandas as pd
 import logging
 from pathlib import Path
 
-from models import db
+from models import db, User, Property, Phase, ConstructionDraw, Receipt, Tenant, Lease, PropertyMaintenanceRequest
 from routes import api
 
 # Load environment variables from .env file
