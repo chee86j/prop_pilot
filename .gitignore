@@ -1,57 +1,40 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-# Node modules and build outputs
-frontend/node_modules/
-frontend/dist/
-frontend/dist-ssr/
-frontend/build/
-frontend/.next/
-frontend/.vite/
-node_modules/
-
-# Python specific
-*__pycache__/
+# Python
+__pycache__/
 *.py[cod]
-*.pyo
-*.pyc
-
-# Virtual Environment
-venv/
-frontend/.venv
-services/scraper/frontend_property_data.json
-
-# Environment variables
+*.so
+.Python
 .env
+.venv/
+env/
+venv/
+ENV/
 
-# Editor directories and files
-.vscode/
+# Node
+node_modules/
+**/node_modules/
+dist/
+dist-ssr/
+*.local
+
+# IDEs and editors
 .idea/
+.vscode/
+*.swp
+*.swo
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
 
-# Others
+# Project specific
 *.log
 *.sqlite
 *.sqlite3
-*.tar.gz
-*.zip
-*.rar
-*.log
-*.tmp
-*.csv
 *.db
-*.json
-
 /migrations/
 scraped/
+services/scraper/downloads/
+*.csv
+*.json
+
+# Build outputs
+build/
+.next/
+.vite/

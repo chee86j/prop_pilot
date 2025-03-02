@@ -2,6 +2,8 @@ import sys
 import os
 from pathlib import Path
 from datetime import date
+from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy import event
 
 # Add the project root directory to Python path
 project_root = str(Path(__file__).parent.parent)
@@ -32,7 +34,32 @@ def client(app):
 @pytest.fixture
 def db_session(app):
     with app.app_context():
-        yield db.session 
+        connection = db.engine.connect()
+        transaction = connection.begin()
+        
+        # Create a session factory bound to the connection
+        session_factory = sessionmaker(bind=connection)
+        
+        # Create a scoped session
+        session = scoped_session(session_factory)
+        
+        # Begin a nested transaction
+        nested = connection.begin_nested()
+        
+        # If the application code calls session.commit, it will end the nested
+        # transaction. Use this hook to start a new one
+        @event.listens_for(session(), 'after_transaction_end')
+        def end_savepoint(session, transaction):
+            nonlocal nested
+            if not nested.is_active:
+                nested = connection.begin_nested()
+                
+        yield session
+        
+        # Rollback everything
+        session.remove()
+        transaction.rollback()
+        connection.close()
 
 @pytest.fixture
 def test_user(db_session):
@@ -41,10 +68,15 @@ def test_user(db_session):
         last_name="User",
         email="test@example.com"
     )
-    user.set_password("TestPass123!")
+    user.set_password("password123")
     db_session.add(user)
     db_session.commit()
-    return user 
+    return user
+
+@pytest.fixture
+def auth_headers(test_user):
+    access_token = create_access_token(identity=test_user.email)
+    return {"Authorization": f"Bearer {access_token}"}
 
 @pytest.fixture
 def test_property(db_session, test_user):
@@ -64,19 +96,13 @@ def test_property(db_session, test_user):
     return property
 
 @pytest.fixture
-def test_tenant(db_session, test_user):
+def test_tenant(db_session):
     tenant = Tenant(
-        manager_id=test_user.id,
         firstName="John",
         lastName="Doe",
         email="john@example.com",
-        dateOfBirth=date(1990, 1, 1)
+        phone="123-456-7890"
     )
     db_session.add(tenant)
     db_session.commit()
-    return tenant
-
-@pytest.fixture
-def auth_headers(test_user):
-    access_token = create_access_token(identity=test_user.email)
-    return {"Authorization": f"Bearer {access_token}"} 
+    return tenant 
