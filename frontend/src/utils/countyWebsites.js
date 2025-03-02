@@ -14,6 +14,10 @@ export const countyWebsites = [
         name: "Demographics and Statistics",
         url: "https://www.city-data.com/",
       },
+      {
+        name: "LoopNet - Commercial Real Estate",
+        url: "https://www.loopnet.com/",
+      },
     ],
   },
   {
