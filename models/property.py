@@ -1,5 +1,6 @@
-from sqlalchemy import Index
+from sqlalchemy import Index, event
 from .base import db
+from .tenant import ValidationError
 
 class Property(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -162,6 +163,34 @@ class Property(db.Model):
     # Indexes
     __table_args__ = (Index('idx_user_property', 'user_id'),)
 
+    def validate_state(self):
+        """Validate state code is 2 letters"""
+        if self.state and (len(self.state) != 2 or not self.state.isalpha()):
+            raise ValidationError("State must be a 2-letter code")
+
+    def validate_zip_code(self):
+        """Validate zip code format"""
+        if self.zipCode and len(self.zipCode) != 5:
+            raise ValidationError("Zip code must be 5 digits")
+
+    def validate_costs(self):
+        """Validate costs are not negative"""
+        cost_fields = [
+            'purchaseCost', 'totalRehabCost', 'equipmentCost', 'constructionCost',
+            'largeRepairsCost', 'renovationCost', 'arvSalePrice'
+        ]
+        for field in cost_fields:
+            value = getattr(self, field)
+            if value is not None and value < 0:
+                raise ValidationError(f"{field} cannot be negative")
+
+@event.listens_for(Property, 'before_insert')
+@event.listens_for(Property, 'before_update')
+def validate_property(mapper, connection, target):
+    """Validate property before saving"""
+    target.validate_state()
+    target.validate_zip_code()
+    target.validate_costs()
 
 class Phase(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from models import db, ConstructionDraw, Receipt
 from flask_jwt_extended import jwt_required
+from datetime import datetime
 
 financial_routes = Blueprint('financial', __name__)
 
@@ -20,18 +21,22 @@ def get_construction_draws(property_id):
 @financial_routes.route('/construction-draws', methods=['POST'])
 @jwt_required()
 def add_construction_draw():
-    data = request.get_json()
-    draw = ConstructionDraw(
-        property_id=data['property_id'],
-        release_date=data['release_date'],
-        amount=data['amount'],
-        bank_account_number=data['bank_account_number'],
-        is_approved=data.get('is_approved', False)
-    )
     try:
+        data = request.get_json()
+        draw = ConstructionDraw(
+            property_id=data['property_id'],
+            release_date=datetime.fromisoformat(data['release_date']).date(),
+            amount=float(data['amount']),
+            bank_account_number=str(data['bank_account_number']),
+            is_approved=bool(data.get('is_approved', False))
+        )
         db.session.add(draw)
         db.session.commit()
         return jsonify({"message": "Construction draw added successfully", "id": draw.id}), 201
+    except KeyError as e:
+        return jsonify({"error": f"Missing required field: {str(e)}"}), 400
+    except ValueError as e:
+        return jsonify({"error": f"Invalid value: {str(e)}"}), 400
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
@@ -81,20 +86,24 @@ def get_receipts(draw_id):
 @financial_routes.route('/receipts', methods=['POST'])
 @jwt_required()
 def add_receipt():
-    data = request.get_json()
-    receipt = Receipt(
-        construction_draw_id=data['construction_draw_id'],
-        date=data['date'],
-        vendor=data['vendor'],
-        amount=data['amount'],
-        description=data.get('description'),
-        pointofcontact=data.get('pointofcontact'),
-        ccnumber=data.get('ccnumber')
-    )
     try:
+        data = request.get_json()
+        receipt = Receipt(
+            construction_draw_id=data['construction_draw_id'],
+            date=datetime.fromisoformat(data['date']).date(),
+            vendor=str(data['vendor']),
+            amount=float(data['amount']),
+            description=data.get('description'),
+            pointofcontact=data.get('pointofcontact'),
+            ccnumber=data.get('ccnumber')
+        )
         db.session.add(receipt)
         db.session.commit()
         return jsonify({"message": "Receipt added successfully", "id": receipt.id}), 201
+    except KeyError as e:
+        return jsonify({"error": f"Missing required field: {str(e)}"}), 400
+    except ValueError as e:
+        return jsonify({"error": f"Invalid value: {str(e)}"}), 400
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500

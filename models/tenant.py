@@ -1,5 +1,11 @@
-from sqlalchemy import Index
+from sqlalchemy import Index, event
 from .base import db
+import re
+from datetime import date, datetime
+
+class ValidationError(Exception):
+    """Custom validation error class for model validation."""
+    pass
 
 class Tenant(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -22,6 +28,53 @@ class Tenant(db.Model):
 
     __table_args__ = (Index('idx_tenant_manager', 'manager_id'),)  # Index for manager queries
 
+    def validate_email(self):
+        """Validate email format using regex pattern."""
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, self.email):
+            raise ValidationError('Invalid email format')
+
+    def validate_phone_number(self):
+        """Validate phone number format if provided."""
+        if self.phoneNumber:
+            # Remove any non-digit characters for validation
+            cleaned_number = re.sub(r'\D', '', self.phoneNumber)
+            if not (10 <= len(cleaned_number) <= 11):  # Allow for optional country code
+                raise ValidationError('Phone number must be 10-11 digits')
+
+    def validate_credit_score(self):
+        """Validate credit score range if provided."""
+        for score in [self.creditScoreAtInitialApplication, self.creditScoreAtLeaseRenewal]:
+            if score is not None and not (300 <= score <= 850):
+                raise ValidationError('Credit score must be between 300 and 850')
+
+    def validate_date_of_birth(self):
+        """Validate tenant is at least 18 years old."""
+        if self.dateOfBirth:
+            today = date.today()
+            age = today.year - self.dateOfBirth.year - ((today.month, today.day) < (self.dateOfBirth.month, self.dateOfBirth.day))
+            if age < 18:
+                raise ValidationError('Tenant must be at least 18 years old')
+
+    def validate_name_fields(self):
+        """Validate name fields contain only letters, spaces, hyphens and apostrophes."""
+        name_pattern = r'^[a-zA-Z\s\'-]+$'
+        if not re.match(name_pattern, self.firstName) or not re.match(name_pattern, self.lastName):
+            raise ValidationError('Names can only contain letters, spaces, hyphens and apostrophes')
+
+    def validate_tenant(self):
+        """Run all validation checks."""
+        self.validate_email()
+        self.validate_phone_number()
+        self.validate_credit_score()
+        self.validate_date_of_birth()
+        self.validate_name_fields()
+
+@event.listens_for(Tenant, 'before_insert')
+@event.listens_for(Tenant, 'before_update')
+def validate_tenant_before_save(mapper, connection, target):
+    """Validate tenant before saving to database."""
+    target.validate_tenant()
 
 class Lease(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -31,4 +84,4 @@ class Lease(db.Model):
     endDate = db.Column(db.Date, nullable=False)
     rentAmount = db.Column(db.Float, nullable=False)
     renewalCondition = db.Column(db.String(255), nullable=True)
-    typeOfLease = db.Column(db.String(100), nullable=False)  # Examples: "Fixed", "Month-to-Month", "Lease to Own", etc. 
+    typeOfLease = db.Column(db.String(100), nullable=False)  # Examples: "Fixed", "Month-to-Month", "Lease to Own", etc.

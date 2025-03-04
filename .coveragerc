@@ -1,11 +1,10 @@
 [run]
 source = .
-omit =
-    tests/*
-    venv/*
+omit = 
     .venv/*
-    */migrations/*
-    setup.py
+    tests/*
+    migrations/*
+    */__init__.py
 
 [report]
 exclude_lines =
@@ -14,4 +13,7 @@ exclude_lines =
     raise NotImplementedError
     if __name__ == .__main__.:
     pass
-    raise ImportError 
+    raise ImportError
+
+[html]
+directory = coverage_html

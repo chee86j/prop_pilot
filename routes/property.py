@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify
 from models import db, User, Property, Phase
+from models.base import ValidationError
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from datetime import datetime
 
 property_routes = Blueprint('property', __name__)
 
@@ -14,9 +16,9 @@ def convert_to_float(value, default=0.0):
 @jwt_required()
 def get_property(property_id):
     current_user_email = get_jwt_identity()
-    user = User.query.filter_by(email=current_user_email).first()
+    user = db.session.query(User).filter_by(email=current_user_email).first()
     if user:
-        property = Property.query.filter_by(id=property_id, user_id=user.id).first()
+        property = db.session.query(Property).filter_by(id=property_id, user_id=user.id).first()
         if property:
             return jsonify({
                 'id': property.id,
@@ -156,9 +158,9 @@ def get_property(property_id):
 @jwt_required()
 def get_properties():
     current_user_email = get_jwt_identity()
-    user = User.query.filter_by(email=current_user_email).first()
+    user = db.session.query(User).filter_by(email=current_user_email).first()
     if user:
-        properties = Property.query.filter_by(user_id=user.id).all()
+        properties = db.session.query(Property).filter_by(user_id=user.id).all()
         return jsonify([{
             'id': property.id,
             'propertyName': property.propertyName,
@@ -177,16 +179,28 @@ def get_properties():
 @jwt_required()
 def add_property():
     current_user_email = get_jwt_identity()
-    user = User.query.filter_by(email=current_user_email).first()
+    user = db.session.query(User).filter_by(email=current_user_email).first()
     if user:
         data = request.get_json()
+        
+        # Handle date conversion
+        status_date = data.get('status_date')
+        if status_date:
+            if isinstance(status_date, str):
+                try:
+                    status_date = datetime.strptime(status_date, '%Y-%m-%d').date()
+                except ValueError:
+                    return jsonify({"error": "Invalid date format for status_date. Expected YYYY-MM-DD"}), 400
+            elif not isinstance(status_date, date):
+                return jsonify({"error": "status_date must be a string in YYYY-MM-DD format or a date object"}), 400
+        
         property = Property(
             user_id=user.id,
             # Foreclosure Fields
             detail_link=data.get('detail_link'),
             property_id=data.get('property_id'),
             sheriff_number=data.get('sheriff_number'),
-            status_date=data.get('status_date'),
+            status_date=status_date,
             plaintiff=data.get('plaintiff'),
             defendant=data.get('defendant'),
             zillow_url=data.get('zillow_url'),
@@ -200,12 +214,29 @@ def add_property():
             bedroomsDescription=data.get('bedroomsDescription'),
             bathroomsDescription=data.get('bathroomsDescription'),
             kitchenDescription=data.get('kitchenDescription'),
-            amenitiesDescription=data.get('amenitiesDescription')
+            amenitiesDescription=data.get('amenitiesDescription'),
+            # Cost Fields
+            purchaseCost=data.get('purchaseCost'),
+            totalRehabCost=data.get('totalRehabCost'),
+            equipmentCost=data.get('equipmentCost'),
+            constructionCost=data.get('constructionCost'),
+            largeRepairsCost=data.get('largeRepairsCost'),
+            renovationCost=data.get('renovationCost'),
+            arvSalePrice=data.get('arvSalePrice')
         )
         try:
+            # Validate before adding to session
+            property.validate_state()
+            property.validate_zip_code()
+            if any(getattr(property, field) is not None for field in ['purchaseCost', 'totalRehabCost', 'equipmentCost', 'constructionCost', 'largeRepairsCost', 'renovationCost', 'arvSalePrice']):
+                property.validate_costs()
+            
             db.session.add(property)
             db.session.commit()
             return jsonify({"message": "Property added successfully", "id": property.id}), 201
+        except ValidationError as e:
+            db.session.rollback()
+            return jsonify({"error": str(e)}), 400
         except Exception as e:
             db.session.rollback()
             return jsonify({"error": str(e)}), 500
@@ -215,9 +246,9 @@ def add_property():
 @jwt_required()
 def update_property(property_id):
     current_user_email = get_jwt_identity()
-    user = User.query.filter_by(email=current_user_email).first()
+    user = db.session.query(User).filter_by(email=current_user_email).first()
     if user:
-        property = Property.query.filter_by(id=property_id, user_id=user.id).first()
+        property = db.session.query(Property).filter_by(id=property_id, user_id=user.id).first()
         if property:
             data = request.get_json()
             try:
@@ -236,9 +267,9 @@ def update_property(property_id):
 @jwt_required()
 def delete_property(property_id):
     current_user_email = get_jwt_identity()
-    user = User.query.filter_by(email=current_user_email).first()
+    user = db.session.query(User).filter_by(email=current_user_email).first()
     if user:
-        property = Property.query.filter_by(id=property_id, user_id=user.id).first()
+        property = db.session.query(Property).filter_by(id=property_id, user_id=user.id).first()
         if property:
             try:
                 db.session.delete(property)
@@ -254,25 +285,41 @@ def delete_property(property_id):
 @property_routes.route('/phases/<int:property_id>', methods=['GET'])
 @jwt_required()
 def get_phases(property_id):
-    phases = Phase.query.filter_by(property_id=property_id).all()
+    phases = db.session.query(Phase).filter_by(property_id=property_id).all()
     return jsonify([phase.serialize() for phase in phases]), 200
 
 @property_routes.route('/phases', methods=['POST'])
 @jwt_required()
 def add_phase():
-    data = request.get_json()
-    phase = Phase(
-        property_id=data['property_id'],
-        name=data['name'],
-        startDate=data.get('startDate'),
-        expectedStartDate=data.get('expectedStartDate'),
-        endDate=data.get('endDate'),
-        expectedEndDate=data.get('expectedEndDate')
-    )
     try:
+        data = request.get_json()
+        
+        # Convert date strings to date objects
+        date_fields = ['startDate', 'expectedStartDate', 'endDate', 'expectedEndDate']
+        date_values = {}
+        for field in date_fields:
+            if data.get(field):
+                try:
+                    date_values[field] = datetime.fromisoformat(data[field]).date()
+                except ValueError:
+                    return jsonify({"error": f"Invalid date format for {field}"}), 400
+            else:
+                date_values[field] = None
+        
+        phase = Phase(
+            property_id=data['property_id'],
+            name=data['name'],
+            startDate=date_values['startDate'],
+            expectedStartDate=date_values['expectedStartDate'],
+            endDate=date_values['endDate'],
+            expectedEndDate=date_values['expectedEndDate']
+        )
+        
         db.session.add(phase)
         db.session.commit()
         return jsonify(phase.serialize()), 201
+    except KeyError as e:
+        return jsonify({"error": f"Missing required field: {str(e)}"}), 400
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
@@ -280,12 +327,27 @@ def add_phase():
 @property_routes.route('/phases/<int:phase_id>', methods=['PUT'])
 @jwt_required()
 def update_phase(phase_id):
-    phase = Phase.query.get_or_404(phase_id)
-    data = request.get_json()
+    phase = db.session.query(Phase).filter_by(id=phase_id).first()
+    if not phase:
+        return jsonify({"message": "Phase not found"}), 404
+        
     try:
+        data = request.get_json()
+        
+        # Convert date strings to date objects
+        date_fields = ['startDate', 'expectedStartDate', 'endDate', 'expectedEndDate']
+        for field in date_fields:
+            if field in data:
+                try:
+                    if data[field] is not None:
+                        data[field] = datetime.fromisoformat(data[field]).date()
+                except ValueError:
+                    return jsonify({"error": f"Invalid date format for {field}"}), 400
+        
         for key, value in data.items():
             if hasattr(phase, key):
                 setattr(phase, key, value)
+                
         db.session.commit()
         return jsonify(phase.serialize()), 200
     except Exception as e:
@@ -295,7 +357,10 @@ def update_phase(phase_id):
 @property_routes.route('/phases/<int:phase_id>', methods=['DELETE'])
 @jwt_required()
 def delete_phase(phase_id):
-    phase = Phase.query.get_or_404(phase_id)
+    phase = db.session.query(Phase).filter_by(id=phase_id).first()
+    if not phase:
+        return jsonify({"message": "Phase not found"}), 404
+        
     try:
         db.session.delete(phase)
         db.session.commit()

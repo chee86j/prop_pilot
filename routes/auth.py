@@ -6,12 +6,36 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 from datetime import timedelta
 import os
+import re
 
 auth_routes = Blueprint('auth', __name__)
+
+def validate_email(email):
+    """Validate email format"""
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return bool(re.match(pattern, email))
+
+def validate_password(password):
+    """Validate password requirements"""
+    return len(password) >= 8
 
 @auth_routes.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
+    
+    # Validate required fields
+    if not data.get('first_name'):
+        return jsonify({"message": "First name is required"}), 400
+    
+    if not data.get('last_name'):
+        return jsonify({"message": "Last name is required"}), 400
+    
+    if not data.get('email') or not validate_email(data['email']):
+        return jsonify({"message": "Valid email is required"}), 400
+    
+    if not data.get('password') or not validate_password(data['password']):
+        return jsonify({"message": "Password must be at least 8 characters"}), 400
+
     user = User(
         first_name=data['first_name'],
         last_name=data['last_name'],
@@ -35,6 +59,10 @@ def register():
 @auth_routes.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
+    
+    if not data.get('email') or not data.get('password'):
+        return jsonify({"message": "Email and password are required"}), 400
+        
     user = User.query.filter_by(email=data['email']).first()
     if user and user.check_password(data['password']):
         access_token = create_access_token(identity=user.email, expires_delta=timedelta(days=1))
