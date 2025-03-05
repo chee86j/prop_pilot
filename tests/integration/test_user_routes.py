@@ -2,11 +2,12 @@ import pytest
 from models import db, User
 from flask_jwt_extended import create_access_token
 import logging
+import uuid
 
 logger = logging.getLogger(__name__)
 
 TEST_USER_DATA = {
-    'email': 'test@example.com',
+    'email': f'test_{str(uuid.uuid4())[:8]}@example.com',
     'password': 'test_password',
     'first_name': 'Test',
     'last_name': 'User',

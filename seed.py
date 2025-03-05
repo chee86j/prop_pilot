@@ -5,6 +5,7 @@ from models import db, User, Property, Phase
 from werkzeug.security import generate_password_hash
 from images import avatar_image_base64
 import math
+import uuid
 
 # Constants
 PROPERTY_PREFIXES = ["Cozy", "Spacious", "Modern", "Luxurious", "Charming",
@@ -265,48 +266,54 @@ def seed_data():
 
 def seed_database():
     """Seed the database with initial data"""
-    # Create test user
-    test_user = User(
-        email="test@example.com",
-        password_hash=generate_password_hash("password123"),
-        first_name="Test",
-        last_name="User"
-    )
-    db.session.add(test_user)
-    db.session.commit()
-
-    # Create some test properties
-    properties = []
-    for i in range(5):
-        # Generate realistic property values following the 70% Rule
-        arv = random.randint(200000, 500000)  # After Repair Value
-        max_purchase = arv * 0.7  # 70% of ARV
-        purchase_cost = max_purchase - random.randint(10000, 30000)  # Slightly below max for profit
-        total_rehab_cost = (max_purchase - purchase_cost) * random.uniform(0.8, 1.2)  # Variation in rehab costs
-        
-        property = Property(
-            user_id=test_user.id,
-            propertyName=f"Test Property {i+1}",
-            address=f"123 Test St #{i+1}",
-            city="Test City",
-            state="TS",
-            zipCode="12345",
-            purchaseCost=purchase_cost,
-            totalRehabCost=total_rehab_cost,
-            arvSalePrice=arv
+    try:
+        # Create test user
+        unique_id = str(uuid.uuid4())[:8]
+        test_user = User(
+            first_name="Test",
+            last_name="User",
+            email=f"test_{unique_id}@example.com"
         )
-        properties.append(property)
-        db.session.add(property)
-    
-    db.session.commit()
+        test_user.set_password("TestPass123!")
+        db.session.add(test_user)
+        db.session.commit()
 
-    # Create phases for each property
-    for property in properties:
-        phases = create_property_phases(property.id, property.purchaseCost, property.totalRehabCost)
-        for phase in phases:
-            db.session.add(phase)
-    
-    db.session.commit()
+        # Create some test properties
+        properties = []
+        for i in range(5):
+            # Generate realistic property values following the 70% Rule
+            arv = random.randint(200000, 500000)  # After Repair Value
+            max_purchase = arv * 0.7  # 70% of ARV
+            purchase_cost = max_purchase - random.randint(10000, 30000)  # Slightly below max for profit
+            total_rehab_cost = (max_purchase - purchase_cost) * random.uniform(0.8, 1.2)  # Variation in rehab costs
+            
+            property = Property(
+                user_id=test_user.id,
+                propertyName=f"Test Property {i+1}",
+                address=f"123 Test St #{i+1}",
+                city="Test City",
+                state="TS",
+                zipCode="12345",
+                purchaseCost=purchase_cost,
+                totalRehabCost=total_rehab_cost,
+                arvSalePrice=arv
+            )
+            properties.append(property)
+            db.session.add(property)
+        
+        db.session.commit()
+
+        # Create phases for each property
+        for property in properties:
+            phases = create_property_phases(property.id, property.purchaseCost, property.totalRehabCost)
+            for phase in phases:
+                db.session.add(phase)
+        
+        db.session.commit()
+
+        print("Seed data inserted successfully.")
+    except Exception as e:
+        print(f"Error seeding database: {e}")
 
 # Real Estate Investment Logic Explanation
 """

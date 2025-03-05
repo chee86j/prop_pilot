@@ -8,6 +8,8 @@ from bs4 import BeautifulSoup
 import logging
 from datetime import datetime
 import time
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 # Configure logging
 logging.basicConfig(filename='scraper.log', level=logging.INFO,
@@ -49,52 +51,54 @@ def fetch_page_selenium(url):
             except Exception as e:
                 logging.error(f"Error closing browser: {e}")
 
-def parse_page_selenium(url):
-    """Parse page content to extract required data."""
-    html = fetch_page_selenium(url)
-    if html:
-        soup = BeautifulSoup(html, 'html.parser')
-        table = soup.find('table', class_='table table-striped')
-        if not table:
-            logging.error(f"Failed to find the table on the page at URL: {url}")
-            return []
-
-        data = []
-        rows = table.find('tbody').find_all('tr') if table.find('tbody') else []
-
-        for row in rows:
-            cells = row.find_all('td')
-            try:
-                # Extract the PropertyId and construct the full detail link
-                detail_link = cells[0].find('a', href=True)['href']
-                if "PropertyId=" not in detail_link:
-                    raise ValueError("Invalid detail link: Missing 'PropertyId'")
-                
-                property_id = detail_link.split("PropertyId=")[-1]
-                full_detail_link = f"https://salesweb.civilview.com{detail_link}"
-
-                # Extract other data for the row
-                row_data = {
-                    'detail_link': full_detail_link,
-                    'property_id': property_id,
-                    'sheriff_number': cells[1].text.strip() if len(cells) > 1 else None,
-                    'status_date': convert_date_format(cells[2].text.strip()) if len(cells) > 2 else None,
-                    'plaintiff': cells[3].text.strip() if len(cells) > 3 else None,
-                    'defendant': cells[4].text.strip() if len(cells) > 4 else None,
-                    'address': cells[5].text.strip() if len(cells) > 5 else None,
-                    'price': int(cells[6].text.strip().replace('$', '').replace(',', '')) if len(cells) > 6 else 0
-                }
-
-                data.append(row_data)
-
-            except Exception as e:
-                logging.error(f"Error parsing row: {e}")
-                continue
-
-        return data
-    else:
-        logging.error("No HTML content returned")
-        return []
+def parse_page_selenium(url: str) -> list[dict]:
+    """
+    Parse property auction data from the given URL using Selenium
+    
+    Args:
+        url (str): The URL to scrape
+        
+    Returns:
+        list[dict]: List of property data dictionaries
+    """
+    logger.info("🔄 Starting Selenium scraper for URL: %s", url)
+    
+    try:
+        options = webdriver.ChromeOptions()
+        options.add_argument('--headless')
+        driver = webdriver.Chrome(options=options)
+        
+        logger.info("🌐 Loading page...")
+        driver.get(url)
+        
+        # Wait for the main content to load
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "property-listing"))
+        )
+        
+        # Extract property data
+        properties = []
+        listings = driver.find_elements(By.CLASS_NAME, "property-listing")
+        
+        for listing in listings:
+            property_data = {
+                'address': listing.find_element(By.CLASS_NAME, "address").text,
+                'price': listing.find_element(By.CLASS_NAME, "price").text,
+                'auction_date': listing.find_element(By.CLASS_NAME, "date").text
+            }
+            properties.append(property_data)
+        
+        logger.info("✅ Successfully scraped %d properties", len(properties))
+        return properties
+        
+    except Exception as e:
+        logger.error("❌ Scraping failed: %s", str(e))
+        return None
+        
+    finally:
+        if 'driver' in locals():
+            driver.quit()
+            logger.info("🔌 Selenium driver closed")
 
 def convert_date_format(date_str):
     """Convert date string from 'MM/DD/YYYY' to 'YYYY-MM-DD' if needed."""

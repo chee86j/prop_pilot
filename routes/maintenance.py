@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import db, PropertyMaintenanceRequest
+from models import db, PropertyMaintenanceRequest, Property, Tenant
 from flask_jwt_extended import jwt_required
 
 maintenance_routes = Blueprint('maintenance', __name__)
@@ -41,18 +41,64 @@ def get_property_maintenance_request(request_id):
 @maintenance_routes.route('/property-maintenance-requests', methods=['POST'])
 @jwt_required()
 def add_property_maintenance_request():
-    data = request.get_json()
-    maintenance_request = PropertyMaintenanceRequest(
-        propertyId=data['propertyId'],
-        tenantId=data['tenantId'],
-        description=data['description'],
-        status=data.get('status', 'pending'),
-        timeToCompletion=data.get('timeToCompletion')
-    )
     try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+
+        # Required fields
+        required_fields = ['propertyId', 'tenantId', 'description']
+        missing_fields = [field for field in required_fields if not data.get(field)]
+        if missing_fields:
+            return jsonify({
+                "error": "Missing required fields",
+                "missing_fields": missing_fields
+            }), 400
+
+        # Validate property and tenant exist
+        property = db.session.query(Property).get(data['propertyId'])
+        if not property:
+            return jsonify({"error": "Property not found"}), 404
+
+        tenant = db.session.query(Tenant).get(data['tenantId'])
+        if not tenant:
+            return jsonify({"error": "Tenant not found"}), 404
+
+        # Validate status
+        valid_statuses = ['pending', 'in_progress', 'completed', 'cancelled']
+        status = data.get('status', 'pending')
+        if status not in valid_statuses:
+            return jsonify({
+                "error": "Invalid status",
+                "valid_statuses": valid_statuses
+            }), 400
+
+        # Validate timeToCompletion
+        time_to_completion = data.get('timeToCompletion')
+        if time_to_completion is not None:
+            try:
+                time_to_completion = int(time_to_completion)
+                if time_to_completion < 0:
+                    return jsonify({"error": "timeToCompletion cannot be negative"}), 400
+            except (ValueError, TypeError):
+                return jsonify({"error": "timeToCompletion must be a positive integer"}), 400
+
+        maintenance_request = PropertyMaintenanceRequest(
+            propertyId=data['propertyId'],
+            tenantId=data['tenantId'],
+            description=data['description'],
+            status=status,
+            timeToCompletion=time_to_completion
+        )
+
         db.session.add(maintenance_request)
         db.session.commit()
-        return jsonify({"message": "Maintenance request added successfully", "id": maintenance_request.id}), 201
+
+        return jsonify({
+            "message": "Maintenance request created successfully",
+            "id": maintenance_request.id
+        }), 201
+
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500

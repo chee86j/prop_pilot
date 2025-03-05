@@ -180,9 +180,23 @@ def get_properties():
 def add_property():
     current_user_email = get_jwt_identity()
     user = db.session.query(User).filter_by(email=current_user_email).first()
-    if user:
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    try:
         data = request.get_json()
-        
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+
+        # Required fields
+        required_fields = ['propertyName', 'address', 'city', 'state', 'zipCode']
+        missing_fields = [field for field in required_fields if not data.get(field)]
+        if missing_fields:
+            return jsonify({
+                "error": "Missing required fields",
+                "missing_fields": missing_fields
+            }), 400
+
         # Handle date conversion
         status_date = data.get('status_date')
         if status_date:
@@ -193,18 +207,19 @@ def add_property():
                     return jsonify({"error": "Invalid date format for status_date. Expected YYYY-MM-DD"}), 400
             elif not isinstance(status_date, date):
                 return jsonify({"error": "status_date must be a string in YYYY-MM-DD format or a date object"}), 400
-        
+
+        # Convert numeric fields
+        numeric_fields = ['purchaseCost', 'totalRehabCost', 'arvSalePrice', 'equipmentCost', 
+                         'constructionCost', 'largeRepairsCost', 'renovationCost']
+        for field in numeric_fields:
+            if field in data:
+                try:
+                    data[field] = float(data[field])
+                except (ValueError, TypeError):
+                    return jsonify({"error": f"Invalid value for {field}. Must be a number"}), 400
+
         property = Property(
             user_id=user.id,
-            # Foreclosure Fields
-            detail_link=data.get('detail_link'),
-            property_id=data.get('property_id'),
-            sheriff_number=data.get('sheriff_number'),
-            status_date=status_date,
-            plaintiff=data.get('plaintiff'),
-            defendant=data.get('defendant'),
-            zillow_url=data.get('zillow_url'),
-            # Location Fields
             propertyName=data.get('propertyName'),
             address=data.get('address'),
             city=data.get('city'),
@@ -215,7 +230,13 @@ def add_property():
             bathroomsDescription=data.get('bathroomsDescription'),
             kitchenDescription=data.get('kitchenDescription'),
             amenitiesDescription=data.get('amenitiesDescription'),
-            # Cost Fields
+            detail_link=data.get('detail_link'),
+            property_id=data.get('property_id'),
+            sheriff_number=data.get('sheriff_number'),
+            status_date=status_date,
+            plaintiff=data.get('plaintiff'),
+            defendant=data.get('defendant'),
+            zillow_url=data.get('zillow_url'),
             purchaseCost=data.get('purchaseCost'),
             totalRehabCost=data.get('totalRehabCost'),
             equipmentCost=data.get('equipmentCost'),
@@ -224,23 +245,26 @@ def add_property():
             renovationCost=data.get('renovationCost'),
             arvSalePrice=data.get('arvSalePrice')
         )
-        try:
-            # Validate before adding to session
-            property.validate_state()
-            property.validate_zip_code()
-            if any(getattr(property, field) is not None for field in ['purchaseCost', 'totalRehabCost', 'equipmentCost', 'constructionCost', 'largeRepairsCost', 'renovationCost', 'arvSalePrice']):
-                property.validate_costs()
-            
-            db.session.add(property)
-            db.session.commit()
-            return jsonify({"message": "Property added successfully", "id": property.id}), 201
-        except ValidationError as e:
-            db.session.rollback()
-            return jsonify({"error": str(e)}), 400
-        except Exception as e:
-            db.session.rollback()
-            return jsonify({"error": str(e)}), 500
-    return jsonify({"message": "User not found"}), 404
+
+        db.session.add(property)
+        db.session.commit()
+
+        return jsonify({
+            "id": property.id,
+            "propertyName": property.propertyName,
+            "address": property.address,
+            "city": property.city,
+            "state": property.state,
+            "zipCode": property.zipCode,
+            "message": "Property added successfully"
+        }), 201
+
+    except ValidationError as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
 @property_routes.route('/properties/<int:property_id>', methods=['PUT'])
 @jwt_required()

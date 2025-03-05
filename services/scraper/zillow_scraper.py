@@ -6,6 +6,8 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import logging
 import sys
+import re
+from typing import Optional
 
 # Configure logging
 
@@ -78,6 +80,32 @@ def parse_property_details(soup):
     property_type_span = soup.find('span', string="Type:")
     property_type = property_type_span.find_next('span').get_text(strip=True) if property_type_span else "Not available"
     return {'property_type': property_type}
+
+def format_zillow_url(address: str) -> Optional[str]:
+    """
+    Format an address into a Zillow-compatible URL
+    
+    Args:
+        address (str): Property address to format
+        
+    Returns:
+        Optional[str]: Formatted Zillow URL or None if formatting fails
+    """
+    try:
+        # Remove any special characters and extra spaces
+        formatted = re.sub(r'[^\w\s-]', '', address)
+        formatted = re.sub(r'\s+', '-', formatted.strip())
+        formatted = formatted.lower()
+        
+        # Create Zillow URL
+        zillow_url = f"https://www.zillow.com/homes/{formatted}_rb/"
+        
+        logging.info("✅ Generated Zillow URL for address: %s", address)
+        return zillow_url
+        
+    except Exception as e:
+        logging.error("❌ Failed to format Zillow URL for address %s: %s", address, str(e))
+        return None
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:

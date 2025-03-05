@@ -1,27 +1,46 @@
+"""
+CSV file merging utilities
+"""
 import pandas as pd
 import logging
-import sys
+from typing import Optional
 
-# Configure logging
-logging.basicConfig(filename='scraper.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
+logger = logging.getLogger(__name__)
 
-def merge_csv_files(address_file, zillow_url_file, output_file='merged_data.csv'):
+def merge_csv_files(address_file: str, zillow_url_file: str, output_file: str) -> bool:
+    """
+    Merge two CSV files based on the address column
+    
+    Args:
+        address_file (str): Path to the CSV file containing property addresses
+        zillow_url_file (str): Path to the CSV file containing Zillow URLs
+        output_file (str): Path to save the merged CSV file
+        
+    Returns:
+        bool: True if files were merged successfully
+    """
     try:
-        # Load the CSV files
-        address_data = pd.read_csv(address_file)
-        zillow_data = pd.read_csv(zillow_url_file)
-
-        # Merge the data on the 'address' column
-        merged_data = pd.merge(address_data, zillow_data, on='address', how='left')
-
-        # Export the merged data to a new CSV file
-        merged_data.to_csv(output_file, index=False)
-        logging.info(f"Merged data exported to {output_file} successfully.")
-        print(f"Merged data has been exported to {output_file}")
-
+        logger.info("🔄 Reading CSV files")
+        df_addresses = pd.read_csv(address_file)
+        df_zillow = pd.read_csv(zillow_url_file)
+        
+        logger.info("🔄 Merging files on 'address' column")
+        df_merged = pd.merge(
+            df_addresses,
+            df_zillow,
+            on='address',
+            how='left'
+        )
+        
+        logger.info("💾 Saving merged file to: %s", output_file)
+        df_merged.to_csv(output_file, index=False)
+        
+        logger.info("✅ Files merged successfully")
+        return True
+        
     except Exception as e:
-        logging.error(f"Failed to merge files: {e}")
-        sys.exit(f"Failed to merge files: {e}")
+        logger.error("❌ Failed to merge CSV files: %s", str(e))
+        return False
 
 if __name__ == "__main__":
     if len(sys.argv) > 2:

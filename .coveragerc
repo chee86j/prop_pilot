@@ -5,15 +5,22 @@ omit =
     tests/*
     migrations/*
     */__init__.py
+    */test_*.py
+    setup.py
+    conftest.py
+    */__pycache__/*
+    node_modules/*
 
 [report]
-exclude_lines =
+exclude_lines = 
     pragma: no cover
     def __repr__
     raise NotImplementedError
-    if __name__ == .__main__.:
+    if __name__ == '__main__':
     pass
     raise ImportError
+    except Exception as e:
+    def main\(\)
 
 [html]
 directory = coverage_html

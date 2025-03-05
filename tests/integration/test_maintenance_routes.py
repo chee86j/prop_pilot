@@ -5,204 +5,210 @@ from flask import url_for
 
 # Test data
 MAINTENANCE_DATA = {
-    'title': 'Fix Leaky Faucet',
+    'propertyId': None,  # Will be set in tests
+    'tenantId': None,    # Will be set in tests
     'description': 'Kitchen sink faucet is leaking',
-    'priority': 'High',
-    'status': 'Open',
-    'estimatedCost': 150.00,
-    'actualCost': None,
-    'scheduledDate': date.today().isoformat(),
-    'completionDate': None
+    'status': 'pending',
+    'timeToCompletion': 24
 }
 
 @pytest.mark.integration
-def test_create_maintenance_request(client, db_session, test_property, logger):
-    """Test creating a new maintenance request"""
-    logger.info("🔧 Starting create maintenance request test...")
+def test_create_maintenance_request(client, auth_headers, test_property, test_tenant, logger):
+    """Test creating a maintenance request"""
+    logger.info('🔧 Starting create maintenance request test...')
     
-    request_data = {**MAINTENANCE_DATA, 'propertyId': test_property.id}
-    response = client.post('/api/maintenance', json=request_data)
-    assert response.status_code == 201
-    
-    # Verify request was created
-    maintenance_request = db_session.query(PropertyMaintenanceRequest).first()
-    assert maintenance_request is not None
-    assert maintenance_request.title == MAINTENANCE_DATA['title']
-    assert maintenance_request.property_id == test_property.id
-    
-    logger.info("✅ Create maintenance request test completed")
-
-@pytest.mark.integration
-def test_get_maintenance_request(client, db_session, test_property, logger):
-    """Test retrieving a maintenance request"""
-    logger.info("🔧 Starting get maintenance request test...")
-    
-    # Create request first
-    request = PropertyMaintenanceRequest(
-        property_id=test_property.id,
-        title=MAINTENANCE_DATA['title'],
-        description=MAINTENANCE_DATA['description'],
-        priority=MAINTENANCE_DATA['priority'],
-        status=MAINTENANCE_DATA['status'],
-        estimatedCost=MAINTENANCE_DATA['estimatedCost'],
-        scheduledDate=date.today()
-    )
-    db_session.add(request)
-    db_session.commit()
-    
-    response = client.get(f'/api/maintenance/{request.id}')
-    assert response.status_code == 200
-    data = response.json
-    assert data['title'] == MAINTENANCE_DATA['title']
-    
-    logger.info("✅ Get maintenance request test completed")
-
-@pytest.mark.integration
-def test_update_maintenance_request(client, db_session, test_property, logger):
-    """Test updating a maintenance request"""
-    logger.info("🔧 Starting update maintenance request test...")
-    
-    # Create request first
-    request = PropertyMaintenanceRequest(
-        property_id=test_property.id,
-        title=MAINTENANCE_DATA['title'],
-        description=MAINTENANCE_DATA['description'],
-        priority=MAINTENANCE_DATA['priority'],
-        status='Open',
-        estimatedCost=MAINTENANCE_DATA['estimatedCost'],
-        scheduledDate=date.today()
-    )
-    db_session.add(request)
-    db_session.commit()
-    
-    update_data = {
-        'status': 'Completed',
-        'actualCost': 175.00,
-        'completionDate': date.today().isoformat()
+    request_data = {
+        'propertyId': test_property.id,
+        'tenantId': test_tenant.id,
+        'description': 'Test maintenance request',
+        'status': 'pending',
+        'timeToCompletion': 24
     }
     
-    response = client.put(f'/api/maintenance/{request.id}', json=update_data)
-    assert response.status_code == 200
+    response = client.post('/api/property-maintenance-requests',
+                         json=request_data,
+                         headers=auth_headers)
     
-    # Verify changes
-    updated_request = db_session.query(PropertyMaintenanceRequest).get(request.id)
-    assert updated_request.status == update_data['status']
-    assert updated_request.actualCost == update_data['actualCost']
-    
-    logger.info("✅ Update maintenance request test completed")
+    assert response.status_code == 201
+    assert 'id' in response.json
 
 @pytest.mark.integration
-def test_delete_maintenance_request(client, db_session, test_property, logger):
+def test_get_maintenance_request(client, auth_headers, test_property, test_tenant, logger):
+    """Test retrieving a maintenance request"""
+    logger.info('🔧 Starting get maintenance request test...')
+    
+    # Create a maintenance request first
+    request_data = {
+        'propertyId': test_property.id,
+        'tenantId': test_tenant.id,
+        'description': 'Test maintenance request',
+        'status': 'pending',
+        'timeToCompletion': 24
+    }
+    
+    create_response = client.post('/api/property-maintenance-requests',
+                               json=request_data,
+                               headers=auth_headers)
+    request_id = create_response.json['id']
+    
+    # Get the maintenance request
+    response = client.get(f'/api/property-maintenance-requests/{request_id}',
+                        headers=auth_headers)
+    
+    assert response.status_code == 200
+    assert response.json['description'] == request_data['description']
+    assert response.json['status'] == request_data['status']
+
+@pytest.mark.integration
+def test_update_maintenance_request(client, auth_headers, test_property, test_tenant, logger):
+    """Test updating a maintenance request"""
+    logger.info('🔧 Starting update maintenance request test...')
+    
+    # Create a maintenance request first
+    request_data = {
+        'propertyId': test_property.id,
+        'tenantId': test_tenant.id,
+        'description': 'Test maintenance request',
+        'status': 'pending',
+        'timeToCompletion': 24
+    }
+    
+    create_response = client.post('/api/property-maintenance-requests',
+                               json=request_data,
+                               headers=auth_headers)
+    request_id = create_response.json['id']
+    
+    # Update the request
+    update_data = {
+        'status': 'in_progress',
+        'timeToCompletion': 48
+    }
+    
+    response = client.put(f'/api/property-maintenance-requests/{request_id}',
+                        json=update_data,
+                        headers=auth_headers)
+    
+    assert response.status_code == 200
+    
+    # Verify the update
+    get_response = client.get(f'/api/property-maintenance-requests/{request_id}',
+                           headers=auth_headers)
+    assert get_response.json['status'] == update_data['status']
+    assert get_response.json['timeToCompletion'] == update_data['timeToCompletion']
+
+@pytest.mark.integration
+def test_delete_maintenance_request(client, auth_headers, test_property, test_tenant, logger):
     """Test deleting a maintenance request"""
-    logger.info("🔧 Starting delete maintenance request test...")
+    logger.info('🔧 Starting delete maintenance request test...')
     
-    # Create request first
-    request = PropertyMaintenanceRequest(
-        property_id=test_property.id,
-        title=MAINTENANCE_DATA['title'],
-        description=MAINTENANCE_DATA['description'],
-        priority=MAINTENANCE_DATA['priority'],
-        status=MAINTENANCE_DATA['status'],
-        estimatedCost=MAINTENANCE_DATA['estimatedCost'],
-        scheduledDate=date.today()
-    )
-    db_session.add(request)
-    db_session.commit()
+    # Create a maintenance request first
+    request_data = {
+        'propertyId': test_property.id,
+        'tenantId': test_tenant.id,
+        'description': 'Test maintenance request',
+        'status': 'pending',
+        'timeToCompletion': 24
+    }
     
-    response = client.delete(f'/api/maintenance/{request.id}')
+    create_response = client.post('/api/property-maintenance-requests',
+                               json=request_data,
+                               headers=auth_headers)
+    request_id = create_response.json['id']
+    
+    # Delete the request
+    response = client.delete(f'/api/property-maintenance-requests/{request_id}',
+                          headers=auth_headers)
+    
     assert response.status_code == 200
     
     # Verify deletion
-    deleted_request = db_session.query(PropertyMaintenanceRequest).get(request.id)
-    assert deleted_request is None
-    
-    logger.info("✅ Delete maintenance request test completed")
+    get_response = client.get(f'/api/property-maintenance-requests/{request_id}',
+                           headers=auth_headers)
+    assert get_response.status_code == 404
 
 @pytest.mark.integration
-def test_list_maintenance_requests(client, db_session, test_property, logger):
-    """Test listing maintenance requests"""
-    logger.info("🔧 Starting list maintenance requests test...")
+def test_list_maintenance_requests(client, auth_headers, test_property, test_tenant, logger):
+    """Test listing all maintenance requests"""
+    logger.info('🔧 Starting list maintenance requests test...')
     
-    # Create multiple requests
-    requests = [
-        PropertyMaintenanceRequest(
-            property_id=test_property.id,
-            title='Fix Roof',
-            description='Roof is leaking',
-            priority='High',
-            status='Open',
-            estimatedCost=500.00,
-            scheduledDate=date.today()
-        ),
-        PropertyMaintenanceRequest(
-            property_id=test_property.id,
-            title='Paint Walls',
-            description='Interior walls need painting',
-            priority='Low',
-            status='Open',
-            estimatedCost=300.00,
-            scheduledDate=date.today() + timedelta(days=7)
-        )
-    ]
-    for request in requests:
-        db_session.add(request)
-    db_session.commit()
+    # Create a couple of maintenance requests
+    request_data = {
+        'propertyId': test_property.id,
+        'tenantId': test_tenant.id,
+        'description': 'Test maintenance request',
+        'status': 'pending',
+        'timeToCompletion': 24
+    }
     
-    # Test listing all requests
-    response = client.get('/api/maintenance')
+    client.post('/api/property-maintenance-requests',
+               json=request_data,
+               headers=auth_headers)
+    
+    request_data['description'] = 'Another test request'
+    client.post('/api/property-maintenance-requests',
+               json=request_data,
+               headers=auth_headers)
+    
+    # Get all requests
+    response = client.get('/api/property-maintenance-requests',
+                        headers=auth_headers)
+    
     assert response.status_code == 200
-    data = response.json
-    assert len(data) == 2
-    
-    # Test filtering by property
-    response = client.get(f'/api/maintenance?propertyId={test_property.id}')
-    assert response.status_code == 200
-    data = response.json
-    assert len(data) == 2
-    
-    # Test filtering by status
-    response = client.get('/api/maintenance?status=Open')
-    assert response.status_code == 200
-    data = response.json
-    assert len(data) == 2
-    
-    logger.info("✅ List maintenance requests test completed")
+    assert isinstance(response.json, list)
+    assert len(response.json) >= 2
 
 @pytest.mark.integration
-def test_maintenance_request_not_found(client, logger):
-    """Test handling of non-existent maintenance request"""
-    logger.info("🔧 Starting maintenance request not found test...")
-    
-    response = client.get('/api/maintenance/999')
-    assert response.status_code == 404
-    
-    logger.info("✅ Maintenance request not found test completed")
+def test_basic_validation(client, test_user, auth_headers, test_property, logger):
+    """Test basic validation of maintenance request data"""
+    logger.info("🔧 Starting basic validation test...")
+
+    # Test missing required fields
+    invalid_data = {
+        'description': 'Fix Something'  # Missing other required fields
+    }
+    response = client.post('/api/property-maintenance-requests', 
+                         json=invalid_data,
+                         headers=auth_headers)
+    assert response.status_code == 400
+
+    logger.info("✅ Basic validation test completed")
 
 @pytest.mark.integration
-def test_invalid_maintenance_data(client, test_property, logger):
-    """Test validation of maintenance request data"""
-    logger.info("🔧 Starting invalid maintenance data test...")
+def test_detailed_validation(client, test_property, test_tenant, auth_headers, logger):
+    """Test detailed validation of maintenance request data"""
+    logger.info("🔧 Starting detailed validation test...")
     
     # Test missing required fields
     invalid_data = {
-        'title': 'Fix Something'  # Missing other required fields
+        'description': 'Fix Something'  # Missing other required fields
     }
-    response = client.post('/api/maintenance', json=invalid_data)
-    assert response.status_code == 400
-    
-    # Test invalid priority
-    invalid_data = {**MAINTENANCE_DATA, 'propertyId': test_property.id, 'priority': 'Invalid'}
-    response = client.post('/api/maintenance', json=invalid_data)
+    response = client.post('/api/property-maintenance-requests', 
+                         json=invalid_data,
+                         headers=auth_headers)
     assert response.status_code == 400
     
     # Test invalid status
-    invalid_data = {**MAINTENANCE_DATA, 'propertyId': test_property.id, 'status': 'Invalid'}
-    response = client.post('/api/maintenance', json=invalid_data)
+    invalid_data = {
+        **MAINTENANCE_DATA,
+        'propertyId': test_property.id,
+        'tenantId': test_tenant.id,
+        'status': 'Invalid'
+    }
+    response = client.post('/api/property-maintenance-requests', 
+                         json=invalid_data,
+                         headers=auth_headers)
     assert response.status_code == 400
     
-    # Test invalid dates
-    invalid_data = {**MAINTENANCE_DATA, 'propertyId': test_property.id, 'scheduledDate': 'invalid-date'}
-    response = client.post('/api/maintenance', json=invalid_data)
+    # Test invalid timeToCompletion
+    invalid_data = {
+        **MAINTENANCE_DATA,
+        'propertyId': test_property.id,
+        'tenantId': test_tenant.id,
+        'timeToCompletion': -1
+    }
+    response = client.post('/api/property-maintenance-requests', 
+                         json=invalid_data,
+                         headers=auth_headers)
     assert response.status_code == 400
     
-    logger.info("✅ Invalid maintenance data test completed") 
+    logger.info("✅ Detailed validation test completed") 

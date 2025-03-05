@@ -1,8 +1,9 @@
 import pytest
 from datetime import date
-from models import Property, Phase, db, User
+from models import Property, Phase, db, User, ConstructionDraw, PropertyMaintenanceRequest, Lease
 from flask_jwt_extended import create_access_token
 import logging
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ PROPERTY_TEST_DATA = [
         "purchaseCost": 180000,
         "totalRehabCost": 45000,
         "arvSalePrice": 280000,
-        "status_date": date.today()
+        "status_date": date.today().strftime('%Y-%m-%d')
     },
     {
         "propertyName": "Downtown Condo",
@@ -28,7 +29,7 @@ PROPERTY_TEST_DATA = [
         "purchaseCost": 250000,
         "totalRehabCost": 30000,
         "arvSalePrice": 350000,
-        "status_date": date.today()
+        "status_date": date.today().strftime('%Y-%m-%d')
     }
 ]
 
@@ -66,8 +67,9 @@ TEST_PROPERTY_DATA = {
 def test_user(db_session):
     """Create a test user"""
     logger.info('Creating test user')
+    unique_id = str(uuid.uuid4())[:8]
     user = User(
-        email=TEST_USER_DATA['email'],
+        email=f'test_{unique_id}@example.com',
         first_name=TEST_USER_DATA['first_name'],
         last_name=TEST_USER_DATA['last_name']
     )
@@ -103,11 +105,20 @@ def test_property(db_session, test_user):
 def cleanup_properties(db_session):
     """Clean up properties before each test"""
     logger.info('Cleaning up properties')
+    # Delete related records first
+    db_session.query(Phase).delete()
+    db_session.query(ConstructionDraw).delete()
+    db_session.query(PropertyMaintenanceRequest).delete()
+    db_session.query(Lease).delete()
     db_session.query(Property).delete()
     db_session.commit()
     logger.info('Properties cleaned up')
     yield
     # Cleanup after test
+    db_session.query(Phase).delete()
+    db_session.query(ConstructionDraw).delete()
+    db_session.query(PropertyMaintenanceRequest).delete()
+    db_session.query(Lease).delete()
     db_session.query(Property).delete()
     db_session.commit()
 
@@ -154,14 +165,18 @@ def test_add_property(client, test_user, auth_headers, db_session, property_data
     """Test adding a new property"""
     logger.info(f"Starting add property test for {property_data['propertyName']}...")
     
+    # Log the request data
+    logger.debug(f"Request data: {property_data}")
+    
     response = client.post('/api/properties', 
                          json=property_data,
                          headers=auth_headers)
     
     logger.debug(f"Response status: {response.status_code}")
+    logger.debug(f"Response data: {response.get_json()}")
     
-    assert response.status_code == 201
-    data = response.json
+    assert response.status_code == 201, f"Expected status code 201, got {response.status_code}. Response: {response.get_json()}"
+    data = response.get_json()
     assert "id" in data
     assert data["message"] == "Property added successfully"
 

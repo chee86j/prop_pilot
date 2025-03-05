@@ -1,11 +1,18 @@
 from sqlalchemy import Index, event
 from .base import db
 from .tenant import ValidationError
+from datetime import datetime
 
 class Property(db.Model):
+    """Property model representing real estate properties"""
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))  # Many to one relationship w/User
-    
+    address = db.Column(db.String(255), nullable=False)
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    purchase_price = db.Column(db.Float, nullable=False)
+    current_phase = db.Column(db.String(50), nullable=False, default='ACQUISITION')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
     # Foreclosure Fields If Applicable
     detail_link = db.Column(db.String(1024))  
     property_id = db.Column(db.String(256))   
@@ -17,7 +24,6 @@ class Property(db.Model):
     
     # Location Section
     propertyName = db.Column(db.String(512))
-    address = db.Column(db.String(1024))
     city = db.Column(db.String(512))
     state = db.Column(db.String(512))
     zipCode = db.Column(db.String(128))
@@ -155,13 +161,21 @@ class Property(db.Model):
     architectPhone = db.Column(db.String(64))
 
     # Relationships
-    construction_draws = db.relationship('ConstructionDraw', backref='property', lazy='dynamic')
-    phases = db.relationship('Phase', backref='property', lazy='dynamic')
+    owner = db.relationship('User', backref=db.backref('properties', lazy=True))
+    phases = db.relationship('Phase', backref='property', lazy=True)
     leases = db.relationship('Lease', backref='property', lazy=True)
     maintenance_requests = db.relationship('PropertyMaintenanceRequest', backref='property', lazy=True)
+    construction_draws = db.relationship('ConstructionDraw', backref='property', lazy=True)
 
     # Indexes
-    __table_args__ = (Index('idx_user_property', 'user_id'),)
+    __table_args__ = (Index('idx_user_property', 'owner_id'),)
+
+    def __init__(self, address, owner_id, purchase_price, current_phase='ACQUISITION'):
+        """Initialize a new property"""
+        self.address = address
+        self.owner_id = owner_id
+        self.purchase_price = purchase_price
+        self.current_phase = current_phase
 
     def validate_state(self):
         """Validate state code is 2 letters"""
@@ -183,6 +197,64 @@ class Property(db.Model):
             value = getattr(self, field)
             if value is not None and value < 0:
                 raise ValidationError(f"{field} cannot be negative")
+
+    def serialize(self):
+        """Convert the property object to a dictionary for JSON serialization"""
+        return {
+            'id': self.id,
+            'address': self.address,
+            'owner_id': self.owner_id,
+            'purchase_price': self.purchase_price,
+            'current_phase': self.current_phase,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+            'detail_link': self.detail_link,
+            'property_id': self.property_id,
+            'sheriff_number': self.sheriff_number,
+            'status_date': self.status_date.isoformat() if self.status_date else None,
+            'plaintiff': self.plaintiff,
+            'defendant': self.defendant,
+            'zillow_url': self.zillow_url,
+            'propertyName': self.propertyName,
+            'city': self.city,
+            'state': self.state,
+            'zipCode': self.zipCode,
+            'county': self.county,
+            'bedroomsDescription': self.bedroomsDescription,
+            'bathroomsDescription': self.bathroomsDescription,
+            'kitchenDescription': self.kitchenDescription,
+            'amenitiesDescription': self.amenitiesDescription,
+            'purchaseCost': self.purchaseCost,
+            'refinanceCosts': self.refinanceCosts,
+            'totalRehabCost': self.totalRehabCost,
+            'equipmentCost': self.equipmentCost,
+            'constructionCost': self.constructionCost,
+            'largeRepairsCost': self.largeRepairsCost,
+            'renovationCost': self.renovationCost,
+            'kickStartFunds': self.kickStartFunds,
+            'lenderConstructionDrawsReceived': self.lenderConstructionDrawsReceived,
+            'utilitiesCost': self.utilitiesCost,
+            'sewer': self.sewer,
+            'water': self.water,
+            'lawn': self.lawn,
+            'garbage': self.garbage,
+            'yearlyPropertyTaxes': self.yearlyPropertyTaxes,
+            'mortgagePaid': self.mortgagePaid,
+            'homeownersInsurance': self.homeownersInsurance,
+            'expectedYearlyRent': self.expectedYearlyRent,
+            'rentalIncomeReceived': self.rentalIncomeReceived,
+            'numUnits': self.numUnits,
+            'vacancyRate': self.vacancyRate,
+            'avgTenantStay': self.avgTenantStay,
+            'otherMonthlyIncome': self.otherMonthlyIncome,
+            'vacancyLoss': self.vacancyLoss,
+            'managementFees': self.managementFees,
+            'maintenanceCosts': self.maintenanceCosts,
+            'totalEquity': self.totalEquity
+        }
+
+    def __str__(self):
+        return str(self.id)
 
 @event.listens_for(Property, 'before_insert')
 @event.listens_for(Property, 'before_update')

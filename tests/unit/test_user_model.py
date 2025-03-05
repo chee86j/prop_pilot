@@ -1,6 +1,7 @@
 import pytest
 from models import User, Property
 from werkzeug.security import check_password_hash
+import uuid
 
 # Test data for parametrized tests
 USER_TEST_DATA = [
@@ -107,12 +108,13 @@ def test_password_hashing(db_session, logger, user_data):
 def test_user_properties_relationship(db_session, logger):
     """Test user-properties relationship"""
     logger.info("🔗 Starting user-properties relationship test...")
-    
+
     # Create test user
+    unique_id = str(uuid.uuid4())[:8]
     user = User(
         first_name="Test",
         last_name="User",
-        email="test@example.com"
+        email=f"test_{unique_id}@example.com"
     )
     user.set_password("TestPass123!")
     db_session.add(user)
@@ -139,6 +141,23 @@ def test_user_properties_relationship(db_session, logger):
         assert property.address == PROPERTY_TEST_DATA[i]['address']
     
     logger.info("✅ User-properties relationship test completed")
+
+@pytest.mark.model
+@pytest.mark.unit
+def test_user_validation(db_session, logger):
+    """Test user validation"""
+    logger.info("✅ Starting user validation test...")
+
+    # Test invalid email format
+    unique_id = str(uuid.uuid4())[:8]
+    user = User(
+        first_name="Test",
+        last_name="User",
+        email=f"test_{unique_id}@example.com"
+    )
+    user.set_password("TestPass123!")
+    db_session.add(user)
+    db_session.commit()
 
 @pytest.mark.model
 @pytest.mark.unit

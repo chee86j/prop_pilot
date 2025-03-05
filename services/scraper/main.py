@@ -1,29 +1,25 @@
-import sys
-import os
+"""
+Main entry point for the property auction scraper service
+"""
 import logging
-import pandas as pd
-from scraper import parse_page_selenium
-from database import connect_db, create_table, insert_data, close_db
-from merge_csv import merge_csv_files
-from utils.logger import setup_logger
-from utils.exceptions import ScraperException, DatabaseException, NetworkException
+from .scraper import parse_page_selenium
+from .database import connect_db, create_table, insert_data, close_db
+from .zillow_scraper import format_zillow_url
+from .merge_csv import merge_csv_files
+import os
 import traceback
+import pandas as pd
+import sys
 
-logger = setup_logger(__name__, 'logs/scraper.log')
+logger = logging.getLogger(__name__)
 
-def format_zillow_url(address):
-    """Convert the address to a Zillow URL format."""
-    try:
-        # Remove any unwanted characters and format the address
-        formatted_address = address.strip()
-        formatted_address = formatted_address.replace(" ", "-").replace(",", "").replace(".", "")
-        formatted_address = formatted_address.replace("--", "-")  # Replace double dashes
-        formatted_address = formatted_address.lower()
-        zillow_url = f"https://www.zillow.com/homes/{formatted_address}_rb/"
-        return zillow_url
-    except Exception as e:
-        logging.error(f"Error formatting Zillow URL for {address}: {e}")
-        return None
+class ScraperException(Exception):
+    """Custom exception for scraper errors"""
+    pass
+
+class DatabaseException(Exception):
+    """Custom exception for database errors"""
+    pass
 
 def format_for_frontend(data):
     """Format scraped data for frontend PropertyDetails component."""

@@ -1,14 +1,15 @@
 import pytest
-from models import Tenant, Lease, Property
+from models import Tenant, Lease, Property, User
 from datetime import date, timedelta
 from models.tenant import ValidationError
+import uuid
 
 # Test data for parametrized tests
 TENANT_TEST_DATA = [
     {
         'firstName': 'John',
         'lastName': 'Doe',
-        'email': 'john.doe@example.com',
+        'email': f'john_{str(uuid.uuid4())[:8]}@example.com',
         'dateOfBirth': date(1990, 1, 1),
         'phoneNumber': '123-456-7890',
         'occupation': 'Software Engineer',
@@ -19,7 +20,7 @@ TENANT_TEST_DATA = [
     {
         'firstName': 'Jane',
         'lastName': 'Smith',
-        'email': 'jane.smith@example.com',
+        'email': f'jane_{str(uuid.uuid4())[:8]}@example.com',
         'dateOfBirth': date(1985, 6, 15),
         'phoneNumber': '987-654-3210',
         'occupation': 'Marketing Manager',
@@ -30,7 +31,7 @@ TENANT_TEST_DATA = [
     {
         'firstName': 'Bob',
         'lastName': 'Johnson',
-        'email': 'bob.johnson@example.com',
+        'email': f'bob_{str(uuid.uuid4())[:8]}@example.com',
         'dateOfBirth': date(1995, 12, 31),
         'phoneNumber': '555-555-5555',
         'occupation': 'Teacher',
@@ -99,10 +100,11 @@ def test_tenant_lease_relationship(db_session, test_property, logger, lease_data
     logger.info(f"🔗 Starting tenant-lease relationship test for {lease_data['description']}...")
     
     # Create a tenant
+    unique_id = str(uuid.uuid4())[:8]
     tenant = Tenant(
         firstName="Test",
         lastName="Tenant",
-        email="test.tenant@example.com",
+        email=f"test_{unique_id}@example.com",
         dateOfBirth=date(1990, 1, 1),
         phoneNumber="123-456-7890"
     )

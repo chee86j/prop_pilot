@@ -78,7 +78,7 @@ rules:
 - name: Test Naming Convention
   description: >
   Ensure that all test functions start with "test*" and test classes begin with "Test".
-  This is essential for pytest’s automatic discovery and promotes consistency.
+  This is essential for pytest's automatic discovery and promotes consistency.
   pattern: "^test*"
   enforcement: strict
 

@@ -1,6 +1,9 @@
 import pytest
 from models import Phase, Property
 from datetime import date, timedelta
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Test data for parametrized tests
 PHASE_TEST_DATA = [
@@ -20,6 +23,18 @@ PHASE_TEST_DATA = [
         'description': 'Interior and exterior finishing'
     }
 ]
+
+@pytest.fixture(autouse=True)
+def cleanup_phases(db_session):
+    """Clean up phases before each test"""
+    logger.info('Cleaning up phases')
+    db_session.query(Phase).delete()
+    db_session.commit()
+    logger.info('Phases cleaned up')
+    yield
+    # Cleanup after test
+    db_session.query(Phase).delete()
+    db_session.commit()
 
 @pytest.fixture
 def sample_property(db_session):
@@ -56,7 +71,8 @@ def test_new_phase(db_session, logger):
     db_session.add(phase)
     db_session.commit()
 
-    retrieved_phase = Phase.query.first()
+    # Query for the specific phase we just created
+    retrieved_phase = Phase.query.filter_by(name="Test Phase").first()
     assert retrieved_phase is not None
     assert retrieved_phase.name == "Test Phase"
     assert retrieved_phase.property_id == 1
