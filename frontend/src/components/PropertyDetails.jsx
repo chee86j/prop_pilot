@@ -1342,33 +1342,52 @@ const PropertyDetails = ({ propertyId }) => {
                 </>
               )}
             </div>
-
-            {/* Edit, Save, and Cancel Buttons */}
-            {editMode ? (
-              <div className="flex justify-between py-5">
-                <button
-                  onClick={cancelChanges}
-                  className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={saveChanges}
-                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                >
-                  Save
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={toggleEditMode}
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mt-5 rounded"
-              >
-                Edit
-              </button>
-            )}
           </div>
         </section>
+      </div>
+
+      {/* Edit, Save, and Cancel Buttons */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center items-center p-4 bg-white bg-opacity-90 border-t border-gray-200 shadow-lg transform transition-transform duration-200 ease-in-out">
+        <div className="container max-w-4xl mx-auto flex justify-end gap-4">
+          {editMode ? (
+            <>
+              <button
+                onClick={cancelChanges}
+                className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg 
+                transform transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md
+                flex items-center gap-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+                Cancel
+              </button>
+              <button
+                onClick={saveChanges}
+                className="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg
+                transform transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md
+                flex items-center gap-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                Save Changes
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={toggleEditMode}
+              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg
+              transform transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md
+              flex items-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+              </svg>
+              Edit Property Details
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Financial Analysis Section */}
