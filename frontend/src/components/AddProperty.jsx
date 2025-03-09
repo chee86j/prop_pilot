@@ -27,6 +27,15 @@ const AddProperty = () => {
     bathroomsDescription: "",
     kitchenDescription: "",
     amenitiesDescription: "",
+    block: "",
+    lot: "",
+    district: "",
+    property_class: "",
+    square_feet: "",
+    year_built: "",
+    last_sale_date: "",
+    book: "",
+    page: "",
     // Departments Section
     municipalBuildingAddress: "",
     buildingDepartmentContact: "",
@@ -761,6 +770,15 @@ const AddProperty = () => {
           {renderInputField("Bathrooms", "bathroomsDescription")}
           {renderInputField("Kitchen", "kitchenDescription")}
           {renderInputField("Amenities", "amenitiesDescription")}
+          {renderInputField("Block", "block")}
+          {renderInputField("Lot", "lot")}
+          {renderInputField("District", "district")}
+          {renderInputField("Property Class", "property_class")}
+          {renderInputField("Square Feet", "square_feet")}
+          {renderInputField("Year Built", "year_built")}
+          {renderInputField("Last Sale Date", "last_sale_date")}
+          {renderInputField("Book", "book")}
+          {renderInputField("Page", "page")}
         </div>
 
         {/* Departments Section */}

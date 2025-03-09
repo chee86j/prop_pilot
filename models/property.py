@@ -26,6 +26,15 @@ class Property(db.Model):
     bathroomsDescription = db.Column(db.String(512))
     kitchenDescription = db.Column(db.String(512))
     amenitiesDescription = db.Column(db.String(512))
+    block = db.Column(db.String(64))
+    lot = db.Column(db.String(64))
+    district = db.Column(db.String(128))
+    property_class = db.Column(db.String(64))
+    square_feet = db.Column(db.Float)
+    year_built = db.Column(db.Integer)
+    last_sale_date = db.Column(db.Date)
+    book = db.Column(db.String(64))
+    page = db.Column(db.String(64))
 
     # Departments
     municipalBuildingAddress = db.Column(db.String(1024))

@@ -545,6 +545,56 @@ const PropertyDetails = ({ propertyId }) => {
                     "amenitiesDescription",
                     editedDetails.amenitiesDescription || ""
                   )}
+                  {renderEditableField(
+                    "Block",
+                    "block",
+                    editedDetails.block || ""
+                  )}
+                  {renderEditableField(
+                    "Lot",
+                    "lot",
+                    editedDetails.lot || ""
+                  )}
+                  {renderEditableField(
+                    "District",
+                    "district",
+                    editedDetails.district || ""
+                  )}
+                  {renderEditableField(
+                    "Property Class",
+                    "property_class",
+                    editedDetails.property_class || ""
+                  )}
+                  {renderEditableField(
+                    "Square Feet",
+                    "square_feet",  
+                    editedDetails.square_feet || "",
+                    "number"
+                  )}
+                  {renderEditableField(
+                    "Year Built",
+                    "year_built",
+                    editedDetails.year_built || "",
+                    "number"
+                  )}
+                  {renderEditableField(
+                    "Last Sale Date",
+                    "last_sale_date",
+                    editedDetails.last_sale_date || "",
+                    "date"
+                  )}
+                  {renderEditableField(
+                    "Book",
+                    "book",
+                    editedDetails.book || "",
+                    "number"
+                  )}
+                  {renderEditableField(
+                    "Page",
+                    "page",
+                    editedDetails.page || "",
+                    "number"
+                  )}
                 </>
               )}
             </div>
