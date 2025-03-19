@@ -165,50 +165,29 @@ const PropertyList = () => {
 
   const columns = [
     {
-      headerName: "Property Name",
-      field: "propertyName",
-      filter: "agTextColumnFilter",
-    },
-    {
-      headerName: "Address",
-      field: "address",
-      filter: "agTextColumnFilter",
-    },
-    {
-      headerName: "City",
-      field: "city",
-      filter: "agTextColumnFilter",
-    },
-    {
-      headerName: "Purchase Cost",
-      field: "purchaseCost",
-      filter: false,
-      floatingFilter: false,
-      valueFormatter: (params) => formatCurrency(params.value),
-    },
-    {
-      headerName: "Total Rehab Cost",
-      field: "totalRehabCost",
-      filter: false,
-      floatingFilter: false,
-      valueFormatter: (params) => formatCurrency(params.value),
-    },
-    {
-      headerName: "ARV Sale Price",
-      field: "arvSalePrice",
-      filter: false,
-      floatingFilter: false,
-      valueFormatter: (params) => formatCurrency(params.value),
-    },
-    {
       headerName: "Actions",
       field: "actions",
+      pinned: 'left', // Pin to left for better mobile experience
+      width: 120,
+      minWidth: 120,
+      maxWidth: 120,
+      sortable: false,
+      filter: false,
+      suppressMovable: true, // Prevent column from being moved
+      cellClass: 'action-cell',
+      cellStyle: { 
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '0.5rem'
+      },
       cellRenderer: (params) => (
-        <div className="flex flex-wrap space-x-2">
+        <div className="flex gap-2 justify-center">
           <button
-            className="flex items-center justify-center bg-blue-500 text-white px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:ring-2 focus:ring-blue-300 transition-colors duration-200"
             onClick={() => handleDetails(params.data.id)}
             aria-label="View Property Details"
+            title="View Details"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -216,7 +195,7 @@ const PropertyList = () => {
               viewBox="0 0 24 24"
               strokeWidth="1.5"
               stroke="currentColor"
-              className="h-5 w-5"
+              className="w-5 h-5"
             >
               <path
                 strokeLinecap="round"
@@ -226,9 +205,10 @@ const PropertyList = () => {
             </svg>
           </button>
           <button
-            className="flex items-center justify-center bg-red-500 text-white px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-300"
+            className="p-2 bg-red-500 text-white rounded hover:bg-red-600 focus:ring-2 focus:ring-red-300 transition-colors duration-200"
             onClick={() => handleDelete(params.data.id)}
             aria-label="Delete Property"
+            title="Delete Property"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -236,7 +216,7 @@ const PropertyList = () => {
               viewBox="0 0 24 24"
               strokeWidth="1.5"
               stroke="currentColor"
-              className="h-5 w-5"
+              className="w-5 h-5"
             >
               <path
                 strokeLinecap="round"
@@ -247,7 +227,58 @@ const PropertyList = () => {
           </button>
         </div>
       ),
-      filter: false, // Disable filter for actions column
+    },
+    {
+      headerName: "Property Name",
+      field: "propertyName",
+      filter: "agTextColumnFilter",
+      minWidth: 200,
+      flex: 1,
+    },
+    {
+      headerName: "Address",
+      field: "address",
+      filter: "agTextColumnFilter",
+      minWidth: 200,
+      flex: 1,
+      hide: isMobile, // Hide on mobile to save space
+    },
+    {
+      headerName: "City",
+      field: "city",
+      filter: "agTextColumnFilter",
+      minWidth: 150,
+      flex: 1,
+    },
+    {
+      headerName: "Purchase Cost",
+      field: "purchaseCost",
+      filter: false,
+      floatingFilter: false,
+      minWidth: 150,
+      flex: 1,
+      valueFormatter: (params) => formatCurrency(params.value),
+      hide: isMobile, // Hide on mobile to save space
+    },
+    {
+      headerName: "Total Rehab Cost",
+      field: "totalRehabCost",
+      filter: false,
+      floatingFilter: false,
+      minWidth: 150,
+      flex: 1,
+      valueFormatter: (params) => formatCurrency(params.value),
+      hide: isMobile, // Hide on mobile to save space
+    },
+    {
+      headerName: "ARV Sale Price",
+      field: "arvSalePrice",
+      filter: false,
+      floatingFilter: false,
+      minWidth: 150,
+      flex: 1,
+      valueFormatter: (params) => formatCurrency(params.value),
+      hide: isMobile, // Hide on mobile to save space
     },
   ];
 
@@ -398,18 +429,17 @@ const PropertyList = () => {
         </button>
       </div>
 
-      <div
-        className="ag-theme-alpine max-w-full mx-auto p-4"
-        style={{ height: "100vh", willChange: "transform" }}
-      >
+      <div className="ag-theme-alpine w-full" style={{ height: "calc(100vh - 300px)" }}>
         <AgGridReact
           rowData={rowData}
           columnDefs={columns}
           defaultColDef={{
             filter: true,
-            floatingFilter: true, // Enable quick filters
+            floatingFilter: true,
             sortable: true,
             resizable: true,
+            suppressMovable: false,
+            flex: 1,
             minWidth: 100,
             cellStyle: { fontSize: isMobile ? "12px" : "14px" },
           }}
@@ -417,10 +447,21 @@ const PropertyList = () => {
           paginationPageSize={25}
           paginationPageSizeSelector={[10, 25, 50, 100]}
           domLayout="autoHeight"
-          aria-label="Property Data Grid"
-          onGridReady={(params) => setGridApi(params.api)}
+          enableCellTextSelection={true}
+          suppressRowClickSelection={true}
+          rowSelection="multiple"
+          suppressColumnVirtualisation={false}
+          suppressRowVirtualisation={false}
+          animateRows={true}
           isExternalFilterPresent={isExternalFilterPresent}
           doesExternalFilterPass={doesExternalFilterPass}
+          onGridReady={(params) => {
+            setGridApi(params.api);
+            params.api.sizeColumnsToFit();
+          }}
+          onGridSizeChanged={(params) => {
+            params.api.sizeColumnsToFit();
+          }}
         />
       </div>
     </div>
