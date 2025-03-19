@@ -88,9 +88,9 @@ def create_default_user():
         first_name="Harry",
         last_name="Potter",
         email="hpotter@gmail.com",
-        password_hash=generate_password_hash("Qwe123!!"),
         avatar=avatar_image_base64
     )
+    user.set_password("Qwe123!!")
     db.session.add(user)
     db.session.commit()
     return user
@@ -100,6 +100,7 @@ def generate_property_data(user_id):
     borough = random.choice(list(BOROUGH_STREET_MAP.keys()))
     street = random.choice(BOROUGH_STREET_MAP[borough])
     property_name = f"{random.choice(PROPERTY_PREFIXES)} {random.choice(ARCHITECTURAL_STYLES)} {random.randint(1, 999)}"
+    address = f"{random.randint(1, 999)} {street}"
     
     # Generate ARV and rehab costs
     arv_sale_price = random.randint(1700000, 25800000)
@@ -108,15 +109,22 @@ def generate_property_data(user_id):
     max_purchase_price = (arv_sale_price * 0.70) - total_rehab_cost
     purchase_cost = max(0, round(random.uniform(0.25, 1.0) * max_purchase_price))
 
-    return Property(
-        user_id=user_id,
-        propertyName=property_name,
-        address=f"{random.randint(1, 999)} {street}",
-        purchaseCost=purchase_cost,
-        totalRehabCost=total_rehab_cost,
-        arvSalePrice=arv_sale_price,
-        city=borough
+    # Create property with required init parameters
+    property = Property(
+        address=address,
+        owner_id=user_id,
+        purchase_price=purchase_cost,
+        current_phase='ACQUISITION'
     )
+    
+    # Set additional attributes after initialization
+    property.propertyName = property_name
+    property.city = borough
+    property.purchaseCost = purchase_cost
+    property.totalRehabCost = total_rehab_cost
+    property.arvSalePrice = arv_sale_price
+
+    return property
 
 def calculate_rehab_category(purchase_cost, total_rehab_cost):
     """Calculate the renovation category based on rehab cost as percentage of purchase price"""
@@ -256,7 +264,7 @@ def seed_data():
         
         # Create phases for each property
         for property in all_properties:
-            phases = create_property_phases(property.id, property.purchaseCost, property.totalRehabCost)
+            phases = create_property_phases(property.id, property.purchase_price, property.totalRehabCost)
             for phase in phases:
                 db.session.add(phase)
 
@@ -287,17 +295,23 @@ def seed_database():
             purchase_cost = max_purchase - random.randint(10000, 30000)  # Slightly below max for profit
             total_rehab_cost = (max_purchase - purchase_cost) * random.uniform(0.8, 1.2)  # Variation in rehab costs
             
+            # Create property with required init parameters
             property = Property(
-                user_id=test_user.id,
-                propertyName=f"Test Property {i+1}",
                 address=f"123 Test St #{i+1}",
-                city="Test City",
-                state="TS",
-                zipCode="12345",
-                purchaseCost=purchase_cost,
-                totalRehabCost=total_rehab_cost,
-                arvSalePrice=arv
+                owner_id=test_user.id,
+                purchase_price=purchase_cost,
+                current_phase='ACQUISITION'
             )
+            
+            # Set additional attributes after initialization
+            property.propertyName = f"Test Property {i+1}"
+            property.city = "Test City"
+            property.state = "TS"
+            property.zipCode = "12345"
+            property.purchaseCost = purchase_cost
+            property.totalRehabCost = total_rehab_cost
+            property.arvSalePrice = arv
+            
             properties.append(property)
             db.session.add(property)
         
@@ -305,7 +319,7 @@ def seed_database():
 
         # Create phases for each property
         for property in properties:
-            phases = create_property_phases(property.id, property.purchaseCost, property.totalRehabCost)
+            phases = create_property_phases(property.id, property.purchase_price, property.totalRehabCost)
             for phase in phases:
                 db.session.add(phase)
         

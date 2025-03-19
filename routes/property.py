@@ -18,7 +18,7 @@ def get_property(property_id):
     current_user_email = get_jwt_identity()
     user = db.session.query(User).filter_by(email=current_user_email).first()
     if user:
-        property = db.session.query(Property).filter_by(id=property_id, user_id=user.id).first()
+        property = db.session.query(Property).filter_by(id=property_id, owner_id=user.id).first()
         if property:
             return jsonify({
                 'id': property.id,
@@ -160,7 +160,7 @@ def get_properties():
     current_user_email = get_jwt_identity()
     user = db.session.query(User).filter_by(email=current_user_email).first()
     if user:
-        properties = db.session.query(Property).filter_by(user_id=user.id).all()
+        properties = db.session.query(Property).filter_by(owner_id=user.id).all()
         return jsonify([{
             'id': property.id,
             'propertyName': property.propertyName,
@@ -219,7 +219,7 @@ def add_property():
                     return jsonify({"error": f"Invalid value for {field}. Must be a number"}), 400
 
         property = Property(
-            user_id=user.id,
+            owner_id=user.id,
             propertyName=data.get('propertyName'),
             address=data.get('address'),
             city=data.get('city'),
@@ -272,7 +272,7 @@ def update_property(property_id):
     current_user_email = get_jwt_identity()
     user = db.session.query(User).filter_by(email=current_user_email).first()
     if user:
-        property = db.session.query(Property).filter_by(id=property_id, user_id=user.id).first()
+        property = db.session.query(Property).filter_by(id=property_id, owner_id=user.id).first()
         if property:
             data = request.get_json()
             try:
@@ -293,7 +293,7 @@ def delete_property(property_id):
     current_user_email = get_jwt_identity()
     user = db.session.query(User).filter_by(email=current_user_email).first()
     if user:
-        property = db.session.query(Property).filter_by(id=property_id, user_id=user.id).first()
+        property = db.session.query(Property).filter_by(id=property_id, owner_id=user.id).first()
         if property:
             try:
                 db.session.delete(property)

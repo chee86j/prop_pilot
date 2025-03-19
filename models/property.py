@@ -161,7 +161,7 @@ class Property(db.Model):
     architectPhone = db.Column(db.String(64))
 
     # Relationships
-    owner = db.relationship('User', backref=db.backref('properties', lazy=True))
+    owner = db.relationship('User', backref=db.backref('owned_properties', lazy=True))
     phases = db.relationship('Phase', backref='property', lazy=True)
     leases = db.relationship('Lease', backref='property', lazy=True)
     maintenance_requests = db.relationship('PropertyMaintenanceRequest', backref='property', lazy=True)

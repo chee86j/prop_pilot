@@ -9,7 +9,6 @@ class User(db.Model):
     email = db.Column(db.String(512), unique=True, nullable=False)
     password_hash = db.Column(db.String(512))
     avatar = db.Column(db.Text, nullable=True) 
-    properties = db.relationship('Property', backref='owner', lazy='dynamic')  # User can own multiple properties
     managed_tenants = db.relationship('Tenant', backref='manager', lazy='dynamic')  # User can be a landlord or manager who manages multiple tenants
 
     def validate_password(self, password):
