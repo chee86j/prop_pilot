@@ -41,6 +41,7 @@ def create_app():
     
     # Initialize extensions with the app
     db.init_app(app)
+    migrate = Migrate(app, db)  # Initialize Flask-Migrate
     jwt = JWTManager(app)
     CORS(app)
     

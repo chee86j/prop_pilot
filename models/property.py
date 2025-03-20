@@ -99,13 +99,13 @@ class Property(db.Model):
     # Utility Information
     typeOfHeatingAndCooling = db.Column(db.String(512))
     waterCompany = db.Column(db.String(512))
-    waterAccountNumber = db.Column(db.Float(32))
+    waterAccountNumber = db.Column(db.String(32))
     electricCompany = db.Column(db.String(512))
-    electricAccountNumber = db.Column(db.Float(32))
+    electricAccountNumber = db.Column(db.String(32))
     gasOrOilCompany = db.Column(db.String(512))
-    gasOrOilAccountNumber = db.Column(db.Float(32))
+    gasOrOilAccountNumber = db.Column(db.String(32))
     sewerCompany = db.Column(db.String(512))
-    sewerAccountNumber = db.Column(db.Float(32))
+    sewerAccountNumber = db.Column(db.String(32))
 
     # Key Players Information
     sellersAgent = db.Column(db.String(64))
@@ -170,12 +170,15 @@ class Property(db.Model):
     # Indexes
     __table_args__ = (Index('idx_user_property', 'owner_id'),)
 
-    def __init__(self, address, owner_id, purchase_price, current_phase='ACQUISITION'):
-        """Initialize a new property"""
-        self.address = address
-        self.owner_id = owner_id
-        self.purchase_price = purchase_price
-        self.current_phase = current_phase
+    def __init__(self, **kwargs):
+        """Initialize a new property with any number of fields"""
+        # Set required fields with defaults if not provided
+        self.current_phase = kwargs.get('current_phase', 'ACQUISITION')
+        
+        # Set all other fields from kwargs
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
     def validate_state(self):
         """Validate state code is 2 letters"""

@@ -165,26 +165,16 @@ const PropertyList = () => {
 
   const columns = [
     {
-      headerName: "Actions",
-      field: "actions",
-      pinned: 'left', // Pin to left for better mobile experience
-      width: 120,
-      minWidth: 120,
-      maxWidth: 120,
-      sortable: false,
-      filter: false,
+      headerName: 'Actions',
+      field: 'actions',
+      pinned: 'left', // Pin to left side
+      width: isMobile ? 110 : 130,
       suppressMovable: true, // Prevent column from being moved
-      cellClass: 'action-cell',
-      cellStyle: { 
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: '0.5rem'
-      },
+      suppressSizeToFit: true, // Prevent column from being auto-sized
       cellRenderer: (params) => (
-        <div className="flex gap-2 justify-center">
+        <div className="flex items-center justify-center space-x-2 px-1">
           <button
-            className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:ring-2 focus:ring-blue-300 transition-colors duration-200"
+            className="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white w-9 h-9 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-1 transition-all duration-200 shadow-sm hover:shadow-md"
             onClick={() => handleDetails(params.data.id)}
             aria-label="View Property Details"
             title="View Details"
@@ -193,9 +183,9 @@ const PropertyList = () => {
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
-              strokeWidth="1.5"
+              strokeWidth="2"
               stroke="currentColor"
-              className="w-5 h-5"
+              className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'}`}
             >
               <path
                 strokeLinecap="round"
@@ -205,7 +195,7 @@ const PropertyList = () => {
             </svg>
           </button>
           <button
-            className="p-2 bg-red-500 text-white rounded hover:bg-red-600 focus:ring-2 focus:ring-red-300 transition-colors duration-200"
+            className="flex items-center justify-center bg-red-500 hover:bg-red-600 text-white w-9 h-9 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-1 transition-all duration-200 shadow-sm hover:shadow-md"
             onClick={() => handleDelete(params.data.id)}
             aria-label="Delete Property"
             title="Delete Property"
@@ -214,9 +204,9 @@ const PropertyList = () => {
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
-              strokeWidth="1.5"
+              strokeWidth="2"
               stroke="currentColor"
-              className="w-5 h-5"
+              className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'}`}
             >
               <path
                 strokeLinecap="round"
@@ -227,78 +217,74 @@ const PropertyList = () => {
           </button>
         </div>
       ),
+      filter: false,
     },
     {
       headerName: "Property Name",
       field: "propertyName",
       filter: "agTextColumnFilter",
-      minWidth: 200,
+      minWidth: isMobile ? 120 : 150,
       flex: 1,
     },
     {
       headerName: "Address",
       field: "address",
       filter: "agTextColumnFilter",
-      minWidth: 200,
-      flex: 1,
-      hide: isMobile, // Hide on mobile to save space
+      minWidth: isMobile ? 120 : 180,
+      flex: 1.2,
+      hide: isMobile,
     },
     {
       headerName: "City",
       field: "city",
       filter: "agTextColumnFilter",
-      minWidth: 150,
-      flex: 1,
+      minWidth: isMobile ? 100 : 120,
+      flex: 0.8,
     },
     {
       headerName: "Purchase Cost",
       field: "purchaseCost",
       filter: false,
       floatingFilter: false,
-      minWidth: 150,
-      flex: 1,
       valueFormatter: (params) => formatCurrency(params.value),
-      hide: isMobile, // Hide on mobile to save space
+      minWidth: isMobile ? 110 : 130,
+      flex: 1,
+      hide: isMobile,
     },
     {
-      headerName: "Total Rehab Cost",
+      headerName: "Total Rehab",
       field: "totalRehabCost",
       filter: false,
       floatingFilter: false,
-      minWidth: 150,
-      flex: 1,
       valueFormatter: (params) => formatCurrency(params.value),
-      hide: isMobile, // Hide on mobile to save space
+      minWidth: isMobile ? 110 : 130,
+      flex: 1,
+      hide: isMobile,
     },
     {
-      headerName: "ARV Sale Price",
+      headerName: "ARV Price",
       field: "arvSalePrice",
       filter: false,
       floatingFilter: false,
-      minWidth: 150,
-      flex: 1,
       valueFormatter: (params) => formatCurrency(params.value),
-      hide: isMobile, // Hide on mobile to save space
+      minWidth: isMobile ? 110 : 130,
+      flex: 1,
     },
   ];
 
   return (
-    <div
-      className="ag-theme-alpine max-w-full mx-auto p-4"
-      style={{ height: "100vh", willChange: "transform" }} // will-change error boundary fix
-    >
-      <header className="mb-6" style={{ willChange: "transform" }}>
-        <div className="flex flex-wrap items-center justify-between">
-          <div className="flex items-center space-x-4">
+    <div className="ag-theme-alpine max-w-full mx-auto p-2 sm:p-4" style={{ height: "100vh" }}>
+      <header className="mb-4 sm:mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <img
               src={SkyScrapers}
               alt="SkyScrapers"
-              className="w-16 h-16 sm:w-24 sm:h-24"
+              className="w-12 h-12 sm:w-24 sm:h-24"
               aria-hidden="true"
-              style={{ willChange: "transform" }}
             />
             <div>
-              <h1 className="text-lg sm:text-xl font-semibold text-gray-700">
+              <h1 className="text-base sm:text-xl font-semibold text-gray-700">
                 Displaying Properties
               </h1>
               {user && (
@@ -307,154 +293,152 @@ const PropertyList = () => {
                 </h2>
               )}
             </div>
-            <img src={SkyScrapers} alt="SkyScrapers" className="w-24 h-24" />
           </div>
-          {/* <button
-            onClick={goToAddPropertyPage}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:ring-2 focus:ring-blue-300"
-          >
-            Add New Property
-          </button> */}
         </div>
       </header>
 
-      <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Purchase Cost Filter
-          </label>
-          <div className="flex space-x-2">
-            <input
-              type="number"
-              placeholder="Min"
-              className="w-1/2 px-3 py-2 border rounded"
-              value={filterValues.purchaseCost.min}
-              onChange={(e) =>
-                handleFilterChange("purchaseCost", "min", e.target.value)
-              }
-            />
-            <input
-              type="number"
-              placeholder="Max"
-              className="w-1/2 px-3 py-2 border rounded"
-              value={filterValues.purchaseCost.max}
-              onChange={(e) =>
-                handleFilterChange("purchaseCost", "max", e.target.value)
-              }
-            />
-          </div>
-        </div>
+      <div className="mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {!isMobile && (
+          <>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Purchase Cost Filter
+              </label>
+              <div className="flex space-x-2">
+                <input
+                  type="number"
+                  placeholder="Min"
+                  className="w-1/2 px-3 py-2 border rounded"
+                  value={filterValues.purchaseCost.min}
+                  onChange={(e) =>
+                    handleFilterChange("purchaseCost", "min", e.target.value)
+                  }
+                />
+                <input
+                  type="number"
+                  placeholder="Max"
+                  className="w-1/2 px-3 py-2 border rounded"
+                  value={filterValues.purchaseCost.max}
+                  onChange={(e) =>
+                    handleFilterChange("purchaseCost", "max", e.target.value)
+                  }
+                />
+              </div>
+            </div>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Rehab Cost Filter
-          </label>
-          <div className="flex space-x-2">
-            <input
-              type="number"
-              placeholder="Min"
-              className="w-1/2 px-3 py-2 border rounded"
-              value={filterValues.totalRehabCost.min}
-              onChange={(e) =>
-                handleFilterChange("totalRehabCost", "min", e.target.value)
-              }
-            />
-            <input
-              type="number"
-              placeholder="Max"
-              className="w-1/2 px-3 py-2 border rounded"
-              value={filterValues.totalRehabCost.max}
-              onChange={(e) =>
-                handleFilterChange("totalRehabCost", "max", e.target.value)
-              }
-            />
-          </div>
-        </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Rehab Cost Filter
+              </label>
+              <div className="flex space-x-2">
+                <input
+                  type="number"
+                  placeholder="Min"
+                  className="w-1/2 px-3 py-2 border rounded"
+                  value={filterValues.totalRehabCost.min}
+                  onChange={(e) =>
+                    handleFilterChange("totalRehabCost", "min", e.target.value)
+                  }
+                />
+                <input
+                  type="number"
+                  placeholder="Max"
+                  className="w-1/2 px-3 py-2 border rounded"
+                  value={filterValues.totalRehabCost.max}
+                  onChange={(e) =>
+                    handleFilterChange("totalRehabCost", "max", e.target.value)
+                  }
+                />
+              </div>
+            </div>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            ARV Sale Price Filter
-          </label>
-          <div className="flex space-x-2">
-            <input
-              type="number"
-              placeholder="Min"
-              className="w-1/2 px-3 py-2 border rounded"
-              value={filterValues.arvSalePrice.min}
-              onChange={(e) =>
-                handleFilterChange("arvSalePrice", "min", e.target.value)
-              }
-            />
-            <input
-              type="number"
-              placeholder="Max"
-              className="w-1/2 px-3 py-2 border rounded"
-              value={filterValues.arvSalePrice.max}
-              onChange={(e) =>
-                handleFilterChange("arvSalePrice", "max", e.target.value)
-              }
-            />
-          </div>
-        </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                ARV Sale Price Filter
+              </label>
+              <div className="flex space-x-2">
+                <input
+                  type="number"
+                  placeholder="Min"
+                  className="w-1/2 px-3 py-2 border rounded"
+                  value={filterValues.arvSalePrice.min}
+                  onChange={(e) =>
+                    handleFilterChange("arvSalePrice", "min", e.target.value)
+                  }
+                />
+                <input
+                  type="number"
+                  placeholder="Max"
+                  className="w-1/2 px-3 py-2 border rounded"
+                  value={filterValues.arvSalePrice.max}
+                  onChange={(e) =>
+                    handleFilterChange("arvSalePrice", "max", e.target.value)
+                  }
+                />
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
-      <div className="mb-4 flex space-x-2">
-        <button
-          onClick={applyFilters}
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Apply Filters
-        </button>
-        <button
-          onClick={resetFilters}
-          className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Reset Filters
-        </button>
-      </div>
-
-      <div className="flex justify-between mb-4">
+      <div className="mb-4 flex flex-wrap gap-2">
+        {!isMobile && (
+          <>
+            <button
+              onClick={applyFilters}
+              className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
+            >
+              Apply Filters
+            </button>
+            <button
+              onClick={resetFilters}
+              className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
+            >
+              Reset Filters
+            </button>
+          </>
+        )}
         <button
           onClick={goToAddPropertyPage}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:ring-2 focus:ring-blue-300"
+          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:ring-2 focus:ring-blue-300 transition-colors duration-200"
         >
           Add New Property
         </button>
         <button
           onClick={handleRunScraper}
           disabled={isScrapingData}
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          className={`${
+            isScrapingData ? 'bg-green-400' : 'bg-green-500 hover:bg-green-600'
+          } text-white font-bold py-2 px-4 rounded transition-colors duration-200`}
         >
           {isScrapingData ? "Scraping..." : "Run Foreclosure Scraper"}
         </button>
       </div>
 
-      <div className="ag-theme-alpine w-full" style={{ height: "calc(100vh - 300px)" }}>
+      <div className="ag-theme-alpine w-full" style={{ height: 'calc(100vh - 300px)' }}>
         <AgGridReact
           rowData={rowData}
           columnDefs={columns}
           defaultColDef={{
             filter: true,
-            floatingFilter: true,
+            floatingFilter: !isMobile,
             sortable: true,
             resizable: true,
-            suppressMovable: false,
-            flex: 1,
-            minWidth: 100,
-            cellStyle: { fontSize: isMobile ? "12px" : "14px" },
+            suppressSizeToFit: false,
+            cellStyle: { 
+              fontSize: isMobile ? '12px' : '14px',
+              padding: isMobile ? '4px' : '8px'
+            },
           }}
           pagination={true}
-          paginationPageSize={25}
-          paginationPageSizeSelector={[10, 25, 50, 100]}
+          paginationPageSize={isMobile ? 10 : 25}
+          paginationPageSizeSelector={isMobile ? [5, 10, 25] : [10, 25, 50, 100]}
           domLayout="autoHeight"
           enableCellTextSelection={true}
           suppressRowClickSelection={true}
-          rowSelection="multiple"
           suppressColumnVirtualisation={false}
           suppressRowVirtualisation={false}
           animateRows={true}
-          isExternalFilterPresent={isExternalFilterPresent}
-          doesExternalFilterPass={doesExternalFilterPass}
           onGridReady={(params) => {
             setGridApi(params.api);
             params.api.sizeColumnsToFit();
@@ -462,6 +446,10 @@ const PropertyList = () => {
           onGridSizeChanged={(params) => {
             params.api.sizeColumnsToFit();
           }}
+          isExternalFilterPresent={isExternalFilterPresent}
+          doesExternalFilterPass={doesExternalFilterPass}
+          tooltipShowDelay={0}
+          tooltipHideDelay={2000}
         />
       </div>
     </div>

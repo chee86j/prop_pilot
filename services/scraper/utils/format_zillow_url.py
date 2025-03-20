@@ -1,9 +1,12 @@
 import pandas as pd
 import logging
 import sys
+import re
+from typing import Optional
+from .logger import setup_logger
 
 # Configure logging
-logging.basicConfig(filename='scraper.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
+logger = setup_logger(__name__, 'logs/scraper.log')
 
 def format_zillow_url(address):
     """Convert the address to a Zillow URL format."""

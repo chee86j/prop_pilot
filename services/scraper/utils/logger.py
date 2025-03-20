@@ -2,10 +2,40 @@
 Logging configuration for the scraper service
 """
 import logging
+import sys
 import os
+from pathlib import Path
 from typing import Optional
 
-def setup_logger(name: str, log_file: Optional[str] = None) -> logging.Logger:
+def setup_logger(name: str, log_file: str) -> logging.Logger:
+    """Set up logger with proper encoding for Windows compatibility."""
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.INFO)
+
+    # Create logs directory if it doesn't exist
+    log_dir = Path(log_file).parent
+    os.makedirs(log_dir, exist_ok=True)
+
+    # File handler with UTF-8 encoding
+    file_handler = logging.FileHandler(log_file, encoding='utf-8')
+    file_handler.setLevel(logging.INFO)
+
+    # Stream handler for console with UTF-8 encoding
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setLevel(logging.INFO)
+
+    # Create formatters and add them to the handlers
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    file_handler.setFormatter(formatter)
+    stream_handler.setFormatter(formatter)
+
+    # Add the handlers to logger
+    logger.addHandler(file_handler)
+    logger.addHandler(stream_handler)
+
+    return logger
+
+def setup_logger_old(name: str, log_file: Optional[str] = None) -> logging.Logger:
     """
     Set up a logger with file and console handlers
     
