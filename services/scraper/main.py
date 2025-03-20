@@ -2,6 +2,7 @@ import sys
 import os
 import logging
 import pandas as pd
+import json
 from .scraper import parse_page_selenium
 from .database import connect_db, create_table, insert_data, close_db
 from .merge_csv import merge_csv_files
@@ -10,6 +11,15 @@ from .utils.exceptions import ScraperException, DatabaseException, NetworkExcept
 import traceback
 
 logger = setup_logger(__name__, 'logs/scraper.log')
+
+# Define county URLs and IDs
+COUNTY_URLS = {
+    'Morris': {'id': 9, 'url': 'https://salesweb.civilview.com/Sales/SalesSearch?countyId=9'},
+    'Bergen': {'id': 7, 'url': 'https://salesweb.civilview.com/Sales/SalesSearch?countyId=7'},
+    'Essex': {'id': 2, 'url': 'https://salesweb.civilview.com/Sales/SalesSearch?countyId=2'},
+    'Union': {'id': 15, 'url': 'https://salesweb.civilview.com/Sales/SalesSearch?countyId=15'},
+    'Hudson': {'id': 10, 'url': 'https://salesweb.civilview.com/Sales/SalesSearch?countyId=10'}
+}
 
 def format_zillow_url(address):
     """Convert the address to a Zillow URL format."""
@@ -61,25 +71,40 @@ def export_formatted_data(formatted_data, output_file):
     except Exception as e:
         logging.error(f"Error exporting frontend data: {e}")
 
-def main() -> bool:
+def main(county='Morris') -> bool:
     """
     Main scraper execution function
     
+    Args:
+        county (str): The county to scrape data from. Defaults to 'Morris'.
+        
     Returns:
         bool: True if scraping completed successfully, False otherwise
     """
     try:
+        # Ensure county is valid
+        if county not in COUNTY_URLS:
+            logger.error(f"❌ Invalid county: {county}")
+            return False
+            
+        # Get county URL
+        url = COUNTY_URLS[county]['url']
+        county_id = COUNTY_URLS[county]['id']
+        
         # Ensure downloads folder exists
         downloads_folder = os.path.join(os.path.dirname(__file__), 'downloads')
         os.makedirs(downloads_folder, exist_ok=True)
         
         # Step 1: Scrape auction data
-        url = "https://salesweb.civilview.com/Sales/SalesSearch?countyId=9"
-        logger.info("🔄 Starting page scrape: %s", url)
+        logger.info(f"🔄 Starting page scrape for {county} County: {url}")
         
         data = parse_page_selenium(url)
         if not data:
-            raise ScraperException("No data returned from scraping")
+            raise ScraperException(f"No data returned from scraping {county} County")
+
+        # Add county information to each record
+        for item in data:
+            item['county'] = county
 
         # Step 2: Database operations
         logger.info("💾 Initializing database connection")
@@ -122,6 +147,11 @@ def main() -> bool:
                 zillow_url_file=zillow_csv,
                 output_file=output_file
             )
+            
+            # Also generate a combined merged_data.csv file for backward compatibility
+            combined_output_file = os.path.join(downloads_folder, 'merged_data.csv')
+            df.to_csv(combined_output_file, index=False)
+            
             logger.info("✅ Files merged successfully to %s", output_file)
 
             return True
@@ -145,15 +175,22 @@ def main() -> bool:
         return False
 
 if __name__ == "__main__":
-    success = main()
+    import argparse
+    parser = argparse.ArgumentParser(description='Run the foreclosure scraper')
+    parser.add_argument('--county', type=str, default='Morris', 
+                        choices=list(COUNTY_URLS.keys()),
+                        help='County to scrape data from')
+    args = parser.parse_args()
+    
+    success = main(args.county)
     if success:
-        logger.info("✅ Script completed successfully")
+        logger.info(f"✅ Script completed successfully for {args.county} County")
         sys.exit(0)
     else:
-        logger.error("❌ Script failed to complete")
+        logger.error(f"❌ Script failed to complete for {args.county} County")
         sys.exit(1)
         
 # In order to start the scraper you will need to run the following command:
-# 1. `python main.py`
+# 1. `python main.py --county Morris`
 # 2. `viewer.py` to view the data in the frontend and add extra data from the Details
 #    links that you will have to manually click on.

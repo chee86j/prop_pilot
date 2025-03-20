@@ -60,7 +60,10 @@ def parse_page_selenium(url):
 
         data = []
         rows = table.find('tbody').find_all('tr') if table.find('tbody') else []
-
+        
+        # Determine if it's Hudson County by checking the URL
+        is_hudson_county = 'countyId=10' in url
+        
         for row in rows:
             cells = row.find_all('td')
             try:
@@ -72,17 +75,31 @@ def parse_page_selenium(url):
                 property_id = detail_link.split("PropertyId=")[-1]
                 full_detail_link = f"https://salesweb.civilview.com{detail_link}"
 
-                # Extract other data for the row
-                row_data = {
-                    'detail_link': full_detail_link,
-                    'property_id': property_id,
-                    'sheriff_number': cells[1].text.strip() if len(cells) > 1 else None,
-                    'status_date': convert_date_format(cells[2].text.strip()) if len(cells) > 2 else None,
-                    'plaintiff': cells[3].text.strip() if len(cells) > 3 else None,
-                    'defendant': cells[4].text.strip() if len(cells) > 4 else None,
-                    'address': cells[5].text.strip() if len(cells) > 5 else None,
-                    'price': int(cells[6].text.strip().replace('$', '').replace(',', '')) if len(cells) > 6 else 0
-                }
+                # Extract other data for the row - handle Hudson County differently
+                if is_hudson_county:
+                    # Hudson County has Address before Plaintiff/Defendant
+                    row_data = {
+                        'detail_link': full_detail_link,
+                        'property_id': property_id,
+                        'sheriff_number': cells[1].text.strip() if len(cells) > 1 else None,
+                        'status_date': convert_date_format(cells[2].text.strip()) if len(cells) > 2 else None,
+                        'address': cells[3].text.strip() if len(cells) > 3 else None,
+                        'plaintiff': cells[4].text.strip() if len(cells) > 4 else None,
+                        'defendant': cells[5].text.strip() if len(cells) > 5 else None,
+                        'price': int(cells[6].text.strip().replace('$', '').replace(',', '')) if len(cells) > 6 and cells[6].text.strip() else 0
+                    }
+                else:
+                    # Standard column order for other counties
+                    row_data = {
+                        'detail_link': full_detail_link,
+                        'property_id': property_id,
+                        'sheriff_number': cells[1].text.strip() if len(cells) > 1 else None,
+                        'status_date': convert_date_format(cells[2].text.strip()) if len(cells) > 2 else None,
+                        'plaintiff': cells[3].text.strip() if len(cells) > 3 else None,
+                        'defendant': cells[4].text.strip() if len(cells) > 4 else None,
+                        'address': cells[5].text.strip() if len(cells) > 5 else None,
+                        'price': int(cells[6].text.strip().replace('$', '').replace(',', '')) if len(cells) > 6 and cells[6].text.strip() else 0
+                    }
 
                 data.append(row_data)
 

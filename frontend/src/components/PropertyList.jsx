@@ -20,9 +20,13 @@ const PropertyList = () => {
     arvSalePrice: { min: "", max: "" },
   });
   const [isScrapingData, setIsScrapingData] = useState(false);
+  const [selectedCounty, setSelectedCounty] = useState("Morris");
   const navigate = useNavigate();
 
   const isMobile = window.innerWidth <= 768;
+
+  // List of counties for the dropdown
+  const counties = ["Morris", "Bergen", "Essex", "Union", "Hudson"];
 
   useEffect(() => {
     fetch("http://localhost:5000/api/properties", {
@@ -133,16 +137,21 @@ const PropertyList = () => {
     );
   };
 
+  const handleCountyChange = (e) => {
+    setSelectedCounty(e.target.value);
+  };
+
   const handleRunScraper = async () => {
     setIsScrapingData(true);
     try {
-      console.log("🤖 Starting Scraper...");
+      console.log(`🤖 Starting Scraper for ${selectedCounty} County...`);
       const response = await fetch("http://localhost:5000/api/run-scraper", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({ county: selectedCounty }),
       });
 
       const data = await response.json();
@@ -154,12 +163,36 @@ const PropertyList = () => {
       }
 
       console.log("✅ Scraper Completed Successfully:", data);
-      toast.success("🏠 Foreclosure List Scraped Successfully!");
+      toast.success(`🏠 Foreclosure List for ${selectedCounty} County Scraped Successfully!`);
+      
+      // Fetch the scraped properties for the selected county
+      fetchScrapedProperties(selectedCounty);
     } catch (error) {
       console.error("🚫 Scraper Error:", error);
       toast.error("❌ Failed to Run Foreclosure Scraper: " + error.message);
     } finally {
       setIsScrapingData(false);
+    }
+  };
+  
+  const fetchScrapedProperties = async (county) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/scraped-properties?county=${county}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch scraped properties");
+      }
+      
+      const scrapedData = await response.json();
+      toast.info(`📊 Found ${scrapedData.length} properties in ${county} County`);
+      
+    } catch (error) {
+      console.error("🚫 Error fetching scraped properties:", error);
+      toast.error("❌ Failed to fetch scraped properties: " + error.message);
     }
   };
 
@@ -404,15 +437,31 @@ const PropertyList = () => {
         >
           Add New Property
         </button>
-        <button
-          onClick={handleRunScraper}
-          disabled={isScrapingData}
-          className={`${
-            isScrapingData ? 'bg-green-400' : 'bg-green-500 hover:bg-green-600'
-          } text-white font-bold py-2 px-4 rounded transition-colors duration-200`}
-        >
-          {isScrapingData ? "Scraping..." : "Run Foreclosure Scraper"}
-        </button>
+        
+        <div className="flex items-center space-x-2">
+          <select
+            value={selectedCounty}
+            onChange={handleCountyChange}
+            className="border border-gray-300 rounded py-2 px-3 bg-white text-gray-700 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label="Select County"
+          >
+            {counties.map((county) => (
+              <option key={county} value={county}>
+                {county} County
+              </option>
+            ))}
+          </select>
+          
+          <button
+            onClick={handleRunScraper}
+            disabled={isScrapingData}
+            className={`${
+              isScrapingData ? 'bg-green-400' : 'bg-green-500 hover:bg-green-600'
+            } text-white font-bold py-2 px-4 rounded transition-colors duration-200`}
+          >
+            {isScrapingData ? "Scraping..." : "Run Foreclosure Scraper"}
+          </button>
+        </div>
       </div>
 
       <div className="ag-theme-alpine w-full" style={{ height: 'calc(100vh - 300px)' }}>

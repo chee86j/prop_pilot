@@ -406,16 +406,27 @@ def delete_phase(phase_id):
 def run_scraper_endpoint():
     """Run the foreclosure scraper and return results."""
     try:
-        success = run_scraper()
+        data = request.get_json() or {}
+        county = data.get('county', 'Morris')  # Default to Morris County if not specified
+        
+        # Validate county
+        from services.scraper.main import COUNTY_URLS
+        if county not in COUNTY_URLS:
+            return jsonify({
+                'status': 'error',
+                'error': f'Invalid county: {county}. Valid counties are: {", ".join(COUNTY_URLS.keys())}'
+            }), 400
+            
+        success = run_scraper(county)
         if success:
             return jsonify({
                 'status': 'success',
-                'message': 'Scraper completed successfully'
+                'message': f'Scraper completed successfully for {county} County'
             }), 200
         else:
             return jsonify({
                 'status': 'error',
-                'error': 'Scraper failed to complete'
+                'error': f'Scraper failed to complete for {county} County'
             }), 500
     except Exception as e:
         return jsonify({
@@ -428,18 +439,34 @@ def run_scraper_endpoint():
 def get_scraped_properties():
     """Get the list of scraped properties from the merged data CSV."""
     try:
-        # Path to the merged data file
-        merged_data_path = os.path.join('services', 'scraper', 'downloads', 'merged_data.csv')
+        # Get county parameter from query string, default to 'Morris'
+        county = request.args.get('county', 'Morris')
         
-        # Check if file exists
-        if not os.path.exists(merged_data_path):
+        # Validate county
+        from services.scraper.main import COUNTY_URLS
+        if county not in COUNTY_URLS:
             return jsonify({
                 'status': 'error',
-                'message': 'No scraped data available. Please run the scraper first.'
+                'message': f'Invalid county: {county}. Valid counties are: {", ".join(COUNTY_URLS.keys())}'
+            }), 400
+        
+        # Path to the merged data file
+        county_specific_path = os.path.join('services', 'scraper', 'downloads', f'merged_data_{county.lower()}.csv')
+        merged_data_path = os.path.join('services', 'scraper', 'downloads', 'merged_data.csv')
+        
+        # Check if county-specific file exists, otherwise fall back to merged_data.csv
+        if os.path.exists(county_specific_path):
+            file_path = county_specific_path
+        elif os.path.exists(merged_data_path):
+            file_path = merged_data_path
+        else:
+            return jsonify({
+                'status': 'error',
+                'message': f'No scraped data available for {county} County. Please run the scraper first.'
             }), 404
             
         # Read the CSV file
-        df = pd.read_csv(merged_data_path)
+        df = pd.read_csv(file_path)
         
         # Convert DataFrame to list of dictionaries
         properties = df.to_dict('records')
