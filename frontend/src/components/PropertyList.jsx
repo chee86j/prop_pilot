@@ -163,8 +163,10 @@ const PropertyList = () => {
       }
 
       console.log("✅ Scraper Completed Successfully:", data);
-      toast.success(`🏠 Foreclosure List for ${selectedCounty} County Scraped Successfully!`);
-      
+      toast.success(
+        `🏠 Foreclosure List for ${selectedCounty} County Scraped Successfully!`
+      );
+
       // Fetch the scraped properties for the selected county
       fetchScrapedProperties(selectedCounty);
     } catch (error) {
@@ -174,22 +176,26 @@ const PropertyList = () => {
       setIsScrapingData(false);
     }
   };
-  
+
   const fetchScrapedProperties = async (county) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/scraped-properties?county=${county}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      });
-      
+      const response = await fetch(
+        `http://localhost:5000/api/scraped-properties?county=${county}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      );
+
       if (!response.ok) {
         throw new Error("Failed to fetch scraped properties");
       }
-      
+
       const scrapedData = await response.json();
-      toast.info(`📊 Found ${scrapedData.length} properties in ${county} County`);
-      
+      toast.info(
+        `📊 Found ${scrapedData.length} properties in ${county} County`
+      );
     } catch (error) {
       console.error("🚫 Error fetching scraped properties:", error);
       toast.error("❌ Failed to fetch scraped properties: " + error.message);
@@ -198,16 +204,16 @@ const PropertyList = () => {
 
   const columns = [
     {
-      headerName: 'Actions',
-      field: 'actions',
-      pinned: 'left', // Pin to left side
-      width: isMobile ? 110 : 130,
+      headerName: "Actions",
+      field: "actions",
+      pinned: "left", // Pin to left side
+      width: isMobile ? 120 : 140, // Slightly increase width for more space
       suppressMovable: true, // Prevent column from being moved
       suppressSizeToFit: true, // Prevent column from being auto-sized
       cellRenderer: (params) => (
-        <div className="flex items-center justify-center space-x-2 px-1">
+        <div className="flex items-center justify-center space-x-3 py-1.5 px-2">
           <button
-            className="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white w-9 h-9 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-1 transition-all duration-200 shadow-sm hover:shadow-md"
+            className="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white w-8 h-8 sm:w-9 sm:h-9 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-1 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105"
             onClick={() => handleDetails(params.data.id)}
             aria-label="View Property Details"
             title="View Details"
@@ -218,7 +224,7 @@ const PropertyList = () => {
               viewBox="0 0 24 24"
               strokeWidth="2"
               stroke="currentColor"
-              className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'}`}
+              className={`${isMobile ? "h-4 w-4" : "h-5 w-5"}`}
             >
               <path
                 strokeLinecap="round"
@@ -228,7 +234,7 @@ const PropertyList = () => {
             </svg>
           </button>
           <button
-            className="flex items-center justify-center bg-red-500 hover:bg-red-600 text-white w-9 h-9 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-1 transition-all duration-200 shadow-sm hover:shadow-md"
+            className="flex items-center justify-center bg-red-500 hover:bg-red-600 text-white w-8 h-8 sm:w-9 sm:h-9 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-1 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105"
             onClick={() => handleDelete(params.data.id)}
             aria-label="Delete Property"
             title="Delete Property"
@@ -239,7 +245,7 @@ const PropertyList = () => {
               viewBox="0 0 24 24"
               strokeWidth="2"
               stroke="currentColor"
-              className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'}`}
+              className={`${isMobile ? "h-4 w-4" : "h-5 w-5"}`}
             >
               <path
                 strokeLinecap="round"
@@ -250,6 +256,12 @@ const PropertyList = () => {
           </button>
         </div>
       ),
+      cellStyle: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "0",
+      },
       filter: false,
     },
     {
@@ -306,7 +318,10 @@ const PropertyList = () => {
   ];
 
   return (
-    <div className="ag-theme-alpine max-w-full mx-auto p-2 sm:p-4" style={{ height: "100vh" }}>
+    <div
+      className="ag-theme-alpine max-w-full mx-auto p-2 sm:p-4"
+      style={{ height: "100vh" }}
+    >
       <header className="mb-4 sm:mb-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center space-x-2 sm:space-x-4">
@@ -437,7 +452,7 @@ const PropertyList = () => {
         >
           Add New Property
         </button>
-        
+
         <div className="flex items-center space-x-2">
           <select
             value={selectedCounty}
@@ -451,12 +466,14 @@ const PropertyList = () => {
               </option>
             ))}
           </select>
-          
+
           <button
             onClick={handleRunScraper}
             disabled={isScrapingData}
             className={`${
-              isScrapingData ? 'bg-green-400' : 'bg-green-500 hover:bg-green-600'
+              isScrapingData
+                ? "bg-green-400"
+                : "bg-green-500 hover:bg-green-600"
             } text-white font-bold py-2 px-4 rounded transition-colors duration-200`}
           >
             {isScrapingData ? "Scraping..." : "Run Foreclosure Scraper"}
@@ -464,24 +481,31 @@ const PropertyList = () => {
         </div>
       </div>
 
-      <div className="ag-theme-alpine w-full" style={{ height: 'calc(100vh - 300px)' }}>
+      <div
+        className="ag-theme-alpine w-full"
+        style={{ height: "calc(100vh - 300px)" }}
+      >
         <AgGridReact
           rowData={rowData}
           columnDefs={columns}
+          rowHeight={isMobile ? 50 : 56}
+          headerHeight={isMobile ? 40 : 48}
           defaultColDef={{
             filter: true,
             floatingFilter: !isMobile,
             sortable: true,
             resizable: true,
             suppressSizeToFit: false,
-            cellStyle: { 
-              fontSize: isMobile ? '12px' : '14px',
-              padding: isMobile ? '4px' : '8px'
+            cellStyle: {
+              fontSize: isMobile ? "12px" : "14px",
+              padding: isMobile ? "8px 4px" : "12px 8px",
             },
           }}
           pagination={true}
           paginationPageSize={isMobile ? 10 : 25}
-          paginationPageSizeSelector={isMobile ? [5, 10, 25] : [10, 25, 50, 100]}
+          paginationPageSizeSelector={
+            isMobile ? [5, 10, 25] : [10, 25, 50, 100]
+          }
           domLayout="autoHeight"
           enableCellTextSelection={true}
           suppressRowClickSelection={true}

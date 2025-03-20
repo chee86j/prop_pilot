@@ -147,8 +147,9 @@ const AddProperty = () => {
     videographerPhone: "",
   });
 
+  const [activeTab, setActiveTab] = useState("basic"); // Track active form section
+  const [progress, setProgress] = useState(0); // Track form completion progress
   const [scrapedProperties, setScrapedProperties] = useState([]);
-  // eslint-disable-next-line no-unused-vars
   const [errorMessage, setErrorMessage] = useState("");
 
   const navigate = useNavigate();
@@ -670,29 +671,454 @@ const AddProperty = () => {
       });
   };
 
-  // Helper function to render input fields
+  // Helper function to render input field with improved styling
   const renderInputField = (label, name, type = "text", isNumber = false) => {
     return (
-      <label className="flex justify-between items-center mb-2">
-        <span className="text-gray-700">{label}:</span>
+      <div className="form-group mb-4">
+        <label
+          className="block text-sm font-medium text-gray-700 mb-1"
+          htmlFor={name}
+        >
+          {label}
+        </label>
         <input
+          id={name}
           type={type}
           name={name}
           value={property[name]}
           onChange={handleChange}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${
-            isNumber ? "text-right" : ""
-          }`}
+          className={`
+            w-full px-3 py-2 rounded-lg border border-gray-300
+            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+            transition duration-150 ease-in-out
+            ${isNumber ? "text-right" : ""}
+            ${errorMessage && !property[name] ? "border-red-500" : ""}
+          `}
+          placeholder={`Enter ${label.toLowerCase()}`}
         />
-      </label>
+      </div>
     );
   };
 
+  // Define form sections/tabs
+  const formSections = {
+    basic: {
+      title: "Basic Information",
+      icon: "📋",
+      fields: [
+        "propertyName",
+        "address",
+        "city",
+        "state",
+        "zipCode",
+        "county",
+        "bedroomsDescription",
+        "bathroomsDescription",
+        "kitchenDescription",
+        "amenitiesDescription",
+      ],
+    },
+    foreclosure: {
+      title: "Foreclosure Details",
+      icon: "🏠",
+      fields: [
+        "detail_link",
+        "property_id",
+        "sheriff_number",
+        "status_date",
+        "plaintiff",
+        "defendant",
+        "zillow_url",
+      ],
+    },
+    departments: {
+      title: "Municipal Departments",
+      icon: "🏛️",
+      fields: [
+        "municipalBuildingAddress",
+        "buildingDepartmentContact",
+        "electricDepartmentContact",
+        "plumbingDepartmentContact",
+        "fireDepartmentContact",
+        "homeownersAssociationContact",
+        "environmentalDepartmentContact",
+      ],
+    },
+    financials: {
+      title: "Financial Details",
+      icon: "💰",
+      fields: [
+        "purchaseCost",
+        "refinanceCosts",
+        "totalRehabCost",
+        "equipmentCost",
+        "constructionCost",
+        "largeRepairCost",
+        "renovationCost",
+        "kickStartFunds",
+        "lenderConstructionDrawsReceived",
+        "totalEquity",
+      ],
+    },
+    expenses: {
+      title: "Operating Expenses",
+      icon: "💸",
+      fields: [
+        "utilitiesCost",
+        "sewer",
+        "water",
+        "lawn",
+        "garbage",
+        "yearlyPropertyTaxes",
+        "mortgagePaid",
+        "homeownersInsurance",
+        "vacancyLoss",
+        "managementFees",
+        "maintenanceCosts",
+      ],
+    },
+    rental: {
+      title: "Rental Information",
+      icon: "🏘️",
+      fields: [
+        "expectedYearlyRent",
+        "rentalIncomeReceived",
+        "numUnits",
+        "vacancyRate",
+        "avgTenantStay",
+        "otherMonthlyIncome",
+      ],
+    },
+    projections: {
+      title: "Sale Projections",
+      icon: "📈",
+      fields: [
+        "arvSalePrice",
+        "realtorFees",
+        "propTaxtillEndOfYear",
+        "lenderLoanBalance",
+        "payOffStatement",
+        "attorneyFees",
+        "miscFees",
+        "utilities",
+        "cash2closeFromPurchase",
+        "cash2closeFromRefinance",
+        "totalRehabCosts",
+        "expectedRemainingRentEndToYear",
+        "totalExpenses",
+        "totalConstructionDrawsReceived",
+        "projectNetProfitIfSold",
+        "cashFlow",
+        "cashRoi",
+        "rule2Percent",
+        "rule50Percent",
+        "financeAmount",
+        "purchaseCapRate",
+      ],
+    },
+    utilities: {
+      title: "Utility Information",
+      icon: "⚡",
+      fields: [
+        "typeOfHeatingAndCooling",
+        "waterCompany",
+        "waterAccountNumber",
+        "electricCompany",
+        "electricAccountNumber",
+        "gasOrOilCompany",
+        "gasOrOilAccountNumber",
+        "sewerCompany",
+        "sewerAccountNumber",
+      ],
+    },
+    sellers: {
+      title: "Seller Information",
+      icon: "🤝",
+      fields: [
+        "sellersAgent",
+        "sellersBroker",
+        "sellersAgentPhone",
+        "sellersAttorney",
+        "sellersAttorneyPhone",
+      ],
+    },
+    escrow: {
+      title: "Escrow & Title",
+      icon: "📑",
+      fields: [
+        "escrowCompany",
+        "escrowAgent",
+        "escrowAgentPhone",
+        "titleInsuranceCompany",
+        "titleAgent",
+        "titleAgentPhone",
+        "titlesPhone",
+      ],
+    },
+    buyers: {
+      title: "Buyer Information",
+      icon: "🛍️",
+      fields: [
+        "buyersAgent",
+        "buyersBroker",
+        "buyersAgentPhone",
+        "buyersAttorney",
+        "buyersAttorneyPhone",
+      ],
+    },
+    professionals: {
+      title: "Professional Services",
+      icon: "👥",
+      fields: [
+        "appraisalCompany",
+        "appraiser",
+        "appraiserPhone",
+        "surveyor",
+        "surveyorPhone",
+        "homeInspector",
+        "homeInspectorPhone",
+        "architect",
+        "architectPhone",
+      ],
+    },
+    lending: {
+      title: "Lending Details",
+      icon: "🏦",
+      fields: [
+        "lender",
+        "lenderPhone",
+        "refinanceLender",
+        "refinanceLenderPhone",
+        "loanOfficer",
+        "loanOfficerPhone",
+        "loanNumber",
+        "downPaymentPercentage",
+        "loanInterestRate",
+        "pmiPercentage",
+        "mortgageYears",
+        "lenderPointsAmount",
+        "otherFees",
+      ],
+    },
+    marketing: {
+      title: "Property Management",
+      icon: "📸",
+      fields: [
+        "propertyManager",
+        "propertyManagerPhone",
+        "propertyManagementCompany",
+        "propertyManagementPhone",
+        "photographer",
+        "photographerPhone",
+        "videographer",
+        "videographerPhone",
+      ],
+    },
+  };
+
+  // Calculate and update progress whenever property or activeTab changes
+  useEffect(() => {
+    const calculateProgress = () => {
+      const totalFields = Object.values(formSections).reduce(
+        (acc, section) => acc + section.fields.length,
+        0
+      );
+
+      const filledFields = Object.values(formSections).reduce(
+        (acc, section) => {
+          return (
+            acc +
+            section.fields.filter(
+              (field) =>
+                property[field] && property[field].toString().trim() !== ""
+            ).length
+          );
+        },
+        0
+      );
+
+      setProgress(Math.round((filledFields / totalFields) * 100));
+    };
+
+    calculateProgress();
+  }, [property, activeTab]);
+
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg text-sm">
-      {/* Add ToastContainer at the top level of your component */}
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Progress Bar */}
+        <div className="mb-8">
+          <div className="h-2 bg-gray-200 rounded-full">
+            <div
+              className="h-full bg-blue-500 rounded-full transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <p className="text-sm text-gray-600 mt-2 text-right">
+            {progress}% Complete
+          </p>
+        </div>
+
+        {/* Main Content */}
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          {/* Header */}
+          <div className="px-6 py-4 bg-gray-800 text-white">
+            <h1 className="text-2xl font-bold">Add New Property</h1>
+            <p className="text-gray-300 mt-1">
+              Fill in the property details below
+            </p>
+          </div>
+
+          {/* Research Tools Section */}
+          <div className="p-6 bg-gray-50 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-700 mb-4">
+              Research Tools
+            </h2>
+            <ResearchDropdown />
+          </div>
+
+          {/* Scraped Data Section */}
+          {scrapedProperties.length > 0 && (
+            <div className="p-6 bg-blue-50 border-b border-blue-100">
+              <h2 className="text-lg font-semibold text-blue-900 mb-3">
+                Quick Fill from Scraped Data
+              </h2>
+              <select
+                onChange={(e) =>
+                  handleUseScrapeData(scrapedProperties[e.target.value])
+                }
+                className="w-full p-2 border rounded-lg bg-white shadow-sm"
+              >
+                <option value="">Select a scraped property...</option>
+                {scrapedProperties.map((prop, index) => (
+                  <option key={index} value={index}>
+                    {prop.address} - ${prop.price}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Tab Navigation */}
+          <div className="border-b border-gray-200">
+            <nav className="py-4 px-6 overflow-x-auto" aria-label="Tabs">
+              <div className="inline-block min-w-full">
+                {/* Property Details Row */}
+                <div className="flex mb-3">
+                  {Object.entries(formSections)
+                    .slice(0, Math.ceil(Object.keys(formSections).length / 2))
+                    .map(([key, section]) => (
+                      <button
+                        key={key}
+                        onClick={() => setActiveTab(key)}
+                        className={`
+                          whitespace-nowrap px-4 py-2 rounded-lg mr-4 flex items-center
+                          ${
+                            activeTab === key
+                              ? "bg-blue-500 text-white shadow-md"
+                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          }
+                          transition duration-150 ease-in-out min-w-fit
+                        `}
+                      >
+                        <span className="mr-2">{section.icon}</span>
+                        {section.title}
+                      </button>
+                    ))}
+                </div>
+
+                {/* Contact & Services Row */}
+                <div className="flex">
+                  {Object.entries(formSections)
+                    .slice(Math.ceil(Object.keys(formSections).length / 2))
+                    .map(([key, section]) => (
+                      <button
+                        key={key}
+                        onClick={() => setActiveTab(key)}
+                        className={`
+                          whitespace-nowrap px-4 py-2 rounded-lg mr-4 flex items-center
+                          ${
+                            activeTab === key
+                              ? "bg-blue-500 text-white shadow-md"
+                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          }
+                          transition duration-150 ease-in-out min-w-fit
+                        `}
+                      >
+                        <span className="mr-2">{section.icon}</span>
+                        {section.title}
+                      </button>
+                    ))}
+                </div>
+              </div>
+            </nav>
+          </div>
+
+          {/* Form Content */}
+          <form onSubmit={handleSubmit} className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Render fields based on active tab */}
+              {formSections[activeTab].fields.map((fieldName) => (
+                <div key={fieldName} className="col-span-1">
+                  {renderInputField(
+                    fieldName.split(/(?=[A-Z])/).join(" "), // Convert camelCase to spaces
+                    fieldName,
+                    typeof property[fieldName] === "number" ? "number" : "text",
+                    typeof property[fieldName] === "number"
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Navigation Buttons */}
+            <div className="mt-8 flex justify-between items-center">
+              <button
+                type="button"
+                onClick={() => {
+                  const sections = Object.keys(formSections);
+                  const currentIndex = sections.indexOf(activeTab);
+                  if (currentIndex > 0) {
+                    setActiveTab(sections[currentIndex - 1]);
+                  }
+                }}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              >
+                ← Previous
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const sections = Object.keys(formSections);
+                  const currentIndex = sections.indexOf(activeTab);
+                  if (currentIndex < sections.length - 1) {
+                    setActiveTab(sections[currentIndex + 1]);
+                  }
+                }}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              >
+                Next →
+              </button>
+            </div>
+
+            {/* Submit Button */}
+            <div className="mt-8 border-t pt-6">
+              <button
+                type="submit"
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg
+                  transition duration-150 ease-in-out transform hover:scale-[1.02]
+                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                Add New Property
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {/* Toast Container */}
       <ToastContainer
-        position="top-right"
+        position="bottom-right"
         autoClose={3000}
         hideProgressBar={false}
         newestOnTop={true}
@@ -703,455 +1129,6 @@ const AddProperty = () => {
         pauseOnHover
         theme="light"
       />
-      <h1 className="text-xl md:text-2xl font-bold text-gray-700 mb-6">
-        Add New Property
-      </h1>
-      {scrapedProperties.length > 0 && (
-        <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
-            Use Scraped Property Data:
-          </label>
-          <select
-            onChange={(e) =>
-              handleUseScrapeData(scrapedProperties[e.target.value])
-            }
-            className="w-full p-2 border rounded"
-          >
-            <option value="">Select a scraped property...</option>
-            {scrapedProperties.map((prop, index) => (
-              <option key={index} value={index}>
-                {prop.address} - ${prop.price}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      {/* Add Due Diligence Dropdown */}
-      <ResearchDropdown />
-
-      <form
-        onSubmit={handleSubmit}
-        className="grid grid-cols-1 md:grid-cols-2 gap-6"
-      >
-        {/* Foreclosure Information Section */}
-        <div className="foreclosureInfo bg-gray-50 p-4 shadow-sm rounded-md">
-          <h2 className="text-lg font-semibold text-gray-700 mb-4">
-            Foreclosure Information
-          </h2>
-          {renderInputField("Detail Link", "detail_link")}
-          {renderInputField("Property ID", "property_id")}
-          {renderInputField("Sheriff Number", "sheriff_number")}
-          {renderInputField("Status Date", "status_date", "date")}
-          {renderInputField("Plaintiff", "plaintiff")}
-          {renderInputField("Defendant", "defendant")}
-          {renderInputField("Zillow URL", "zillow_url")}
-        </div>
-
-        {/* Location Section */}
-        <div className="propHeader bg-gray-50 p-4 shadow-sm rounded-md">
-          <h2 className="text-lg font-semibold text-gray-700 mb-4">Location</h2>
-          {renderInputField("Property Name", "propertyName")}
-          {renderInputField("Address", "address")}
-          {renderInputField("City", "city")}
-          {renderInputField("State", "state")}
-          {renderInputField("Zip Code", "zipCode")}
-          {renderInputField("County", "county")}
-          {renderInputField("Bedrooms", "bedroomsDescription")}
-          {renderInputField("Bathrooms", "bathroomsDescription")}
-          {renderInputField("Kitchen", "kitchenDescription")}
-          {renderInputField("Amenities", "amenitiesDescription")}
-        </div>
-
-        {/* Departments Section */}
-        <div className="propDepartments bg-gray-50 p-4 shadow-sm rounded-md">
-          <h2 className="text-lg font-semibold text-gray-700 mb-4">
-            Departments
-          </h2>
-          {renderInputField(
-            "Municipal Building Address",
-            "municipalBuildingAddress"
-          )}
-          {renderInputField("Building Dept", "buildingDepartmentContact")}
-          {renderInputField("Electric Dept", "electricDepartmentContact")}
-          {renderInputField("Plumbing Dept", "plumbingDepartmentContact")}
-          {renderInputField("Fire Dept", "fireDepartmentContact")}
-          {renderInputField("HOA", "homeownersAssociationContact")}
-          {renderInputField(
-            "Environmental Dept",
-            "environmentalDepartmentContact"
-          )}
-        </div>
-
-        {/* Total Outlay To Date Section */}
-        <div className="totalOutlayToDate bg-gray-50 p-4 shadow-sm rounded-md">
-          <h2 className="text-lg font-semibold text-gray-700 mb-4">
-            Total Outlay To Date
-          </h2>
-          {renderInputField("Purchase Cost", "purchaseCost", "number", true)}
-          {renderInputField(
-            "Refinance Costs",
-            "refinanceCosts",
-            "number",
-            true
-          )}
-          {renderInputField(
-            "Total Rehab Cost",
-            "totalRehabCost",
-            "number",
-            true
-          )}
-          {renderInputField(
-            "Kick Start Funds",
-            "kickStartFunds",
-            "number",
-            true
-          )}
-          {renderInputField(
-            "Lender Construction Draws Received",
-            "lenderConstructionDrawsReceived",
-            "number",
-            true
-          )}
-          {renderInputField("Utilities Cost", "utilitiesCost", "number", true)}
-          {renderInputField("Sewer", "sewer", "number", true)}
-          {renderInputField("Water", "water", "number", true)}
-          {renderInputField("Lawn", "lawn", "number", true)}
-          {renderInputField("Garbage", "garbage", "number", true)}
-          {renderInputField(
-            "Yearly Property Taxes",
-            "yearlyPropertyTaxes",
-            "number",
-            true
-          )}
-          {renderInputField("Mortgage Paid", "mortgagePaid", "number", true)}
-          {renderInputField(
-            "Homeowners Insurance",
-            "homeownersInsurance",
-            "number",
-            true
-          )}
-          {renderInputField(
-            "Expected Yearly Rent",
-            "expectedYearlyRent",
-            "number",
-            true
-          )}
-          {renderInputField(
-            "Rental Income Received",
-            "rentalIncomeReceived",
-            "number",
-            true
-          )}
-          {renderInputField("Number of Units", "numUnits", "number", true)}
-          {renderInputField("Vacancy Rate", "vacancyRate", "number", true)}
-          {renderInputField("Avg Tenant Stay", "avgTenantStay", "number", true)}
-          {renderInputField(
-            "Other Monthly Income",
-            "otherMonthlyIncome",
-            "number",
-            true
-          )}
-          {renderInputField("Vacancy Loss", "vacancyLoss", "number", true)}
-          {renderInputField(
-            "Management Fees",
-            "managementFees",
-            "number",
-            true
-          )}
-          {renderInputField(
-            "Maintenance Costs",
-            "maintenanceCosts",
-            "number",
-            true
-          )}
-          {renderInputField("Total Equity", "totalEquity", "number", true)}
-        </div>
-
-        {/* Sale Projection Section */}
-        <div className="saleProjection bg-gray-50 p-4 shadow-sm rounded-md">
-          <h2 className="text-lg font-semibold text-gray-700 mb-4">
-            Sale Projection
-          </h2>
-          {renderInputField("ARV Sale Price", "arvSalePrice", "number", true)}
-          {renderInputField("Realtor Fees", "realtorFees", "number", true)}
-          {renderInputField(
-            "Prop Tax till End of Year",
-            "propTaxtillEndOfYear",
-            "number",
-            true
-          )}
-          {renderInputField(
-            "Lender Loan Balance",
-            "lenderLoanBalance",
-            "number",
-            true
-          )}
-          {renderInputField(
-            "Pay Off Statement",
-            "payOffStatement",
-            "number",
-            true
-          )}
-          {renderInputField("Attorney Fees", "attorneyFees", "number", true)}
-          {renderInputField("Misc Fees", "miscFees", "number", true)}
-          {renderInputField("Utilities", "utilities", "number", true)}
-          {renderInputField(
-            "Cash to Close from Purchase",
-            "cash2closeFromPurchase",
-            "number",
-            true
-          )}
-          {renderInputField(
-            "Cash to Close from Refinance",
-            "cash2closeFromRefinance",
-            "number",
-            true
-          )}
-          {renderInputField(
-            "Total Rehab Costs",
-            "totalRehabCosts",
-            "number",
-            true
-          )}
-          {renderInputField(
-            "Expected Remaining Rent End To Year",
-            "expectedRemainingRentEndToYear",
-            "number",
-            true
-          )}
-          {renderInputField("Total Expenses", "totalExpenses", "number", true)}
-          {renderInputField(
-            "Total Construction Draws Received",
-            "totalConstructionDrawsReceived",
-            "number",
-            true
-          )}
-          {renderInputField(
-            "Project Net Profit If Sold",
-            "projectNetProfitIfSold",
-            "number",
-            true
-          )}
-          {renderInputField("Cash Flow", "cashFlow", "number", true)}
-          {renderInputField("Cash ROI", "cashRoi", "number", true)}
-          {renderInputField("Rule 2 Percent", "rule2Percent", "number", true)}
-          {renderInputField("Rule 50 Percent", "rule50Percent", "number", true)}
-          {renderInputField("Finance Amount", "financeAmount", "number", true)}
-          {renderInputField(
-            "Purchase Cap Rate",
-            "purchaseCapRate",
-            "number",
-            true
-          )}
-        </div>
-
-        {/* Utility Information Section */}
-        <div className="utilityInformation bg-gray-50 p-4 shadow-sm rounded-md">
-          <h2 className="text-lg font-semibold text-gray-700 mb-4">
-            Utility Information
-          </h2>
-          {renderInputField(
-            "Type of Heating & Cooling",
-            "typeOfHeatingAndCooling"
-          )}
-          {renderInputField("Water Company", "waterCompany")}
-          {renderInputField(
-            "Water Account Number",
-            "waterAccountNumber",
-            "number",
-            true
-          )}
-          {renderInputField("Electric Company", "electricCompany")}
-          {renderInputField(
-            "Electric Account Number",
-            "electricAccountNumber",
-            "number",
-            true
-          )}
-          {renderInputField("Gas or Oil Company", "gasOrOilCompany")}
-          {renderInputField(
-            "Gas or Oil Account Number",
-            "gasOrOilAccountNumber",
-            "number",
-            true
-          )}
-          {renderInputField("Sewer Company", "sewerCompany")}
-          {renderInputField(
-            "Sewer Account Number",
-            "sewerAccountNumber",
-            "number",
-            true
-          )}
-        </div>
-
-        {/* Key Players Information Section */}
-        <div className="keyPlayersInformation bg-gray-50 p-4 shadow-sm rounded-md">
-          <h2 className="text-lg font-semibold text-gray-700 mb-4">
-            Key Players
-          </h2>
-          {renderInputField("Seller's Agent", "sellersAgent")}
-          {renderInputField("Seller's Broker", "sellersBroker")}
-          {renderInputField(
-            "Seller's Agent Phone",
-            "sellersAgentPhone",
-            "number",
-            true
-          )}
-          {renderInputField("Seller's Attorney", "sellersAttorney")}
-          {renderInputField(
-            "Seller's Attorney Phone",
-            "sellersAttorneyPhone",
-            "number",
-            true
-          )}
-          {renderInputField("Escrow Company", "escrowCompany")}
-          {renderInputField("Escrow Agent", "escrowAgent")}
-          {renderInputField(
-            "Escrow Agent Phone",
-            "escrowAgentPhone",
-            "number",
-            true
-          )}
-          {renderInputField("Buyer's Agent", "buyersAgent")}
-          {renderInputField("Buyer's Broker", "buyersBroker")}
-          {renderInputField(
-            "Buyer's Agent Phone",
-            "buyersAgentPhone",
-            "number",
-            true
-          )}
-          {renderInputField("Buyer's Attorney", "buyersAttorney")}
-          {renderInputField(
-            "Buyer's Attorney Phone",
-            "buyersAttorneyPhone",
-            "number",
-            true
-          )}
-          {renderInputField("Title Insurance Company", "titleInsuranceCompany")}
-          {renderInputField("Title Agent", "titleAgent")}
-          {renderInputField(
-            "Title Agent Phone",
-            "titleAgentPhone",
-            "number",
-            true
-          )}
-          {renderInputField("Titles Phone", "titlesPhone", "number", true)}
-          {renderInputField("Appraisal Company", "appraisalCompany")}
-          {renderInputField("Appraiser", "appraiser")}
-          {renderInputField(
-            "Appraiser Phone",
-            "appraiserPhone",
-            "number",
-            true
-          )}
-          {renderInputField("Surveyor", "surveyor")}
-          {renderInputField("Surveyor Phone", "surveyorPhone", "number", true)}
-          {renderInputField("Home Inspector", "homeInspector")}
-          {renderInputField(
-            "Home Inspector Phone",
-            "homeInspectorPhone",
-            "number",
-            true
-          )}
-          {renderInputField("Architect", "architect")}
-          {renderInputField(
-            "Architect Phone",
-            "architectPhone",
-            "number",
-            true
-          )}
-        </div>
-
-        {/* Lender Information Section */}
-        <div className="lenderInformation bg-gray-50 p-4 shadow-sm rounded-md">
-          <h2 className="text-lg font-semibold text-gray-700 mb-4">Lender</h2>
-          {renderInputField("Lender", "lender")}
-          {renderInputField("Lender Phone", "lenderPhone", "number", true)}
-          {renderInputField("Refinance Lender", "refinanceLender")}
-          {renderInputField(
-            "Refinance Lender Phone",
-            "refinanceLenderPhone",
-            "number",
-            true
-          )}
-          {renderInputField("Loan Officer", "loanOfficer")}
-          {renderInputField(
-            "Loan Officer Phone",
-            "loanOfficerPhone",
-            "number",
-            true
-          )}
-          {renderInputField("Loan Number", "loanNumber")}
-          {renderInputField(
-            "Down Payment Percentage",
-            "downPaymentPercentage",
-            "number",
-            true
-          )}
-          {renderInputField(
-            "Loan Interest Rate",
-            "loanInterestRate",
-            "number",
-            true
-          )}
-          {renderInputField("PMI Percentage", "pmiPercentage", "number", true)}
-          {renderInputField("Mortgage Years", "mortgageYears", "number", true)}
-          {renderInputField(
-            "Lender Points Amount",
-            "lenderPointsAmount",
-            "number",
-            true
-          )}
-          {renderInputField("Other Fees", "otherFees", "number", true)}
-        </div>
-
-        {/* Sales & Marketing Section */}
-        <div className="salesAndmarketing bg-gray-50 p-4 shadow-sm rounded-md">
-          <h2 className="text-lg font-semibold text-gray-700 mb-4">
-            Sales & Marketing
-          </h2>
-          {renderInputField("Property Manager", "propertyManager")}
-          {renderInputField(
-            "Property Manager Phone",
-            "propertyManagerPhone",
-            "number",
-            true
-          )}
-          {renderInputField(
-            "Property Management Company",
-            "propertyManagementCompany"
-          )}
-          {renderInputField(
-            "Property Management Phone",
-            "propertyManagementPhone",
-            "number",
-            true
-          )}
-          {renderInputField("Photographer", "photographer")}
-          {renderInputField(
-            "Photographer Phone",
-            "photographerPhone",
-            "number",
-            true
-          )}
-          {renderInputField("Videographer", "videographer")}
-          {renderInputField(
-            "Videographer Phone",
-            "videographerPhone",
-            "number",
-            true
-          )}
-        </div>
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="md:col-span-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md"
-        >
-          Add New Property
-        </button>
-      </form>
     </div>
   );
 };
