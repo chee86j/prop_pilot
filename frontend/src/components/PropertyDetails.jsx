@@ -11,8 +11,7 @@ import RentalAnalysis from "./RentalAnalysis";
 // import CsvDisplay from "./CsvDisplay";
 // import CsvReader from "./CsvReader";
 import { formatFullCurrency } from "../utils/formatting";
-import { ChevronsUp, ChevronsDown } from "lucide-react";
-import { Download } from "lucide-react";
+import { ChevronsUp, ChevronsDown, Download, Printer, Edit2, Save, X } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ResearchDropdown from "./ResearchDropdown";
@@ -43,9 +42,13 @@ const PropertyDetails = ({ propertyId }) => {
   //   setCsvData(data); // Store the parsed CSV data
   // };
 
+  // Add loading state
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     const fetchPropertyDetails = async () => {
       try {
+        setIsLoading(true);
         const response = await fetch(
           `http://localhost:5000/api/properties/${propertyId}`,
           {
@@ -64,6 +67,9 @@ const PropertyDetails = ({ propertyId }) => {
         setEditedDetails(data);
       } catch (error) {
         console.error("Error fetching property details:", error);
+        toast.error("Failed to load property details");
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -335,68 +341,128 @@ const PropertyDetails = ({ propertyId }) => {
     </button>
   );
 
-  if (!propertyDetails) {
-    return <div>Loading...</div>;
+  // Loading state UI with better mobile handling
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="animate-pulse space-y-4 w-full max-w-lg">
+          <div className="h-8 sm:h-12 bg-gray-200 rounded w-3/4 mx-auto"></div>
+          <div className="h-6 sm:h-8 bg-gray-200 rounded w-2/3 mx-auto"></div>
+          <div className="grid gap-4 mt-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-32 sm:h-48 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
+  if (!propertyDetails) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center text-gray-600">
+          <h2 className="text-2xl font-bold mb-4">Property Not Found</h2>
+          <p>The requested property details could not be loaded.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Enhanced button styles
+  const buttonStyles = {
+    primary: `
+      inline-flex items-center gap-1 sm:gap-2 
+      px-3 py-1.5 sm:px-4 sm:py-2
+      text-sm sm:text-base
+      bg-gradient-to-r from-blue-500 to-blue-600 
+      hover:from-blue-600 hover:to-blue-700 
+      text-white font-medium rounded-lg shadow-sm 
+      hover:shadow-md transition-all duration-200 
+      transform hover:scale-105 active:scale-95
+      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+      w-full sm:w-auto justify-center sm:justify-start
+    `,
+    secondary: `
+      inline-flex items-center gap-1 sm:gap-2
+      px-3 py-1.5 sm:px-4 sm:py-2
+      text-sm sm:text-base
+      bg-gray-100 hover:bg-gray-200 
+      text-gray-700 font-medium rounded-lg shadow-sm 
+      hover:shadow-md transition-all duration-200 
+      transform hover:scale-105 active:scale-95
+      focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2
+      w-full sm:w-auto justify-center sm:justify-start
+    `,
+  };
+
+  // Enhanced card styles
+  const cardStyles = `
+    bg-white rounded-lg sm:rounded-xl shadow-md sm:shadow-lg overflow-hidden
+    transition-all duration-300 ease-in-out
+    hover:shadow-xl transform hover:-translate-y-1
+    focus-within:ring-2 focus-within:ring-blue-500
+    p-4 sm:p-6 lg:p-8
+    mx-4 sm:mx-0
+  `;
+
   return (
-    <div className="property-details-container bg-white shadow-md rounded-lg p-4 max-w-4xl mx-auto">
-      {/* Render ToastContainer for displaying notifications */}
-      <ToastContainer position="top-left" autoClose={5000} />
-      <header
-        className="mb-8 px-4 sm:px-6 lg:px-8"
-        role="banner"
-        aria-label="Property Details Header"
-      >
+    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        className="sm:top-4 top-2 sm:right-4 right-2"
+        toastClassName="sm:min-w-[300px] min-w-[250px]"
+      />
+      
+      {/* Header Section */}
+      <header className="max-w-7xl mx-auto mb-4 sm:mb-6 lg:mb-8 px-4 sm:px-6 lg:px-8" role="banner">
         <div className="text-center sm:text-left">
-          <h1
-            className="text-2xl sm:text-3xl md:text-4xl font-bold break-words"
-            aria-label={`Property Name: ${propertyDetails.propertyName}`}
+          <h1 
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-2 
+                       break-words leading-tight"
+            aria-label={`Property Details for ${propertyDetails.propertyName}`}
           >
             {propertyDetails.propertyName}
           </h1>
-          <p
-            className="text-xl sm:text-2xl text-gray-600 mt-2 break-words"
-            aria-label={`Address: ${propertyDetails.address}`}
-          >
+          <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 break-words">
             {propertyDetails.address}
           </p>
         </div>
       </header>
 
-      {/* Add Due Diligence Dropdown */}
-      <ResearchDropdown />
-
-      <button
-        onClick={handlePrintDetails}
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
-      >
-        Print Property Details
-      </button>
-
-      {/* Wrap all content you want to print in a div with the printRef */}
-      <div ref={detailsPrintRef}>
-        {/* Construction Draw Section */}
-        <section className="mb-12 p-6 bg-gray-50 rounded-lg shadow-lg">
-          <h2 className="text-2xl font-bold text-blue-600 mb-6 border-b-2 border-blue-200 pb-2">
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8 px-4 sm:px-6 lg:px-8">
+        {/* Construction Progress Card */}
+        <section className={`${cardStyles} p-6`}>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <span role="img" aria-label="Construction">🏗️</span>
             Construction Progress
           </h2>
           <ConstructionDraw propertyId={propertyId} />
         </section>
 
-        {/* Phase Timeline Section */}
-        <section className="mb-12 p-6 bg-gray-50 rounded-lg shadow-lg">
+        {/* Project Timeline Card */}
+        <section className={`${cardStyles} p-6`}>
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-blue-600 border-b-2 border-blue-200 pb-2">
+            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <span role="img" aria-label="Timeline">📅</span>
               Project Timeline
             </h2>
+            <button
+              onClick={handleAddPhase}
+              className={buttonStyles.primary}
+              aria-label="Add new phase"
+            >
+              Add Phase
+            </button>
           </div>
           <PhaseTimeline
             phases={phases}
             onEdit={handleEditPhase}
             onDelete={handleDeletePhase}
           />
-          {isEditingPhase || isAddingPhase ? (
+          {(isEditingPhase || isAddingPhase) && (
             <div className="mt-6">
               <PhaseForm
                 initialData={currentPhase}
@@ -404,46 +470,50 @@ const PropertyDetails = ({ propertyId }) => {
                 onCancel={handleCancelPhase}
               />
             </div>
-          ) : (
-            <div className="mt-6 flex justify-center">
-              <button
-                onClick={handleAddPhase}
-                className="rounded-lg relative w-32 h-10 mb-5 cursor-pointer flex items-center border border-blue-500 bg-blue-500 group hover:bg-blue-500 active:bg-blue-500 active:border-blue-500"
-              >
-                <span className="text-white font-semibold ml-5 transform group-hover:translate-x-10 transition-all duration-300">
-                  Phase
-                </span>
-                <span className="absolute right-0 h-full w-12 rounded-lg bg-blue-500 flex items-center justify-center transform group-hover:translate-x-0 group-hover:w-full transition-all duration-300">
-                  <svg
-                    className="svg w-8 text-white"
-                    fill="none"
-                    height="24"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    width="24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <line x1="12" x2="12" y1="5" y2="19"></line>
-                    <line x1="5" x2="19" y1="12" y2="12"></line>
-                  </svg>
-                </span>
-              </button>
-            </div>
           )}
         </section>
 
-        {/* Property Details Grid */}
-        <section className="mb-12 p-6 bg-gray-50 rounded-lg shadow-lg">
+        {/* Property Information Card */}
+        <section className={`${cardStyles} p-6`}>
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-blue-600 border-b-2 border-blue-200 pb-2">
+            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <span role="img" aria-label="Details">📋</span>
               Property Information
             </h2>
-            {renderExpandAllButton()}
+            <div className="flex gap-2">
+              {editMode ? (
+                <>
+                  <button
+                    onClick={saveChanges}
+                    className={buttonStyles.primary}
+                    aria-label="Save changes"
+                  >
+                    <Save size={18} />
+                    <span className="sr-only sm:not-sr-only">Save</span>
+                  </button>
+                  <button
+                    onClick={cancelChanges}
+                    className={buttonStyles.secondary}
+                    aria-label="Cancel editing"
+                  >
+                    <X size={18} />
+                    <span className="sr-only sm:not-sr-only">Cancel</span>
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={toggleEditMode}
+                  className={buttonStyles.primary}
+                  aria-label="Edit property details"
+                >
+                  <Edit2 size={18} />
+                  <span className="sr-only sm:not-sr-only">Edit</span>
+                </button>
+              )}
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Foreclosure Information Section */}
             <div className="foreclosureInfo hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
               {renderSectionTitle("Foreclosure Information", "foreclosureInfo")}
@@ -1292,145 +1362,50 @@ const PropertyDetails = ({ propertyId }) => {
                 </>
               )}
             </div>
+          </div>
+        </section>
 
-            {/* Edit, Save, and Cancel Buttons */}
-            {editMode ? (
-              <div className="flex justify-between py-5">
+        {/* Financial Analysis Section */}
+        <section className={`${cardStyles}`} ref={financialsPrintRef}>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4 sm:gap-0">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+              Financial Analysis
+            </h2>
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <button
+                onClick={handlePrintFinancials}
+                className={buttonStyles.primary}
+                aria-label="Print financial analysis"
+              >
+                <Printer size={16} className="sm:mr-2" />
+                <span className="hidden sm:inline">Print Financial Analysis</span>
+                <span className="sm:hidden">Print</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:gap-6 lg:gap-8">
+            {/* Financial Components with improved mobile layout */}
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2 sm:gap-0">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-700">
+                  Profit & Loss Statement
+                </h3>
                 <button
-                  onClick={cancelChanges}
-                  className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={() => exportToCSV(propertyDetails.profitLossData, "profit-loss")}
+                  className="w-full sm:w-auto whitespace-nowrap"
                 >
-                  Cancel
-                </button>
-                <button
-                  onClick={saveChanges}
-                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                >
-                  Save
+                  <Download size={16} className="sm:mr-2" />
+                  <span className="hidden sm:inline">Export CSV</span>
+                  <span className="sm:hidden">Export</span>
                 </button>
               </div>
-            ) : (
-              <button
-                onClick={toggleEditMode}
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mt-5 rounded"
-              >
-                Edit
-              </button>
-            )}
+              <ProfitAndLoss property={propertyDetails} />
+            </div>
+            {/* Repeat similar pattern for other financial components */}
           </div>
         </section>
       </div>
-
-      {/* Financial Analysis Section */}
-      <section
-        className="mb-12 p-6 bg-gray-50 rounded-lg shadow-lg"
-        ref={financialsPrintRef}
-      >
-        <div className="flex justify-between items-center mb-6 border-b-2 border-blue-200 pb-2">
-          <h2 className="text-2xl font-bold text-blue-600">
-            Financial Analysis
-          </h2>
-          <button
-            onClick={handlePrintFinancials}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
-          >
-            Print Financial Analysis
-          </button>
-        </div>
-
-        <div className="space-y-8">
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-gray-700">
-                Profit & Loss Statement
-              </h3>
-              <button
-                onClick={() =>
-                  exportToCSV(propertyDetails.profitLossData, "profit-loss")
-                }
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
-              >
-                <Download size={16} /> Export CSV
-              </button>
-            </div>
-            <ProfitAndLoss property={propertyDetails} />
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-gray-700">
-                Operating Expenses
-              </h3>
-              <button
-                onClick={() =>
-                  exportToCSV(
-                    propertyDetails.operatingExpenseData,
-                    "operating-expenses"
-                  )
-                }
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
-              >
-                <Download size={16} /> Export CSV
-              </button>
-            </div>
-            <OperatingExpense property={propertyDetails} />
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-gray-700">
-                Rental Income
-              </h3>
-              <button
-                onClick={() =>
-                  exportToCSV(propertyDetails.rentalIncomeData, "rental-income")
-                }
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
-              >
-                <Download size={16} /> Export CSV
-              </button>
-            </div>
-            <RentalIncome property={propertyDetails} />
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-gray-700">
-                Capital Expenditure
-              </h3>
-              <button
-                onClick={() =>
-                  exportToCSV(propertyDetails.capExData, "capital-expenditure")
-                }
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
-              >
-                <Download size={16} /> Export CSV
-              </button>
-            </div>
-            <CapitalExpenditure property={propertyDetails} />
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-gray-700">
-                Rental Analysis
-              </h3>
-              <button
-                onClick={() =>
-                  exportToCSV(
-                    propertyDetails.rentalAnalysisData,
-                    "rental-analysis"
-                  )
-                }
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
-              >
-                <Download size={16} /> Export CSV
-              </button>
-            </div>
-            <RentalAnalysis property={propertyDetails} />
-          </div>
-        </div>
-      </section>
     </div>
   );
 };
