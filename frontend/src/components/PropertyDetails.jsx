@@ -25,6 +25,7 @@ const PropertyDetails = ({ propertyId }) => {
   const [currentPhase, setCurrentPhase] = useState({});
   const [editMode, setEditMode] = useState(false);
   const [editedDetails, setEditedDetails] = useState({});
+  const [errorMessage, setErrorMessage] = useState("");
   const [expandedSections, setExpandedSections] = useState({
     foreclosureInfo: false,
     location: false,
@@ -108,6 +109,19 @@ const PropertyDetails = ({ propertyId }) => {
   };
 
   const saveChanges = async () => {
+    // Clear any previous error messages
+    setErrorMessage("");
+
+    // Validate required fields
+    const requiredFields = ["propertyName", "address"]; // Add any other required fields
+    const missingFields = requiredFields.filter(field => !editedDetails[field]);
+
+    if (missingFields.length > 0) {
+      setErrorMessage(`Please fill in all required fields: ${missingFields.join(", ")}`);
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
     try {
       const response = await fetch(
         `http://localhost:5000/api/properties/${propertyId}`,
@@ -131,37 +145,47 @@ const PropertyDetails = ({ propertyId }) => {
       toast.success("Property details saved successfully!");
     } catch (error) {
       console.error("Error saving property details:", error);
+      setErrorMessage("Failed to save property details.");
       toast.error("Failed to save property details.");
     }
   };
 
   const cancelChanges = () => {
     setEditedDetails(propertyDetails);
+    setErrorMessage("");
     toggleEditMode();
   };
 
-  const renderEditableField = (
-    label,
-    name,
-    value,
-    type = "text",
-    isCurrency = false
-  ) => {
-    const displayValue =
-      isCurrency && !editMode ? formatFullCurrency(value) : value;
+  const renderInputField = (label, name, type = "text", isNumber = false) => {
+    const value = editMode ? editedDetails[name] : propertyDetails[name];
+    const hasError = errorMessage && !value && type !== "number";
+
     return (
-      <div className="flex justify-between items-center mb-2">
-        <strong>{label}:</strong>
-        {editMode ? (
+      <div className="form-group mb-4">
+        <label
+          className="block text-sm font-medium text-gray-700 mb-1"
+          htmlFor={name}
+        >
+          {label}
+        </label>
           <input
+          id={name}
             type={type}
             name={name}
-            value={displayValue}
+          value={value || ""}
             onChange={handleEditChange}
-            className="border rounded px-2 py-1"
-          />
-        ) : (
-          <span>{displayValue}</span>
+          className={`
+            w-full px-3 py-2 rounded-lg border
+            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+            transition duration-150 ease-in-out
+            ${isNumber ? "text-right" : ""}
+            ${hasError ? "border-red-500" : "border-gray-300"}
+          `}
+        />
+        {hasError && (
+          <p className="mt-1 text-sm text-red-500">
+            {`${label} is required`}
+          </p>
         )}
       </div>
     );
@@ -406,6 +430,8 @@ const PropertyDetails = ({ propertyId }) => {
     mx-4 sm:mx-0
   `;
 
+  const progress = 75; // Replace with actual progress calculation
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <ToastContainer
@@ -501,864 +527,245 @@ const PropertyDetails = ({ propertyId }) => {
                   </button>
                 </>
               ) : (
-                <button
-                  onClick={toggleEditMode}
-                  className={buttonStyles.primary}
-                  aria-label="Edit property details"
-                >
-                  <Edit2 size={18} />
-                  <span className="sr-only sm:not-sr-only">Edit</span>
-                </button>
+                <>
+                  <button
+                    onClick={toggleEditMode}
+                    className={buttonStyles.primary}
+                    aria-label="Edit property details"
+                  >
+                    <Edit2 size={18} />
+                    <span className="sr-only sm:not-sr-only">Edit</span>
+                  </button>
+                  {renderExpandAllButton()}
+                </>
               )}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Foreclosure Information Section */}
-            <div className="foreclosureInfo hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
+            <div className="foreclosureInfo hover:bg-gray-200 hover:scale-[1.02] bg-gray-50 p-4 shadow-sm rounded-md">
               {renderSectionTitle("Foreclosure Information", "foreclosureInfo")}
               {expandedSections.foreclosureInfo && (
                 <>
-                  {renderEditableField(
-                    "Detail Link",
-                    "detail_link",
-                    editedDetails.detail_link || ""
-                  )}
-                  {renderEditableField(
-                    "Property ID",
-                    "property_id",
-                    editedDetails.property_id || ""
-                  )}
-                  {renderEditableField(
-                    "Sheriff Number",
-                    "sheriff_number",
-                    editedDetails.sheriff_number || ""
-                  )}
-                  {renderEditableField(
-                    "Status Date",
-                    "status_date",
-                    editedDetails.status_date || "",
-                    "date"
-                  )}
-                  {renderEditableField(
-                    "Plaintiff",
-                    "plaintiff",
-                    editedDetails.plaintiff || ""
-                  )}
-                  {renderEditableField(
-                    "Defendant",
-                    "defendant",
-                    editedDetails.defendant || ""
-                  )}
-                  {renderEditableField(
-                    "Zillow URL",
-                    "zillow_url",
-                    editedDetails.zillow_url || ""
-                  )}
+                  {renderInputField("Detail Link", "detail_link")}
+                  {renderInputField("Property ID", "property_id")}
+                  {renderInputField("Sheriff Number", "sheriff_number")}
+                  {renderInputField("Status Date", "status_date", "date")}
+                  {renderInputField("Plaintiff", "plaintiff")}
+                  {renderInputField("Defendant", "defendant")}
+                  {renderInputField("Zillow URL", "zillow_url")}
                 </>
               )}
             </div>
 
             {/* Location Section */}
-            <div className="propLocation hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
+            <div className="propLocation hover:bg-gray-200 hover:scale-[1.02] bg-gray-50 p-4 shadow-sm rounded-md">
               {renderSectionTitle("Location", "location")}
               {expandedSections.location && (
                 <>
-                  {renderEditableField(
-                    "Property Name",
-                    "propertyName",
-                    editedDetails.propertyName || ""
-                  )}
-                  {renderEditableField(
-                    "Address",
-                    "address",
-                    editedDetails.address || ""
-                  )}
-                  {renderEditableField(
-                    "City",
-                    "city",
-                    editedDetails.city || ""
-                  )}
-                  {renderEditableField(
-                    "State",
-                    "state",
-                    editedDetails.state || ""
-                  )}
-                  {renderEditableField(
-                    "Zip Code",
-                    "zipCode",
-                    editedDetails.zipCode || "",
-                    "number"
-                  )}
-                  {renderEditableField(
-                    "County",
-                    "county",
-                    editedDetails.county || ""
-                  )}
-                  {renderEditableField(
-                    "Bedrooms",
-                    "bedroomsDescription",
-                    editedDetails.bedroomsDescription || ""
-                  )}
-                  {renderEditableField(
-                    "Bathrooms",
-                    "bathroomsDescription",
-                    editedDetails.bathroomsDescription || ""
-                  )}
-                  {renderEditableField(
-                    "Kitchen",
-                    "kitchenDescription",
-                    editedDetails.kitchenDescription || ""
-                  )}
-                  {renderEditableField(
-                    "Amenities",
-                    "amenitiesDescription",
-                    editedDetails.amenitiesDescription || ""
-                  )}
+                  {renderInputField("Property Name", "propertyName")}
+                  {renderInputField("Address", "address")}
+                  {renderInputField("City", "city")}
+                  {renderInputField("State", "state")}
+                  {renderInputField("Zip Code", "zipCode", "number")}
+                  {renderInputField("County", "county")}
+                  {renderInputField("Bedrooms", "bedroomsDescription")}
+                  {renderInputField("Bathrooms", "bathroomsDescription")}
+                  {renderInputField("Kitchen", "kitchenDescription")}
+                  {renderInputField("Amenities", "amenitiesDescription")}
                 </>
               )}
             </div>
 
             {/* Departments Section */}
-            <div className="propDepartments hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
+            <div className="propDepartments hover:bg-gray-200 hover:scale-[1.02] bg-gray-50 p-4 shadow-sm rounded-md">
               {renderSectionTitle("Departments", "departments")}
               {expandedSections.departments && (
                 <>
-                  {renderEditableField(
-                    "Municipal Building Address",
-                    "municipalBuildingAddress",
-                    editedDetails.municipalBuildingAddress || ""
-                  )}
-                  {renderEditableField(
-                    "Building Dept",
-                    "buildingDepartmentContact",
-                    editedDetails.buildingDepartmentContact || ""
-                  )}
-                  {renderEditableField(
-                    "Electric Dept",
-                    "electricDepartmentContact",
-                    editedDetails.electricDepartmentContact || ""
-                  )}
-                  {renderEditableField(
-                    "Plumbing Dept",
-                    "plumbingDepartmentContact",
-                    editedDetails.plumbingDepartmentContact || ""
-                  )}
-                  {renderEditableField(
-                    "Fire Dept",
-                    "fireDepartmentContact",
-                    editedDetails.fireDepartmentContact || ""
-                  )}
-                  {renderEditableField(
-                    "Homeowners Association",
-                    "homeownersAssociationContact",
-                    editedDetails.homeownersAssociationContact || ""
-                  )}
-                  {renderEditableField(
-                    "Environmental Dept",
-                    "environmentalDepartmentContact",
-                    editedDetails.environmentalDepartmentContact || ""
-                  )}
+                  {renderInputField("Municipal Building Address", "municipalBuildingAddress")}
+                  {renderInputField("Building Dept", "buildingDepartmentContact")}
+                  {renderInputField("Electric Dept", "electricDepartmentContact")}
+                  {renderInputField("Plumbing Dept", "plumbingDepartmentContact")}
+                  {renderInputField("Fire Dept", "fireDepartmentContact")}
+                  {renderInputField("Homeowners Association", "homeownersAssociationContact")}
+                  {renderInputField("Environmental Dept", "environmentalDepartmentContact")}
                 </>
               )}
             </div>
 
             {/* Total Outlay To Date Section */}
-            <div className="propTotalOutlayToDate hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
+            <div className="propTotalOutlayToDate hover:bg-gray-200 hover:scale-[1.02] bg-gray-50 p-4 shadow-sm rounded-md">
               {renderSectionTitle("Total Outlay To Date", "outlayToDate")}
               {expandedSections.outlayToDate && (
                 <>
-                  {renderEditableField(
-                    "Purchase Cost",
-                    "purchaseCost",
-                    editedDetails.purchaseCost || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Refinance Cost",
-                    "refinanceCost",
-                    editedDetails.refinanceCost || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Equipment Cost",
-                    "equipmentCost",
-                    editedDetails.equipmentCost || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Construction Cost",
-                    "constructionCost",
-                    editedDetails.constructionCost || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Large Repair Cost",
-                    "largeRepairCost",
-                    editedDetails.largeRepairCost || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Renovation Cost",
-                    "renovationCost",
-                    editedDetails.renovationCost || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Total Rehab Cost",
-                    "totalRehabCost",
-                    editedDetails.totalRehabCost || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Kick Start Funds",
-                    "kickStartFunds",
-                    editedDetails.kickStartFunds || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Lender Construction Draws Received",
-                    "lenderConstructionDrawsReceived",
-                    editedDetails.lenderConstructionDrawsReceived || "",
-                    "number",
-                    true
-                  )}
+                  {renderInputField("Purchase Cost", "purchaseCost", "number", true)}
+                  {renderInputField("Refinance Cost", "refinanceCost", "number", true)}
+                  {renderInputField("Equipment Cost", "equipmentCost", "number", true)}
+                  {renderInputField("Construction Cost", "constructionCost", "number", true)}
+                  {renderInputField("Large Repair Cost", "largeRepairCost", "number", true)}
+                  {renderInputField("Renovation Cost", "renovationCost", "number", true)}
+                  {renderInputField("Total Rehab Cost", "totalRehabCost", "number", true)}
+                  {renderInputField("Kick Start Funds", "kickStartFunds", "number", true)}
+                  {renderInputField("Lender Construction Draws Received", "lenderConstructionDrawsReceived", "number", true)}
                   <div className="border-t-2 border-black border-solid my-4"></div>
-                  {renderEditableField(
-                    "Utilities Cost",
-                    "utilitiesCost",
-                    editedDetails.utilitiesCost || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Sewer Yearly Cost",
-                    "sewer",
-                    editedDetails.sewer || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Water Yearly Cost",
-                    "water",
-                    editedDetails.water || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Lawn Yearly Cost",
-                    "lawn",
-                    editedDetails.lawn || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Garbage Yearly Cost",
-                    "garbage",
-                    editedDetails.garbage || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Yearly Property Taxes",
-                    "yearlyPropertyTaxes",
-                    editedDetails.yearlyPropertyTaxes || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Mortgage Paid",
-                    "mortgagePaid",
-                    editedDetails.mortgagePaid || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Homeowners Insurance",
-                    "homeownersInsurance",
-                    editedDetails.homeownersInsurance || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Expected Yearly Rent",
-                    "expectedYearlyRent",
-                    editedDetails.expectedYearlyRent || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Rental Income Received",
-                    "rentalIncomeReceived",
-                    editedDetails.rentalIncomeReceived || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Number of Units",
-                    "numUnits",
-                    editedDetails.numUnits || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Vacancy Rate",
-                    "vacancyRate",
-                    editedDetails.vacancyRate || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Average Tenant Stay",
-                    "avgTenantStay",
-                    editedDetails.avgTenantStay || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Other Monthly Income",
-                    "otherMonthlyIncome",
-                    editedDetails.otherMonthlyIncome || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Vacancy Loss",
-                    "vacancyLoss",
-                    editedDetails.vacancyLoss || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Management Fees",
-                    "managementFees",
-                    editedDetails.managementFees || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Maintenance Costs",
-                    "maintenanceCosts",
-                    editedDetails.maintenanceCosts || "",
-                    "number",
-                    true
-                  )}
+                  {renderInputField("Utilities Cost", "utilitiesCost", "number", true)}
+                  {renderInputField("Sewer Yearly Cost", "sewer", "number", true)}
+                  {renderInputField("Water Yearly Cost", "water", "number", true)}
+                  {renderInputField("Lawn Yearly Cost", "lawn", "number", true)}
+                  {renderInputField("Garbage Yearly Cost", "garbage", "number", true)}
+                  {renderInputField("Yearly Property Taxes", "yearlyPropertyTaxes", "number", true)}
+                  {renderInputField("Mortgage Paid", "mortgagePaid", "number", true)}
+                  {renderInputField("Homeowners Insurance", "homeownersInsurance", "number", true)}
+                  {renderInputField("Expected Yearly Rent", "expectedYearlyRent", "number", true)}
+                  {renderInputField("Rental Income Received", "rentalIncomeReceived", "number", true)}
+                  {renderInputField("Number of Units", "numUnits", "number", true)}
+                  {renderInputField("Vacancy Rate", "vacancyRate", "number", true)}
+                  {renderInputField("Average Tenant Stay", "avgTenantStay", "number", true)}
+                  {renderInputField("Other Monthly Income", "otherMonthlyIncome", "number", true)}
+                  {renderInputField("Vacancy Loss", "vacancyLoss", "number", true)}
+                  {renderInputField("Management Fees", "managementFees", "number", true)}
+                  {renderInputField("Maintenance Costs", "maintenanceCosts", "number", true)}
                   <div className="border-t-2 border-black border-solid my-4"></div>
-                  {renderEditableField(
-                    "Total Equity",
-                    "totalEquity",
-                    editedDetails.totalEquity || "",
-                    "number",
-                    true
-                  )}
+                  {renderInputField("Total Equity", "totalEquity", "number", true)}
                 </>
               )}
             </div>
 
             {/* Sale Projection Section */}
-            <div className="propSaleProjection hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
+            <div className="propSaleProjection hover:bg-gray-200 hover:scale-[1.02] bg-gray-50 p-4 shadow-sm rounded-md">
               {renderSectionTitle("Sale Projection", "saleProjection")}
               {expandedSections.saleProjection && (
                 <>
-                  {renderEditableField(
-                    "ARV Sale Price",
-                    "arvSalePrice",
-                    editedDetails.arvSalePrice || "",
-                    "number",
-                    true
-                  )}
+                  {renderInputField("ARV Sale Price", "arvSalePrice", "number", true)}
                   <div className="border-t-2 border-black border-solid my-4"></div>
-                  {renderEditableField(
-                    "Realtor Fees",
-                    "realtorFees",
-                    editedDetails.realtorFees || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Remaining Property Tax",
-                    "propTaxTillEndOfYear",
-                    editedDetails.propTaxTillEndOfYear || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Lender Loan Balance",
-                    "lenderLoanBalance",
-                    editedDetails.lenderLoanBalance || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Pay Off Statement",
-                    "payOffStatement",
-                    editedDetails.payOffStatement || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Attorney Fees",
-                    "attorneyFees",
-                    editedDetails.attorneyFees || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Misc Fees",
-                    "miscFees",
-                    editedDetails.miscFees || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Utilities",
-                    "utilities",
-                    editedDetails.utilities || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Cash to Close from Purchase",
-                    "cash2closeFromPurchase",
-                    editedDetails.cash2closeFromPurchase || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Cash to Close from Refinance",
-                    "cash2closeFromRefinance",
-                    editedDetails.cash2closeFromRefinance || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Total Rehab Costs",
-                    "totalRehabCosts",
-                    editedDetails.totalRehabCost || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Expected Remaining Rent End To Year",
-                    "expectedRemainingRentEndToYear",
-                    editedDetails.expectedRemainingRentEndToYear || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Mortgage Paid",
-                    "mortgagePaid",
-                    editedDetails.mortgagePaid || "",
-                    "number",
-                    true
-                  )}
+                  {renderInputField("Realtor Fees", "realtorFees", "number", true)}
+                  {renderInputField("Remaining Property Tax", "propTaxTillEndOfYear", "number", true)}
+                  {renderInputField("Lender Loan Balance", "lenderLoanBalance", "number", true)}
+                  {renderInputField("Pay Off Statement", "payOffStatement", "number", true)}
+                  {renderInputField("Attorney Fees", "attorneyFees", "number", true)}
+                  {renderInputField("Misc Fees", "miscFees", "number", true)}
+                  {renderInputField("Utilities", "utilities", "number", true)}
+                  {renderInputField("Cash to Close from Purchase", "cash2closeFromPurchase", "number", true)}
+                  {renderInputField("Cash to Close from Refinance", "cash2closeFromRefinance", "number", true)}
+                  {renderInputField("Total Rehab Costs", "totalRehabCosts", "number", true)}
+                  {renderInputField("Expected Remaining Rent End To Year", "expectedRemainingRentEndToYear", "number", true)}
+                  {renderInputField("Mortgage Paid", "mortgagePaid", "number", true)}
                   <div className="border-t-2 border-black border-solid my-4"></div>
-                  {renderEditableField(
-                    "Total Expenses",
-                    "totalExpenses",
-                    editedDetails.totalExpenses || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Total Expected Draws In",
-                    "totalConstructionDrawsReceived",
-                    editedDetails.totalConstructionDrawsReceived || "",
-                    "number",
-                    true
-                  )}
+                  {renderInputField("Total Expenses", "totalExpenses", "number", true)}
+                  {renderInputField("Total Expected Draws In", "totalConstructionDrawsReceived", "number", true)}
                   <div className="border-t-2 border-black border-solid my-4"></div>
-                  {renderEditableField(
-                    "Project Net Profit If Sold",
-                    "projectNetProfitIfSold",
-                    editedDetails.projectNetProfitIfSold || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Cash Flow",
-                    "cashFlow",
-                    editedDetails.cashFlow || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Cash ROI",
-                    "cashRoi",
-                    editedDetails.cashRoi || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Rule 2 Percent",
-                    "rule2Percent",
-                    editedDetails.rule2Percent || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Rule 50 Percent",
-                    "rule50Percent",
-                    editedDetails.rule50Percent || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Finance Amount",
-                    "financeAmount",
-                    editedDetails.financeAmount || "",
-                    "number",
-                    true
-                  )}
-                  {renderEditableField(
-                    "Purchase Cap Rate",
-                    "purchaseCapRate",
-                    editedDetails.purchaseCapRate || "",
-                    "number",
-                    true
-                  )}
+                  {renderInputField("Project Net Profit If Sold", "projectNetProfitIfSold", "number", true)}
+                  {renderInputField("Cash Flow", "cashFlow", "number", true)}
+                  {renderInputField("Cash ROI", "cashRoi", "number", true)}
+                  {renderInputField("Rule 2 Percent", "rule2Percent", "number", true)}
+                  {renderInputField("Rule 50 Percent", "rule50Percent", "number", true)}
+                  {renderInputField("Finance Amount", "financeAmount", "number", true)}
+                  {renderInputField("Purchase Cap Rate", "purchaseCapRate", "number", true)}
                 </>
               )}
             </div>
 
             {/* Utility Information Section */}
-            <div className="propUtilityInformation hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
+            <div className="propUtilityInformation hover:bg-gray-200 hover:scale-[1.02] bg-gray-50 p-4 shadow-sm rounded-md">
               {renderSectionTitle("Utility Information", "utilityInformation")}
               {expandedSections.utilityInformation && (
                 <>
-                  {renderEditableField(
-                    "Type of Heating & Cooling",
-                    "typeOfHeatingAndCooling",
-                    editedDetails.typeOfHeatingAndCooling || ""
-                  )}
+                  {renderInputField("Type of Heating & Cooling", "typeOfHeatingAndCooling")}
                   <div className="border-t-2 border-transparent my-2"></div>
-                  {renderEditableField(
-                    "Water Company",
-                    "waterCompany",
-                    editedDetails.waterCompany || ""
-                  )}
-                  {renderEditableField(
-                    "Water Account Number",
-                    "waterAccountNumber",
-                    editedDetails.waterAccountNumber || ""
-                  )}
+                  {renderInputField("Water Company", "waterCompany")}
+                  {renderInputField("Water Account Number", "waterAccountNumber")}
                   <div className="border-t-2 border-transparent my-2"></div>
-                  {renderEditableField(
-                    "Electric Company",
-                    "electricCompany",
-                    editedDetails.electricCompany || ""
-                  )}
-                  {renderEditableField(
-                    "Electric Account Number",
-                    "electricAccountNumber",
-                    editedDetails.electricAccountNumber || ""
-                  )}
+                  {renderInputField("Electric Company", "electricCompany")}
+                  {renderInputField("Electric Account Number", "electricAccountNumber")}
                   <div className="border-t-2 border-transparent my-2"></div>
-                  {renderEditableField(
-                    "Gas or Oil Company",
-                    "gasOrOilCompany",
-                    editedDetails.gasOrOilCompany || ""
-                  )}
-                  {renderEditableField(
-                    "Gas or Oil Account Number",
-                    "gasOrOilAccountNumber",
-                    editedDetails.gasOrOilAccountNumber || ""
-                  )}
+                  {renderInputField("Gas or Oil Company", "gasOrOilCompany")}
+                  {renderInputField("Gas or Oil Account Number", "gasOrOilAccountNumber")}
                   <div className="border-t-2 border-transparent my-2"></div>
-                  {renderEditableField(
-                    "Sewer Company",
-                    "sewerCompany",
-                    editedDetails.sewerCompany || ""
-                  )}
-                  {renderEditableField(
-                    "Sewer Account Number",
-                    "sewerAccountNumber",
-                    editedDetails.sewerAccountNumber || ""
-                  )}
+                  {renderInputField("Sewer Company", "sewerCompany")}
+                  {renderInputField("Sewer Account Number", "sewerAccountNumber")}
                 </>
               )}
             </div>
 
             {/* Lender Information Section */}
-            <div className="propLenderInformation hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
+            <div className="propLenderInformation hover:bg-gray-200 hover:scale-[1.02] bg-gray-50 p-4 shadow-sm rounded-md">
               {renderSectionTitle("Lender", "lender")}
               {expandedSections.lender && (
                 <>
-                  {renderEditableField(
-                    "Lender",
-                    "lender",
-                    editedDetails.lender || ""
-                  )}
-                  {renderEditableField(
-                    "Lender Phone",
-                    "lenderPhone",
-                    editedDetails.lenderPhone || ""
-                  )}
+                  {renderInputField("Lender", "lender")}
+                  {renderInputField("Lender Phone", "lenderPhone")}
                   <div className="border-t-2 border-transparent my-2"></div>
-                  {renderEditableField(
-                    "Refinance Lender",
-                    "refinanceLender",
-                    editedDetails.refinanceLender || ""
-                  )}
-                  {renderEditableField(
-                    "Refinance Lender Phone",
-                    "refinanceLenderPhone",
-                    editedDetails.refinanceLenderPhone || ""
-                  )}
+                  {renderInputField("Refinance Lender", "refinanceLender")}
+                  {renderInputField("Refinance Lender Phone", "refinanceLenderPhone")}
                   <div className="border-t-2 border-transparent my-2"></div>
-                  {renderEditableField(
-                    "Loan Officer",
-                    "loanOfficer",
-                    editedDetails.loanOfficer || ""
-                  )}
-                  {renderEditableField(
-                    "Loan Officer Phone",
-                    "loanOfficerPhone",
-                    editedDetails.loanOfficerPhone || ""
-                  )}
-                  {renderEditableField(
-                    "Loan Number",
-                    "loanNumber",
-                    editedDetails.loanNumber || ""
-                  )}
-                  {renderEditableField(
-                    "Down Payment Percentage",
-                    "downPaymentPercentage",
-                    editedDetails.downPaymentPercentage || "",
-                    "number"
-                  )}
-                  {renderEditableField(
-                    "Loan Interest Rate",
-                    "loanInterestRate",
-                    editedDetails.loanInterestRate || "",
-                    "number"
-                  )}
-                  {renderEditableField(
-                    "PMI Percentage",
-                    "pmiPercentage",
-                    editedDetails.pmiPercentage || "",
-                    "number"
-                  )}
-                  {renderEditableField(
-                    "Mortgage Years",
-                    "mortgageYears",
-                    editedDetails.mortgageYears || "",
-                    "number"
-                  )}
-                  {renderEditableField(
-                    "Lender Points Amount",
-                    "lenderPointsAmount",
-                    editedDetails.lenderPointsAmount || "",
-                    "number"
-                  )}
-                  {renderEditableField(
-                    "Other Fees",
-                    "otherFees",
-                    editedDetails.otherFees || "",
-                    "number"
-                  )}
+                  {renderInputField("Loan Officer", "loanOfficer")}
+                  {renderInputField("Loan Officer Phone", "loanOfficerPhone")}
+                  {renderInputField("Loan Number", "loanNumber")}
+                  {renderInputField("Down Payment Percentage", "downPaymentPercentage", "number")}
+                  {renderInputField("Loan Interest Rate", "loanInterestRate", "number")}
+                  {renderInputField("PMI Percentage", "pmiPercentage", "number")}
+                  {renderInputField("Mortgage Years", "mortgageYears", "number")}
+                  {renderInputField("Lender Points Amount", "lenderPointsAmount", "number")}
+                  {renderInputField("Other Fees", "otherFees", "number")}
                 </>
               )}
             </div>
 
             {/* Key Players Section */}
-            <div className="propKeyPlayers hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
+            <div className="propKeyPlayers hover:bg-gray-200 hover:scale-[1.02] bg-gray-50 p-4 shadow-sm rounded-md">
               {renderSectionTitle("Key Players", "keyPlayers")}
               {expandedSections.keyPlayers && (
                 <>
-                  {renderEditableField(
-                    "Seller's Agent",
-                    "sellersAgent",
-                    editedDetails.sellersAgent || ""
-                  )}
-                  {renderEditableField(
-                    "Seller's Broker",
-                    "sellersBroker",
-                    editedDetails.sellersBroker || ""
-                  )}
-                  {renderEditableField(
-                    "Seller's Agent Phone",
-                    "sellersAgentPhone",
-                    editedDetails.sellersAgentPhone || ""
-                  )}
-                  {renderEditableField(
-                    "Seller's Attorney",
-                    "sellersAttorney",
-                    editedDetails.sellersAttorney || ""
-                  )}
-                  {renderEditableField(
-                    "Seller's Attorney Phone",
-                    "sellersAttorneyPhone",
-                    editedDetails.sellersAttorneyPhone || ""
-                  )}
+                  {renderInputField("Seller's Agent", "sellersAgent")}
+                  {renderInputField("Seller's Broker", "sellersBroker")}
+                  {renderInputField("Seller's Agent Phone", "sellersAgentPhone")}
+                  {renderInputField("Seller's Attorney", "sellersAttorney")}
+                  {renderInputField("Seller's Attorney Phone", "sellersAttorneyPhone")}
                   <div className="border-t-2 border-black border-solid my-4"></div>
-                  {renderEditableField(
-                    "Escrow Company",
-                    "escrowCompany",
-                    editedDetails.escrowCompany || ""
-                  )}
-                  {renderEditableField(
-                    "Escrow Agent",
-                    "escrowAgent",
-                    editedDetails.escrowAgent || ""
-                  )}
-                  {renderEditableField(
-                    "Escrow Agent Phone",
-                    "escrowAgentPhone",
-                    editedDetails.escrowAgentPhone || ""
-                  )}
+                  {renderInputField("Escrow Company", "escrowCompany")}
+                  {renderInputField("Escrow Agent", "escrowAgent")}
+                  {renderInputField("Escrow Agent Phone", "escrowAgentPhone")}
                   <div className="border-t-2 border-black border-solid my-4"></div>
-                  {renderEditableField(
-                    "Buyer's Agent",
-                    "buyersAgent",
-                    editedDetails.buyersAgent || ""
-                  )}
-                  {renderEditableField(
-                    "Buyer's Broker",
-                    "buyersBroker",
-                    editedDetails.buyersBroker || ""
-                  )}
-                  {renderEditableField(
-                    "Buyer's Agent Phone",
-                    "buyersAgentPhone",
-                    editedDetails.buyersAgentPhone || ""
-                  )}
-                  {renderEditableField(
-                    "Buyer's Attorney",
-                    "buyersAttorney",
-                    editedDetails.buyersAttorney || ""
-                  )}
-                  {renderEditableField(
-                    "Buyer's Attorney Phone",
-                    "buyersAttorneyPhone",
-                    editedDetails.buyersAttorneyPhone || ""
-                  )}
+                  {renderInputField("Buyer's Agent", "buyersAgent")}
+                  {renderInputField("Buyer's Broker", "buyersBroker")}
+                  {renderInputField("Buyer's Agent Phone", "buyersAgentPhone")}
+                  {renderInputField("Buyer's Attorney", "buyersAttorney")}
+                  {renderInputField("Buyer's Attorney Phone", "buyersAttorneyPhone")}
                   <div className="border-t-2 border-black border-solid my-4"></div>
-                  {renderEditableField(
-                    "Title Insurance Company",
-                    "titleInsuranceCompany",
-                    editedDetails.titleInsuranceCompany || ""
-                  )}
-                  {renderEditableField(
-                    "Title Agent",
-                    "titleAgent",
-                    editedDetails.titleAgent || ""
-                  )}
-                  {renderEditableField(
-                    "Title Agent Phone",
-                    "titleAgentPhone",
-                    editedDetails.titleAgentPhone || ""
-                  )}
-                  {renderEditableField(
-                    "Title Company Phone",
-                    "titlePhone",
-                    editedDetails.titlePhone || ""
-                  )}
+                  {renderInputField("Title Insurance Company", "titleInsuranceCompany")}
+                  {renderInputField("Title Agent", "titleAgent")}
+                  {renderInputField("Title Agent Phone", "titleAgentPhone")}
+                  {renderInputField("Title Company Phone", "titlePhone")}
                 </>
               )}
             </div>
 
             {/* Sales & Marketing Section */}
-            <div className="propSalesAndMarketing hover:bg-gray-100 hover:scale-105 bg-gray-50 p-4 shadow-sm rounded-md">
+            <div className="propSalesAndMarketing hover:bg-gray-200 hover:scale-[1.02] bg-gray-50 p-4 shadow-sm rounded-md">
               {renderSectionTitle("Sales & Marketing", "salesAndMarketing")}
               {expandedSections.salesAndMarketing && (
                 <>
-                  {renderEditableField(
-                    "Property Manager",
-                    "propertyManager",
-                    editedDetails.propertyManager || ""
-                  )}
-                  {renderEditableField(
-                    "Property Manager Phone",
-                    "propertyManagerPhone",
-                    editedDetails.propertyManagerPhone || ""
-                  )}
-                  {renderEditableField(
-                    "Property Management Company",
-                    "propertyManagementCompany",
-                    editedDetails.propertyManagementCompany || ""
-                  )}
-                  {renderEditableField(
-                    "Property Management Phone",
-                    "propertyManagementPhone",
-                    editedDetails.propertyManagementPhone || ""
-                  )}
+                  {renderInputField("Property Manager", "propertyManager")}
+                  {renderInputField("Property Manager Phone", "propertyManagerPhone")}
+                  {renderInputField("Property Management Company", "propertyManagementCompany")}
+                  {renderInputField("Property Management Phone", "propertyManagementPhone")}
                   <div className="border-t-2 border-black border-solid my-4"></div>
-                  {renderEditableField(
-                    "Photographer",
-                    "photographer",
-                    editedDetails.photographer || ""
-                  )}
-                  {renderEditableField(
-                    "Photographer Phone",
-                    "photographerPhone",
-                    editedDetails.photographerPhone || ""
-                  )}
-                  {renderEditableField(
-                    "Videographer",
-                    "videographer",
-                    editedDetails.videographer || ""
-                  )}
-                  {renderEditableField(
-                    "Videographer Phone",
-                    "videographerPhone",
-                    editedDetails.videographerPhone || ""
-                  )}
+                  {renderInputField("Photographer", "photographer")}
+                  {renderInputField("Photographer Phone", "photographerPhone")}
+                  {renderInputField("Videographer", "videographer")}
+                  {renderInputField("Videographer Phone", "videographerPhone")}
                   <div className="border-t-2 border-black border-solid my-4"></div>
-                  {renderEditableField(
-                    "Appraisal Company",
-                    "appraisalCompany",
-                    editedDetails.appraisalCompany || ""
-                  )}
-                  {renderEditableField(
-                    "Appraiser",
-                    "appraiser",
-                    editedDetails.appraiser || ""
-                  )}
-                  {renderEditableField(
-                    "Appraiser Phone",
-                    "appraiserPhone",
-                    editedDetails.appraiserPhone || ""
-                  )}
-                  {renderEditableField(
-                    "Surveyor",
-                    "surveyor",
-                    editedDetails.surveyor || ""
-                  )}
-                  {renderEditableField(
-                    "Surveyor Phone",
-                    "surveyorPhone",
-                    editedDetails.surveyorPhone || ""
-                  )}
-                  {renderEditableField(
-                    "Home Inspector",
-                    "homeInspector",
-                    editedDetails.homeInspector || ""
-                  )}
-                  {renderEditableField(
-                    "Home Inspector Phone",
-                    "homeInspectorPhone",
-                    editedDetails.homeInspectorPhone || ""
-                  )}
+                  {renderInputField("Appraisal Company", "appraisalCompany")}
+                  {renderInputField("Appraiser", "appraiser")}
+                  {renderInputField("Appraiser Phone", "appraiserPhone")}
+                  {renderInputField("Surveyor", "surveyor")}
+                  {renderInputField("Surveyor Phone", "surveyorPhone")}
+                  {renderInputField("Home Inspector", "homeInspector")}
+                  {renderInputField("Home Inspector Phone", "homeInspectorPhone")}
                   <div className="border-t-2 border-black border-solid my-4"></div>
-                  {renderEditableField(
-                    "Architect",
-                    "architect",
-                    editedDetails.architect || ""
-                  )}
-                  {renderEditableField(
-                    "Architect Phone",
-                    "architectPhone",
-                    editedDetails.architectPhone || ""
-                  )}
+                  {renderInputField("Architect", "architect")}
+                  {renderInputField("Architect Phone", "architectPhone")}
                 </>
               )}
             </div>
@@ -1405,6 +812,18 @@ const PropertyDetails = ({ propertyId }) => {
             {/* Repeat similar pattern for other financial components */}
           </div>
         </section>
+
+        <div className="mb-8">
+          <div className="h-2 bg-gray-200 rounded-full">
+            <div
+              className="h-full bg-blue-500 rounded-full transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <p className="text-sm text-gray-600 mt-2 text-right">
+            {progress}% Complete
+          </p>
+        </div>
       </div>
     </div>
   );

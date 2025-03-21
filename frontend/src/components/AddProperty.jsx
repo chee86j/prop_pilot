@@ -694,7 +694,6 @@ const AddProperty = () => {
             ${isNumber ? "text-right" : ""}
             ${errorMessage && !property[name] ? "border-red-500" : ""}
           `}
-          placeholder={`Enter ${label.toLowerCase()}`}
         />
       </div>
     );
