@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { formatCurrencyDetailed } from "../utils/formatting";
 import {
   ChevronsLeft,
@@ -8,11 +8,13 @@ import {
   ChevronsUp,
   ChevronsDown,
 } from "lucide-react";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Receipt = ({ drawId }) => {
   const [receipts, setReceipts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [editReceiptId, setEditReceiptId] = useState(null);
   const [editedReceipt, setEditedReceipt] = useState({});
@@ -28,41 +30,72 @@ const Receipt = ({ drawId }) => {
   const [expandedDescriptions, setExpandedDescriptions] = useState(new Set());
   const [expandedReceipts, setReceiptsExpanded] = useState(false);
 
-  useEffect(() => {
-    const fetchReceipts = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:5000/api/receipts/${drawId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          }
-        );
+  // Toast configuration
+  const toastConfig = {
+    position: "top-right",
+    autoClose: 3000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "light",
+    containerId: "root-toast",
+  };
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch receipts");
+  const showToast = useCallback((message, type = "success") => {
+    if (type === "success") {
+      toast.success(message, toastConfig);
+    } else if (type === "error") {
+      toast.error(message, toastConfig);
+    }
+  }, []);
+
+  const fetchReceipts = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/receipts/${drawId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
         }
+      );
 
-        const data = await response.json();
-        // Sort receipts by Ascending date
-        const sortedReceipts = data.sort(
-          (a, b) => new Date(a.date) - new Date(b.date)
-        );
-        setReceipts(sortedReceipts);
-        toast.success("Receipts fetched successfully!");
-      } catch (err) {
-        setError(err.message);
-        toast.error("Failed to fetch receipts.");
+      if (!response.ok) {
+        throw new Error("Failed to fetch receipts");
       }
-    };
 
-    fetchReceipts();
-  }, [drawId]);
+      const data = await response.json();
+      const sortedReceipts = data.sort(
+        (a, b) => new Date(a.date) - new Date(b.date)
+      );
+      setReceipts(sortedReceipts);
+      showToast("Receipts fetched successfully");
+    } catch (err) {
+      setError(err.message);
+      showToast("Failed to fetch receipts", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [drawId, showToast]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    if (drawId && mounted) {
+      fetchReceipts();
+    }
+
+    return () => {
+      mounted = false;
+    };
+  }, [drawId, fetchReceipts]);
 
   const handleEditChange = (e) => {
     const { name, value } = e.target;
-    setEditedReceipt({ ...editedReceipt, [name]: value });
+    setEditedReceipt((prev) => ({ ...prev, [name]: value }));
   };
 
   const startEdit = (receipt) => {
@@ -72,6 +105,7 @@ const Receipt = ({ drawId }) => {
 
   const saveEdit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const response = await fetch(
         `http://localhost:5000/api/receipts/${editReceiptId}`,
@@ -86,130 +120,24 @@ const Receipt = ({ drawId }) => {
       );
 
       if (!response.ok) {
-        {
-          receipts.map((receipt) => (
-            <tr key={receipt.id} className="text-gray-700 hover:bg-gray-100">
-              <td className="border px-2 py-1 text-center">
-                {new Date(receipt.date).toLocaleDateString(undefined, {
-                  timeZone: "UTC",
-                })}
-              </td>
-              <td className="border px-2 py-1">{receipt.vendor}</td>
-              <td className="border px-2 py-1 text-center">
-                {/* Invoke formatCurrencyDetailed only if the 'Amount' column is not hidden on medium to small devices */}
-                {receipt.isAmountHidden
-                  ? `x${receipt.amount}`
-                  : formatCurrencyDetailed(receipt.amount)}
-              </td>
-              <td className="border px-2 py-1">
-                {expandedDescriptions.has(receipt.id) ? (
-                  <span>{receipt.description}</span>
-                ) : (
-                  <span>
-                    {receipt.description.length > 10
-                      ? receipt.description.substring(0, 10) + "..."
-                      : receipt.description}
-                  </span>
-                )}
-                {receipt.description.length > 10 && (
-                  <button
-                    onClick={() => toggleDescriptionExpansion(receipt.id)}
-                    className="text-blue-500 hover:underline focus:outline-none ml-2"
-                  >
-                    {expandedDescriptions.has(receipt.id) ? (
-                      <>
-                        <ChevronsLeft size={20} />
-                        {/* <span>Read Less</span> */}
-                      </>
-                    ) : (
-                      <>
-                        {/* <span>Read More</span> */}
-                        <ChevronsRight size={20} />
-                      </>
-                    )}
-                  </button>
-                )}
-              </td>
-              <td className="hidden md:table-cell border px-2 py-1 text-center">
-                {receipt.pointofcontact}
-              </td>
-              <td className="hidden md:table-cell border px-2 py-1 text-center">
-                x{receipt.ccnumber}
-              </td>
-
-              <td className="px-2 py-1 border">
-                <span className="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
-                  <button
-                    onClick={() => startEdit(receipt)}
-                    className="inline-block border-e p-3 text-gray-700 hover:bg-gray-50 focus:relative"
-                    title="Edit Product"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="currentColor"
-                      className="h-4 w-4"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
-                      />
-                    </svg>
-                  </button>
-
-                  <button
-                    onClick={() => handleDeleteReceipt(receipt.id)}
-                    className="inline-block p-3 text-gray-700 hover:bg-gray-50 focus:relative"
-                    title="Delete Product"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="currentColor"
-                      className="h-4 w-4"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
-                      />
-                    </svg>
-                  </button>
-                </span>
-              </td>
-            </tr>
-          ));
-        }
         throw new Error("Failed to update receipt");
       }
 
-      const updatedReceipt = await response.json();
-      setReceipts(
-        receipts.map((receipt) =>
-          receipt.id === editReceiptId ? updatedReceipt : receipt
-        )
-      );
+      await fetchReceipts();
       setEditReceiptId(null);
       setEditedReceipt({});
-      toast.success("Receipt updated successfully!");
+      showToast("Receipt updated successfully");
     } catch (err) {
       setError(err.message);
-      toast.error("Failed to update receipt.");
+      showToast("Failed to update receipt", "error");
+    } finally {
+      setIsSubmitting(false);
     }
-  };
-
-  const cancelEdit = () => {
-    setEditReceiptId(null);
-    setEditedReceipt({});
   };
 
   const handleAddReceipt = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const response = await fetch("http://localhost:5000/api/receipts", {
         method: "POST",
@@ -224,18 +152,27 @@ const Receipt = ({ drawId }) => {
         throw new Error("Failed to add receipt");
       }
 
-      const addedReceipt = await response.json();
-      setReceipts([...receipts, addedReceipt]);
-      setNewReceipt({ date: "", vendor: "", amount: "", description: "" });
+      await fetchReceipts();
+      setNewReceipt({
+        date: "",
+        vendor: "",
+        amount: "",
+        description: "",
+        pointofcontact: "",
+        ccnumber: "",
+      });
       setShowAddForm(false);
-      toast.success("Receipt added successfully!");
+      showToast("Receipt added successfully");
     } catch (err) {
       setError(err.message);
-      toast.error("Failed to add receipt.");
+      showToast("Failed to add receipt", "error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleDeleteReceipt = async (receiptId) => {
+    setIsSubmitting(true);
     try {
       const response = await fetch(
         `http://localhost:5000/api/receipts/${receiptId}`,
@@ -251,20 +188,21 @@ const Receipt = ({ drawId }) => {
         throw new Error("Failed to delete receipt");
       }
 
-      setReceipts(receipts.filter((receipt) => receipt.id !== receiptId));
-      toast.success("Receipt deleted successfully!");
+      await fetchReceipts();
+      showToast("Receipt deleted successfully");
     } catch (err) {
       setError(err.message);
-      toast.error("Failed to delete receipt.");
+      showToast("Failed to delete receipt", "error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const calcSubtotal = () => {
-    let subtotal = 0;
-    receipts.forEach((receipt) => {
-      subtotal += parseFloat(receipt.amount);
-    });
-    return subtotal.toFixed(2); // Format subtotal to two decimal places
+    if (!Array.isArray(receipts) || receipts.length === 0) return 0;
+    return receipts
+      .reduce((sum, receipt) => sum + parseFloat(receipt.amount || 0), 0)
+      .toFixed(2);
   };
 
   const toggleDescriptionExpansion = (receiptId) => {
@@ -283,9 +221,22 @@ const Receipt = ({ drawId }) => {
     setReceiptsExpanded((prevExpanded) => !prevExpanded);
   };
 
+  if (isLoading || isSubmitting) {
+    return (
+      <div className="flex items-center justify-center p-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error && (!Array.isArray(receipts) || receipts.length === 0)) {
+    return (
+      <div className="text-red-500 p-4">Error loading receipts: {error}</div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-1 bg-transparent rounded-lg text-sm">
-      <ToastContainer />
       <h1 className="text-lg md:text-md font-bold text-gray-700 my-2">
         Receipts
       </h1>
@@ -387,11 +338,9 @@ const Receipt = ({ drawId }) => {
                         {expandedDescriptions.has(receipt.id) ? (
                           <>
                             <ChevronsLeft size={20} />
-                            {/* <span>Read Less</span> */}
                           </>
                         ) : (
                           <>
-                            {/* <span>Read More</span> */}
                             <ChevronsRight size={20} />
                           </>
                         )}
@@ -688,7 +637,7 @@ const Receipt = ({ drawId }) => {
               </button>
               <button
                 type="button"
-                onClick={cancelEdit}
+                onClick={() => setEditReceiptId(null)}
                 className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
               >
                 Cancel

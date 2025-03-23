@@ -51,9 +51,15 @@ const ConstructionDraw = ({ propertyId }) => {
   }, [propertyId]);
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const userTimezoneOffset = date.getTimezoneOffset() * 60000;
-    return new Date(date.getTime() + userTimezoneOffset).toLocaleDateString();
+    if (!dateString) return "";
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "";
+      return date.toLocaleDateString();
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "";
+    }
   };
 
   const startEdit = (draw) => {
@@ -123,6 +129,9 @@ const ConstructionDraw = ({ propertyId }) => {
     e.preventDefault();
 
     try {
+      // Ensure the date is in ISO format for the API
+      const formattedDate = new Date(newDraw.release_date).toISOString();
+
       const response = await fetch(
         "http://localhost:5000/api/construction-draws",
         {
@@ -131,7 +140,11 @@ const ConstructionDraw = ({ propertyId }) => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
-          body: JSON.stringify({ ...newDraw, property_id: propertyId }),
+          body: JSON.stringify({
+            ...newDraw,
+            release_date: formattedDate,
+            property_id: propertyId,
+          }),
         }
       );
 
@@ -140,7 +153,19 @@ const ConstructionDraw = ({ propertyId }) => {
       }
 
       const addedDraw = await response.json();
-      setDraws([...draws, addedDraw]);
+
+      // Update the draws state with the properly formatted date
+      setDraws((prevDraws) => {
+        const newDraws = [
+          ...prevDraws,
+          {
+            ...addedDraw,
+            release_date: new Date(formattedDate).toISOString(),
+          },
+        ].sort((a, b) => new Date(a.release_date) - new Date(b.release_date));
+        return newDraws;
+      });
+
       setNewDraw({
         release_date: "",
         amount: "",
