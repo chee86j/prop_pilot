@@ -106,72 +106,52 @@ def main(county='Morris') -> bool:
         for item in data:
             item['county'] = county
 
-        # Step 2: Database operations
-        logger.info("💾 Initializing database connection")
-        conn = connect_db()
-        if not conn:
-            raise DatabaseException("Failed to establish database connection")
+        # Step 2: Load existing data from merged_data.csv if it exists
+        output_file = os.path.join(downloads_folder, 'merged_data.csv')
+        existing_data = []
+        if os.path.exists(output_file):
+            try:
+                existing_df = pd.read_csv(output_file)
+                existing_data = existing_df.to_dict('records')
+            except Exception as e:
+                logger.warning(f"⚠️ Could not read existing merged_data.csv: {e}")
 
-        try:
-            create_table(conn)
-            insert_data(conn, data)
-            
-            # Step 3: Export data processing
-            logger.info("📊 Processing and exporting data")
-            
-            exported_csv = os.path.join(downloads_folder, "exported_data.csv")
-            df = pd.DataFrame(data)
-            df.to_csv(exported_csv, index=False)
-            logger.info("✅ Data exported to %s", exported_csv)
+        # Step 3: Update existing data with new data
+        # Create a dictionary of existing data keyed by address for quick lookup
+        existing_data_dict = {item['address']: item for item in existing_data}
+        
+        # Update or add new data
+        for item in data:
+            if item['address'] in existing_data_dict:
+                # Update existing entry
+                existing_data_dict[item['address']].update(item)
+            else:
+                # Add new entry
+                existing_data_dict[item['address']] = item
 
-            # Step 4: Generate Zillow URLs
-            logger.info("🏠 Generating Zillow URLs")
-            zillow_csv = os.path.join(downloads_folder, "exported_zillow_urls.csv")
-            results = []
-            for address in df['address']:
+        # Convert back to list
+        merged_data = list(existing_data_dict.values())
+
+        # Step 4: Generate Zillow URLs for new entries
+        logger.info("🏠 Generating Zillow URLs")
+        for item in merged_data:
+            if 'Zillow URL' not in item or not item['Zillow URL']:
                 try:
-                    zillow_url = format_zillow_url(address)
-                    if zillow_url:
-                        results.append({'address': address, 'Zillow URL': zillow_url})
+                    item['Zillow URL'] = format_zillow_url(item['address'])
                 except Exception as e:
-                    logger.warning("⚠️ Failed to generate Zillow URL for address %s: %s", address, e)
+                    logger.warning(f"⚠️ Failed to generate Zillow URL for address {item['address']}: {e}")
 
-            pd.DataFrame(results).to_csv(zillow_csv, index=False)
-            logger.info("✅ Zillow URLs exported to %s", zillow_csv)
-
-            # Step 5: Merge files
-            logger.info("🔄 Merging data files")
-            output_file = os.path.join(downloads_folder, 'merged_data.csv')
-            merge_csv_files(
-                address_file=exported_csv,
-                zillow_url_file=zillow_csv,
-                output_file=output_file
-            )
+        # Step 5: Save merged data
+        logger.info("💾 Saving merged data")
+        df = pd.DataFrame(merged_data)
+        df.to_csv(output_file, index=False)
+        logger.info(f"✅ Data saved successfully to {output_file}")
             
-            # Also generate a combined merged_data.csv file for backward compatibility
-            combined_output_file = os.path.join(downloads_folder, 'merged_data.csv')
-            df.to_csv(combined_output_file, index=False)
+        return True
             
-            logger.info("✅ Files merged successfully to %s", output_file)
-
-            return True
-
-        except Exception as e:
-            logger.error("❌ Database operation failed: %s\n%s", str(e), traceback.format_exc())
-            raise DatabaseException(f"Database operation failed: {str(e)}")
-            
-        finally:
-            close_db(conn)
-            logger.info("🔌 Database connection closed")
-
-    except ScraperException as e:
-        logger.error("❌ Scraping failed: %s\n%s", str(e), traceback.format_exc())
-        return False
-    except DatabaseException as e:
-        logger.error("❌ Database error: %s\n%s", str(e), traceback.format_exc())
-        return False
     except Exception as e:
-        logger.error("❌ Unexpected error: %s\n%s", str(e), traceback.format_exc())
+        logger.error(f"❌ Error in main scraper function: {e}")
+        traceback.print_exc()
         return False
 
 if __name__ == "__main__":

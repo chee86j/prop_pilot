@@ -439,37 +439,26 @@ def run_scraper_endpoint():
 def get_scraped_properties():
     """Get the list of scraped properties from the merged data CSV."""
     try:
-        # Get county parameter from query string, default to 'Morris'
-        county = request.args.get('county', 'Morris')
-        
-        # Validate county
-        from services.scraper.main import COUNTY_URLS
-        if county not in COUNTY_URLS:
-            return jsonify({
-                'status': 'error',
-                'message': f'Invalid county: {county}. Valid counties are: {", ".join(COUNTY_URLS.keys())}'
-            }), 400
-        
         # Path to the merged data file
-        county_specific_path = os.path.join('services', 'scraper', 'downloads', f'merged_data_{county.lower()}.csv')
         merged_data_path = os.path.join('services', 'scraper', 'downloads', 'merged_data.csv')
         
-        # Check if county-specific file exists, otherwise fall back to merged_data.csv
-        if os.path.exists(county_specific_path):
-            file_path = county_specific_path
-        elif os.path.exists(merged_data_path):
-            file_path = merged_data_path
-        else:
+        if not os.path.exists(merged_data_path):
             return jsonify({
                 'status': 'error',
-                'message': f'No scraped data available for {county} County. Please run the scraper first.'
+                'message': 'No scraped data available. Please run the scraper first.'
             }), 404
             
         # Read the CSV file
-        df = pd.read_csv(file_path)
+        df = pd.read_csv(merged_data_path)
         
         # Convert DataFrame to list of dictionaries
         properties = df.to_dict('records')
+        
+        if not properties:
+            return jsonify({
+                'status': 'error',
+                'message': 'No properties found in the scraped data.'
+            }), 404
         
         return jsonify(properties), 200
         

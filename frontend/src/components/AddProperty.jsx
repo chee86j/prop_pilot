@@ -171,20 +171,37 @@ const AddProperty = () => {
         }
       );
 
+      const data = await response.json();
+
       if (response.status === 404) {
-        toast.info("No Scraped Data found. Run Foreclosure Scraper First.");
+        console.log("No scraped data found:", data.message);
+        toast.info(
+          data.message ||
+            "No Scraped Data found. Run Foreclosure Scraper First."
+        );
+        setScrapedProperties([]);
         return;
       }
 
       if (!response.ok) {
-        throw new Error(`HTTP Error! Status: ${response.status}`);
+        throw new Error(
+          data.error || data.message || `HTTP Error! Status: ${response.status}`
+        );
       }
 
-      const data = await response.json();
+      if (!Array.isArray(data) || data.length === 0) {
+        toast.info("No properties found in scraped data.");
+        setScrapedProperties([]);
+        return;
+      }
+
+      console.log("Loaded scraped properties:", data);
       setScrapedProperties(data);
+      toast.success(`Loaded ${data.length} scraped properties`);
     } catch (error) {
       console.error("Error fetching Scraped Data:", error);
       toast.error(`Failed to Load Scraped Properties: ${error.message}`);
+      setScrapedProperties([]);
     }
   };
 
