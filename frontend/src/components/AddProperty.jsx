@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Select from "react-select";
 import ResearchDropdown from "./ResearchDropdown";
 
 const AddProperty = () => {
@@ -999,19 +1000,60 @@ const AddProperty = () => {
               <h2 className="text-lg font-semibold text-blue-900 mb-3">
                 Quick Fill from Scraped Data
               </h2>
-              <select
-                onChange={(e) =>
-                  handleUseScrapeData(scrapedProperties[e.target.value])
-                }
-                className="w-full p-2 border rounded-lg bg-white shadow-sm"
-              >
-                <option value="">Select a scraped property...</option>
-                {scrapedProperties.map((prop, index) => (
-                  <option key={index} value={index}>
-                    {prop.address} - ${prop.price}
-                  </option>
-                ))}
-              </select>
+              <Select
+                className="w-full"
+                classNamePrefix="select"
+                isClearable={true}
+                isSearchable={true}
+                placeholder="Search and select a property..."
+                options={scrapedProperties.map((prop, index) => ({
+                  value: index,
+                  label: `${prop.address} - $${
+                    prop.price?.toLocaleString() || "N/A"
+                  }`,
+                  data: prop,
+                }))}
+                onChange={(selectedOption) => {
+                  if (selectedOption) {
+                    handleUseScrapeData(
+                      scrapedProperties[selectedOption.value]
+                    );
+                  }
+                }}
+                theme={(theme) => ({
+                  ...theme,
+                  colors: {
+                    ...theme.colors,
+                    primary: "#3B82F6",
+                    primary25: "#DBEAFE",
+                    primary50: "#BFDBFE",
+                  },
+                })}
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    borderColor: "#E5E7EB",
+                    "&:hover": {
+                      borderColor: "#3B82F6",
+                    },
+                    boxShadow: "none",
+                    borderRadius: "0.5rem",
+                  }),
+                  option: (base, state) => ({
+                    ...base,
+                    padding: "0.75rem",
+                    backgroundColor: state.isSelected
+                      ? "#3B82F6"
+                      : state.isFocused
+                      ? "#DBEAFE"
+                      : "white",
+                    color: state.isSelected ? "white" : "#374151",
+                    "&:active": {
+                      backgroundColor: "#2563EB",
+                    },
+                  }),
+                }}
+              />
             </div>
           )}
 
