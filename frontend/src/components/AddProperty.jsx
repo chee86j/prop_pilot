@@ -196,7 +196,7 @@ const AddProperty = () => {
         return;
       }
 
-      console.log("Loaded scraped properties:", data);
+      console.log("Loaded scraped properties:", data.length);
       setScrapedProperties(data);
       toast.success(`Loaded ${data.length} scraped properties`);
     } catch (error) {
@@ -689,6 +689,15 @@ const AddProperty = () => {
       });
   };
 
+  // Helper function to capitalize first letter of each word
+  const capitalizeWords = (str) => {
+    return str
+      .split(/(?=[A-Z])|[\s_-]/) // Split on capital letters, spaces, underscores, and hyphens
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ")
+      .trim();
+  };
+
   // Helper function to render input field with improved styling
   const renderInputField = (label, name, type = "text", isNumber = false) => {
     return (
@@ -697,7 +706,7 @@ const AddProperty = () => {
           className="block text-sm font-medium text-gray-700 mb-1"
           htmlFor={name}
         >
-          {label}
+          {capitalizeWords(label)}
         </label>
         <input
           id={name}
