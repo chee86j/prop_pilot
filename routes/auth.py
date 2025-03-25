@@ -7,113 +7,149 @@ from google.auth.transport import requests
 from datetime import timedelta
 import os
 import re
+from utils.images import url_to_base64
+import logging
+from typing import Tuple, Dict, Any
+from http import HTTPStatus
+
+logger = logging.getLogger(__name__)
 
 auth_routes = Blueprint('auth', __name__)
 
-def validate_email(email):
-    """Validate email format"""
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    return bool(re.match(pattern, email))
+def create_auth_response(user: User, message: str = None) -> Tuple[Dict[str, Any], int]:
+    """
+    Create a standardized auth response with user data and token.
+    
+    Args:
+        user: User model instance
+        message: Optional message to include in response
+        
+    Returns:
+        Tuple of response dict and status code
+    """
+    access_token = create_access_token(
+        identity=user.email,
+        expires_delta=timedelta(days=1)
+    )
+    
+    response = {
+        'access_token': access_token,
+        'user': {
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'avatar': user.avatar
+        }
+    }
+    
+    if message:
+        response['message'] = message
+        
+    return response, HTTPStatus.OK
 
-def validate_password(password):
+def validate_email(email: str) -> bool:
+    """Validate email format"""
+    return bool(re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email))
+
+def validate_password(password: str) -> bool:
     """Validate password requirements"""
     return len(password) >= 8
 
 @auth_routes.route('/register', methods=['POST'])
 def register():
-    data = request.get_json()
-    
-    # Validate required fields
-    if not data.get('first_name'):
-        return jsonify({"message": "First name is required"}), 400
-    
-    if not data.get('last_name'):
-        return jsonify({"message": "Last name is required"}), 400
-    
-    if not data.get('email') or not validate_email(data['email']):
-        return jsonify({"message": "Valid email is required"}), 400
-    
-    if not data.get('password') or not validate_password(data['password']):
-        return jsonify({"message": "Password must be at least 8 characters"}), 400
-
-    user = User(
-        first_name=data['first_name'],
-        last_name=data['last_name'],
-        email=data['email']
-    )
-    user.set_password(data['password'])
-
     try:
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = {
+            'first_name': "First name is required",
+            'last_name': "Last name is required",
+            'email': "Valid email is required",
+            'password': "Password must be at least 8 characters"
+        }
+        
+        for field, message in required_fields.items():
+            if not data.get(field):
+                return jsonify({"message": message}), HTTPStatus.BAD_REQUEST
+            
+        if not validate_email(data['email']):
+            return jsonify({"message": "Valid email is required"}), HTTPStatus.BAD_REQUEST
+            
+        if not validate_password(data['password']):
+            return jsonify({"message": "Password must be at least 8 characters"}), HTTPStatus.BAD_REQUEST
+
+        user = User(
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            email=data['email']
+        )
+        user.set_password(data['password'])
+        
         db.session.add(user)
         db.session.commit()
-        return jsonify({"message": "User Created successfully"}), 201
+        
+        return create_auth_response(user, "User created successfully")
 
     except IntegrityError:
         db.session.rollback()
-        return jsonify({"message": "Email Already registered"}), 409
-
+        return jsonify({"message": "Email already registered"}), HTTPStatus.CONFLICT
     except Exception as e:
         db.session.rollback()
-        return jsonify({"message": "An Error Occurred"}), 500
+        logger.error(f"❌ Registration error: {str(e)}")
+        return jsonify({"message": "An error occurred"}), HTTPStatus.INTERNAL_SERVER_ERROR
 
 @auth_routes.route('/login', methods=['POST'])
 def login():
-    data = request.get_json()
-    
-    if not data.get('email') or not data.get('password'):
-        return jsonify({"message": "Email and password are required"}), 400
+    try:
+        data = request.get_json()
         
-    user = User.query.filter_by(email=data['email']).first()
-    if user and user.check_password(data['password']):
-        access_token = create_access_token(identity=user.email, expires_delta=timedelta(days=1))
-        return jsonify(access_token=access_token), 200
-    return jsonify({"message": "Invalid credentials"}), 401
+        if not data.get('email') or not data.get('password'):
+            return jsonify({"message": "Email and password are required"}), HTTPStatus.BAD_REQUEST
+            
+        user = User.query.filter_by(email=data['email']).first()
+        if user and user.check_password(data['password']):
+            return create_auth_response(user)
+            
+        return jsonify({"message": "Invalid credentials"}), HTTPStatus.UNAUTHORIZED
+        
+    except Exception as e:
+        logger.error(f"❌ Login error: {str(e)}")
+        return jsonify({"message": "An error occurred"}), HTTPStatus.INTERNAL_SERVER_ERROR
 
 @auth_routes.route('/auth/google', methods=['POST'])
 def google_auth():
     try:
         data = request.json
         if not data or 'credential' not in data or 'userInfo' not in data:
-            return jsonify({'error': 'Missing required data'}), 400
+            return jsonify({'error': 'Missing required data'}), HTTPStatus.BAD_REQUEST
             
-        print(f"Received user info: {data['userInfo']}")  # Debug log
+        user_info = data['userInfo']
+        email = user_info.get('email')
         
-        # Extract user info from the response
-        email = data['userInfo'].get('email')
-        first_name = data['userInfo'].get('given_name', '')
-        last_name = data['userInfo'].get('family_name', '')
-
         if not email:
-            return jsonify({'error': 'Email not found in user info'}), 400
+            return jsonify({'error': 'Email not found in user info'}), HTTPStatus.BAD_REQUEST
 
-        # Check if user exists
-        user = User.query.filter_by(email=email).first()
+        # Handle avatar conversion
+        avatar = url_to_base64(user_info.get('picture')) if user_info.get('picture') else None
         
+        # Get or create user
+        user = User.query.filter_by(email=email).first()
         if not user:
-            # Create new user if doesn't exist
             user = User(
                 email=email,
-                first_name=first_name,
-                last_name=last_name
+                first_name=user_info.get('given_name', ''),
+                last_name=user_info.get('family_name', ''),
+                avatar=avatar
             )
             db.session.add(user)
-            db.session.commit()
-
-        # Create access token
-        access_token = create_access_token(
-            identity=email,
-            expires_delta=timedelta(days=1)
-        )
-        
-        return jsonify({
-            'access_token': access_token,
-            'user': {
-                'email': user.email,
-                'first_name': user.first_name,
-                'last_name': user.last_name
-            }
-        }), 200
+            logger.info(f"👤 Created new user: {email}")
+        elif avatar:
+            user.avatar = avatar
+            logger.info(f"🔄 Updated avatar for: {email}")
+            
+        db.session.commit()
+        return create_auth_response(user)
 
     except Exception as e:
-        print(f"Unexpected error: {str(e)}")
-        return jsonify({'error': str(e)}), 500 
+        logger.error(f"❌ Google auth error: {str(e)}")
+        return jsonify({'error': str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR 
