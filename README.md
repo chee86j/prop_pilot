@@ -27,7 +27,12 @@ through Flask-SQLAlchemy with PostgreSQL as the database, ensuring secure and
 scalable storage. Authentication and security are managed using Flask-JWT-Extended.
 Flask-CORS is utilized to handle Cross-Origin Resource Sharing (CORS), facilitating
 secure and flexible interactions between the frontend and backend. Werkzeug provides
-comprehensive WSGI web application library support. AG Grid is used in Prop Pilot to provide a powerful and flexible data grid component for displaying and managing property data. It offers features such as sorting, filtering, pagination, and inline editing, making it easy to handle large datasets efficiently. The grid is integrated into the React frontend and styled using Tailwind CSS to ensure a consistent look and feel with the rest of the application.
+comprehensive WSGI web application library support. AG Grid is used in Prop Pilot to
+provide a powerful and flexible data grid component for displaying and managing property
+data. It offers features such as sorting, filtering, pagination, and inline editing,
+making it easy to handle large datasets efficiently. The grid is integrated into the
+React frontend and styled using Tailwind CSS to ensure a consistent look and feel with
+the rest of the application.
 
 ## Project Setup
 
@@ -39,33 +44,60 @@ comprehensive WSGI web application library support. AG Grid is used in Prop Pilo
    - `.\venv\Scripts\activate` on Windows
    - `pip3 install -r requirements.txt`
    - _(Note: you may need to upgrade pip3 to the latest version by running `pip3 install --upgrade pip`.)_
-3. Google OAuth Setup
-   - Go to Google Cloud Console at https://console.cloud.google.com/
-   - Create project/select existing
-   - Enable Google+ API
-   - Configure OAuth consent screen
-   - Create OAuth 2.0 credentials
-   - Add authorized origins:
+
+### Google OAuth Setup
+
+1. Go to Google Cloud Console at https://console.cloud.google.com/
+2. Create a new project or select an existing one
+3. Enable the following APIs:
+   - Google+ API
+   - Google OAuth2 API
+4. Configure OAuth consent screen:
+   - Set up your app's name, user support email, and developer contact
+   - Add scopes: email, profile
+   - Add test users if in testing mode
+5. Create OAuth 2.0 credentials:
+   - Choose "Web application" as the application type
+   - Set the name of your OAuth 2.0 client
+   - Add authorized JavaScript origins:
+     ```
      http://localhost:5173
+     ```
    - Add authorized redirect URIs:
-     http://localhost:5000/api/google/callback
+     ```
+     http://localhost:5173
+     ```
+6. Copy the generated Client ID
 
 ### Environment Variables Setup
 
-1. Create a `.env` file in the root directory.
-2. Add the following environment variables to the `.env` file (replace placeholders with your actual values):
+1. Create a `.env` file in the root directory
+2. Add the following environment variables:
 
-DB_USERNAME=postgres
-DB_PASSWORD=your_password
-DB_NAME=prop_pilot_db
-JWT_SECRET_KEY=your_secret_key
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-GOOGLE_REDIRECT_URI=http://localhost:5000/api/auth/callback
-VITE_API_BASE_URL=http://localhost:5000
+   ```
+   # Database Configuration
+   DB_USERNAME=postgres
+   DB_PASSWORD=your_password
+   DB_NAME=prop_pilot_db
 
-3. Ensure that the `.env` file is added to the `.gitignore` file to prevent it from
-   being tracked by version control.
+   # JWT Configuration
+   JWT_SECRET_KEY=your_secret_key
+
+   # Frontend Configuration
+   VITE_API_URL=http://localhost:5000/api
+   VITE_GOOGLE_CLIENT_ID=your_google_client_id
+   ```
+
+3. Ensure that the `.env` file is added to the `.gitignore` file to prevent it from being tracked by version control.
+
+### Troubleshooting
+
+- Ensure that the `.env` file is added to the `.gitignore` file to prevent it from
+  being tracked by version control.
+  -If you see COOP (Cross-Origin-Opener-Policy) warnings in the console, these are informational and don't affect functionality
+- Ensure all environment variables are correctly set and accessible
+- Verify Google Cloud Console settings match your application URLs
+- Check browser console and backend logs for detailed error messages
 
 ### Setup PostgreSQL Database
 
