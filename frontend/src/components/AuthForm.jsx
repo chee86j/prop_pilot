@@ -28,50 +28,66 @@ const AuthForm = () => {
     setErrorMessage("");
   };
 
-  const handleGoogleLogin = async () => {
-    try {
-      // Fetch the URL to which the user should be redirected for Google login
-      const response = await fetch("/api/google-login");
-      const data = await response.json();
-      console.log("Response from server:", data);
-      if (response.ok) {
-        // Redirect user to Google's OAuth page
-        window.location.href = data.authUrl; // Ensure your backend is sending `authUrl`
-      } else {
-        console.error("Error during Google login:", data.error);
-      }
-    } catch (error) {
-      console.error("Error during Google login:", error);
-    }
-  };
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (response) => {
+      try {
+        console.log("Google login response:", response); // Debug log
 
-  const handleGoogleSuccess = async (response) => {
-    try {
-      const backendResponse = await fetch(
-        "http://localhost:5000/api/auth/google",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            credential: response.credential,
-          }),
+        // Get user info using the access token
+        const userInfoResponse = await fetch(
+          "https://www.googleapis.com/oauth2/v3/userinfo",
+          {
+            headers: {
+              Authorization: `Bearer ${response.access_token}`,
+            },
+          }
+        );
+
+        if (!userInfoResponse.ok) {
+          throw new Error("Failed to fetch user info from Google");
         }
-      );
 
-      const data = await backendResponse.json();
+        const userInfo = await userInfoResponse.json();
+        console.log("User info from Google:", userInfo); // Debug log
 
-      if (backendResponse.ok) {
-        localStorage.setItem("accessToken", data.access_token);
-        navigate("/propertylist");
-      } else {
-        setErrorMessage(data.error || "Google authentication failed");
+        const backendResponse = await fetch(
+          `${import.meta.env.VITE_API_URL}/auth/google`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              credential: response.access_token,
+              userInfo: userInfo,
+            }),
+          }
+        );
+
+        const data = await backendResponse.json();
+        console.log("Backend response:", data); // Debug log
+
+        if (backendResponse.ok) {
+          localStorage.setItem("accessToken", data.access_token);
+          navigate("/propertylist");
+        } else {
+          setErrorMessage(data.error || "Google authentication failed");
+        }
+      } catch (error) {
+        console.error("Google auth error:", error);
+        setErrorMessage("An error occurred during Google authentication");
       }
-    } catch (error) {
-      setErrorMessage("An error occurred during Google authentication");
-      console.error("Google auth error:", error);
-    }
+    },
+    onError: (error) => {
+      console.error("Google login error:", error);
+      setErrorMessage("Google authentication failed");
+    },
+    flow: "implicit",
+    scope: "email profile",
+  });
+
+  const handleGoogleLogin = () => {
+    googleLogin();
   };
 
   const handleLogin = async (event) => {

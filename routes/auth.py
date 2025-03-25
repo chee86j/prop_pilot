@@ -72,19 +72,19 @@ def login():
 @auth_routes.route('/auth/google', methods=['POST'])
 def google_auth():
     try:
-        token = request.json.get('credential')
+        data = request.json
+        if not data or 'credential' not in data or 'userInfo' not in data:
+            return jsonify({'error': 'Missing required data'}), 400
+            
+        print(f"Received user info: {data['userInfo']}")  # Debug log
         
-        # Verify the token with Google
-        idinfo = id_token.verify_oauth2_token(
-            token,
-            requests.Request(),
-            os.getenv('GOOGLE_CLIENT_ID')
-        )
+        # Extract user info from the response
+        email = data['userInfo'].get('email')
+        first_name = data['userInfo'].get('given_name', '')
+        last_name = data['userInfo'].get('family_name', '')
 
-        # Get user info from the token
-        email = idinfo['email']
-        first_name = idinfo.get('given_name', '')
-        last_name = idinfo.get('family_name', '')
+        if not email:
+            return jsonify({'error': 'Email not found in user info'}), 400
 
         # Check if user exists
         user = User.query.filter_by(email=email).first()
@@ -114,7 +114,6 @@ def google_auth():
             }
         }), 200
 
-    except ValueError:
-        return jsonify({'error': 'Invalid token'}), 401
     except Exception as e:
+        print(f"Unexpected error: {str(e)}")
         return jsonify({'error': str(e)}), 500 

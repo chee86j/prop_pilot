@@ -35,7 +35,7 @@ function App() {
   });
 
   const PropertyDetailsWrapper = () => {
-    const { propertyId } = useParams(); // Access propertyId from the URL
+    const { propertyId } = useParams();
     return <PropertyDetails propertyId={propertyId} auth={auth} />;
   };
 
@@ -61,8 +61,18 @@ function App() {
     }
   }, []);
 
+  // Get the Google Client ID from environment variables
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+  if (!googleClientId) {
+    console.error(
+      "Google Client ID is not configured. Please check your .env file."
+    );
+    return null;
+  }
+
   return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+    <GoogleOAuthProvider clientId={googleClientId}>
       <Router>
         <div>
           <Navbar auth={auth} />

@@ -273,7 +273,7 @@ const DSCRCalculator = ({ isOpen, onClose }) => {
                 {parseFloat(dscrResult.dscr) >= 1.25 && (
                   <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
                     <p className="text-sm text-green-700">
-                      Great! Your DSCR is above 1.25, which meets most lenders'
+                      Great! Your DSCR is above 1.25, which meets most lenders&apos;
                       requirements.
                     </p>
                   </div>
