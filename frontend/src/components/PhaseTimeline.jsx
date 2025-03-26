@@ -221,7 +221,7 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
           className="w-full"
           style={{ minHeight: "400px", height: "400px" }}
         >
-          {mounted ? (
+          {mounted && containerRef.current ? (
             <Chrono
               items={items}
               mode="HORIZONTAL"

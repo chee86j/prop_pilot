@@ -522,36 +522,4 @@ def create_construction_draw():
         return jsonify({'error': str(e)}), 400
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
-
-@property_routes.route('/receipts', methods=['POST'])
-@jwt_required()
-def create_receipt():
-    try:
-        data = request.get_json()
-        
-        draw = ConstructionDraw.query.get_or_404(data['construction_draw_id'])
-        
-        new_receipt = Receipt(
-            construction_draw_id=data['construction_draw_id'],
-            date=datetime.strptime(data['date'], '%Y-%m-%d').date(),
-            vendor=data['vendor'],
-            amount=float(data['amount']),
-            description=data['description'],
-            pointofcontact=data.get('pointofcontact'),
-            ccnumber=data.get('ccnumber')
-        )
-        
-        # Validate receipt
-        draw.validate_receipt(new_receipt)
-        
-        db.session.add(new_receipt)
-        db.session.commit()
-        
-        return jsonify(new_receipt.to_dict()), 201
-        
-    except (ReceiptAmountError, ReceiptDateError, ReceiptDuplicateError) as e:
-        return jsonify({'error': str(e)}), 400
-    except Exception as e:
-        db.session.rollback()
         return jsonify({'error': str(e)}), 500 

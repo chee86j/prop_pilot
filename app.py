@@ -30,9 +30,15 @@ def create_app():
                  "origins": ["http://localhost:5173"],
                  "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
                  "allow_headers": ["Content-Type", "Authorization"],
-                 "supports_credentials": True
+                 "expose_headers": ["Content-Type", "Authorization"],
+                 "supports_credentials": True,
+                 "max_age": 120,
+                 "send_wildcard": False
              }
-         }
+         },
+         allow_headers=["Content-Type", "Authorization"],
+         expose_headers=["Content-Type", "Authorization"],
+         supports_credentials=True
     )
     
     # Configure the Flask app
@@ -75,6 +81,15 @@ def create_app():
         except Exception as e:
             print(f"[ERROR] Database connection failed: {e}")
             
+    # Add OPTIONS method handler for all routes
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Access-Control-Allow-Origin', 'http://localhost:5173')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        return response
+    
     return app
 
 # Create the app instance for running directly

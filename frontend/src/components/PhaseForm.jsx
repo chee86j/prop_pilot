@@ -5,15 +5,15 @@ import "react-toastify/dist/ReactToastify.css";
 import { PREDEFINED_PHASES } from "../constants/phases";
 import { Search, ChevronDown, ChevronUp } from "lucide-react";
 
-const PhaseForm = ({ onSave, onCancel, initialData }) => {
-  const initialFormState = {
-    name: "",
-    expectedStartDate: "",
-    startDate: "",
-    expectedEndDate: "",
-    endDate: "",
-  };
+const initialFormState = {
+  name: "",
+  expectedStartDate: "",
+  startDate: "",
+  expectedEndDate: "",
+  endDate: "",
+};
 
+const PhaseForm = ({ onSave, onCancel, initialData }) => {
   const [formData, setFormData] = useState(initialFormState);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");

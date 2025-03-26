@@ -11,7 +11,7 @@ import {
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const Receipt = ({ drawId }) => {
+const Receipt = ({ drawId, onReceiptChange }) => {
   const [receipts, setReceipts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,20 +30,19 @@ const Receipt = ({ drawId }) => {
   const [expandedDescriptions, setExpandedDescriptions] = useState(new Set());
   const [expandedReceipts, setReceiptsExpanded] = useState(false);
 
-  // Toast configuration
-  const toastConfig = {
-    position: "top-right",
-    autoClose: 3000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "light",
-    containerId: "root-toast",
-  };
-
   const showToast = useCallback((message, type = "success") => {
+    const toastConfig = {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      containerId: "root-toast",
+    };
+
     if (type === "success") {
       toast.success(message, toastConfig);
     } else if (type === "error") {
@@ -72,7 +71,6 @@ const Receipt = ({ drawId }) => {
         (a, b) => new Date(a.date) - new Date(b.date)
       );
       setReceipts(sortedReceipts);
-      showToast("Receipts fetched successfully");
     } catch (err) {
       setError(err.message);
       showToast("Failed to fetch receipts", "error");
@@ -139,17 +137,44 @@ const Receipt = ({ drawId }) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      // Validate required fields
+      if (!newReceipt.date) {
+        throw new Error("Date is required");
+      }
+      if (!newReceipt.vendor) {
+        throw new Error("Vendor is required");
+      }
+      if (!newReceipt.amount || parseFloat(newReceipt.amount) <= 0) {
+        throw new Error("Amount must be greater than 0");
+      }
+      if (!drawId) {
+        throw new Error("Construction draw ID is missing");
+      }
+
+      // Format the date to ISO format - only the date part
+      const formattedDate = new Date(newReceipt.date)
+        .toISOString()
+        .split("T")[0];
+      const amount = parseFloat(newReceipt.amount);
+
       const response = await fetch("http://localhost:5000/api/receipts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
-        body: JSON.stringify({ ...newReceipt, construction_draw_id: drawId }),
+        body: JSON.stringify({
+          ...newReceipt,
+          date: formattedDate,
+          construction_draw_id: drawId,
+          amount: amount,
+        }),
       });
 
+      const responseData = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to add receipt");
+        throw new Error(responseData.error || "Failed to add receipt");
       }
 
       await fetchReceipts();
@@ -163,9 +188,14 @@ const Receipt = ({ drawId }) => {
       });
       setShowAddForm(false);
       showToast("Receipt added successfully");
+      // Notify parent component of the change
+      if (onReceiptChange) {
+        onReceiptChange();
+      }
     } catch (err) {
+      console.error("Error adding receipt:", err); // Debug log
       setError(err.message);
-      showToast("Failed to add receipt", "error");
+      showToast("Failed to add receipt: " + err.message, "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -190,6 +220,10 @@ const Receipt = ({ drawId }) => {
 
       await fetchReceipts();
       showToast("Receipt deleted successfully");
+      // Notify parent component of the change
+      if (onReceiptChange) {
+        onReceiptChange();
+      }
     } catch (err) {
       setError(err.message);
       showToast("Failed to delete receipt", "error");
@@ -505,7 +539,6 @@ const Receipt = ({ drawId }) => {
                 setNewReceipt({ ...newReceipt, description: e.target.value })
               }
               className="border rounded px-2 py-1 w-full"
-              required
             ></textarea>
           </div>
           <div>
@@ -519,7 +552,6 @@ const Receipt = ({ drawId }) => {
                 setNewReceipt({ ...newReceipt, pointofcontact: e.target.value })
               }
               className="border rounded px-2 py-1 w-full"
-              required
             ></textarea>
           </div>
           <div>
@@ -533,7 +565,6 @@ const Receipt = ({ drawId }) => {
                 setNewReceipt({ ...newReceipt, ccnumber: e.target.value })
               }
               className="border rounded px-2 py-1 w-full"
-              required
             ></textarea>
           </div>
           <button

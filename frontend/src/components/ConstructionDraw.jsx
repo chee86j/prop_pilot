@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { formatCurrency } from "../utils/formatting";
 import Receipt from "./Receipt";
 import { ToastContainer, toast } from "react-toastify";
@@ -50,15 +50,80 @@ const ConstructionDraw = ({ propertyId }) => {
           (a, b) => new Date(a.release_date) - new Date(b.release_date)
         );
         setDraws(sortedDraws);
-        console.log("Construction draws fetched successfully", {});
       } catch (error) {
         setError(error.message);
-        console.log("Failed to fetch construction draws", {});
+        console.error("Failed to fetch construction draws:", error);
       }
     };
 
     fetchDraws();
   }, [propertyId]);
+
+  // Separate useEffect to fetch receipts and calculate totals
+  useEffect(() => {
+    const fetchReceiptsAndCalculate = async () => {
+      if (!draws.length) return;
+
+      try {
+        // Fetch receipts for each draw
+        const drawsWithReceipts = await Promise.all(
+          draws.map(async (draw) => {
+            const response = await fetch(
+              `http://localhost:5000/api/receipts/${draw.id}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem(
+                    "accessToken"
+                  )}`,
+                },
+              }
+            );
+            if (!response.ok)
+              throw new Error(`Failed to fetch receipts for draw ${draw.id}`);
+            const receipts = await response.json();
+            return { ...draw, receipts };
+          })
+        );
+
+        // Calculate totals
+        const totalDrawAmount = drawsWithReceipts.reduce(
+          (sum, draw) => sum + Number(draw.amount),
+          0
+        );
+
+        let totalReceiptAmount = 0;
+        drawsWithReceipts.forEach((draw) => {
+          if (Array.isArray(draw.receipts)) {
+            draw.receipts.forEach((receipt) => {
+              const amount = Number(receipt.amount);
+              if (!isNaN(amount)) {
+                totalReceiptAmount += amount;
+              }
+            });
+          }
+        });
+
+        const completionPercentage =
+          (totalReceiptAmount / totalDrawAmount) * 100;
+        const remainingBalance = totalDrawAmount - totalReceiptAmount;
+
+        setDrawStats({
+          totalDraws: totalDrawAmount,
+          totalReceipts: totalReceiptAmount,
+          completionPercentage: Math.min(completionPercentage, 100),
+          remainingBalance: Math.max(remainingBalance, 0),
+        });
+
+        // Update draws with receipts
+        setDraws(drawsWithReceipts);
+      } catch (error) {
+        console.error("Failed to fetch receipts:", error);
+        setError("Failed to fetch receipts");
+      }
+    };
+
+    fetchReceiptsAndCalculate();
+  }, [draws.length]); // Only re-run when the number of draws changes
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -217,29 +282,70 @@ const ConstructionDraw = ({ propertyId }) => {
     }
   };
 
-  useEffect(() => {
-    if (draws.length > 0) {
-      const totalDrawAmount = draws.reduce(
-        (sum, draw) => sum + parseFloat(draw.amount),
-        0
-      );
-      const totalReceiptAmount = draws.reduce(
-        (sum, draw) =>
-          sum +
-          draw.receipts.reduce(
-            (rSum, receipt) => rSum + parseFloat(receipt.amount),
-            0
-          ),
-        0
-      );
+  const handleReceiptChange = useCallback(() => {
+    // Trigger a refresh of receipts and recalculation of totals
+    const fetchReceiptsAndCalculate = async () => {
+      if (!draws.length) return;
 
-      setDrawStats({
-        totalDraws: totalDrawAmount,
-        totalReceipts: totalReceiptAmount,
-        completionPercentage: (totalReceiptAmount / totalDrawAmount) * 100,
-        remainingBalance: totalDrawAmount - totalReceiptAmount,
-      });
-    }
+      try {
+        // Fetch receipts for each draw
+        const drawsWithReceipts = await Promise.all(
+          draws.map(async (draw) => {
+            const response = await fetch(
+              `http://localhost:5000/api/receipts/${draw.id}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem(
+                    "accessToken"
+                  )}`,
+                },
+              }
+            );
+            if (!response.ok)
+              throw new Error(`Failed to fetch receipts for draw ${draw.id}`);
+            const receipts = await response.json();
+            return { ...draw, receipts };
+          })
+        );
+
+        // Calculate totals
+        const totalDrawAmount = drawsWithReceipts.reduce(
+          (sum, draw) => sum + Number(draw.amount),
+          0
+        );
+
+        let totalReceiptAmount = 0;
+        drawsWithReceipts.forEach((draw) => {
+          if (Array.isArray(draw.receipts)) {
+            draw.receipts.forEach((receipt) => {
+              const amount = Number(receipt.amount);
+              if (!isNaN(amount)) {
+                totalReceiptAmount += amount;
+              }
+            });
+          }
+        });
+
+        const completionPercentage =
+          (totalReceiptAmount / totalDrawAmount) * 100;
+        const remainingBalance = totalDrawAmount - totalReceiptAmount;
+
+        setDrawStats({
+          totalDraws: totalDrawAmount,
+          totalReceipts: totalReceiptAmount,
+          completionPercentage: Math.min(completionPercentage, 100),
+          remainingBalance: Math.max(remainingBalance, 0),
+        });
+
+        // Update draws with receipts
+        setDraws(drawsWithReceipts);
+      } catch (error) {
+        console.error("Failed to fetch receipts:", error);
+        setError("Failed to fetch receipts");
+      }
+    };
+
+    fetchReceiptsAndCalculate();
   }, [draws]);
 
   const ValidationError = ({ error }) => {
@@ -301,10 +407,11 @@ const ConstructionDraw = ({ propertyId }) => {
         </p>
       </div>
       <div className="bg-white p-4 rounded-lg shadow">
-        <h3 className="text-sm font-medium text-gray-500">Completion</h3>
+        <h3 className="text-sm font-medium text-gray-500">Draw % Used</h3>
         <p className="text-2xl font-semibold text-gray-900">
           {stats.completionPercentage.toFixed(1)}%
         </p>
+        <ProgressIndicator percentage={stats.completionPercentage} />
       </div>
       <div className="bg-white p-4 rounded-lg shadow">
         <h3 className="text-sm font-medium text-gray-500">Remaining Balance</h3>
@@ -320,10 +427,8 @@ const ConstructionDraw = ({ propertyId }) => {
   }
 
   // Calculate subtotal for Released Draws
-  const subtotaldraws = draws.reduce(
-    (acc, draw) => acc + parseFloat(draw.amount),
-    0
-  );
+  const subtotaldraws =
+    draws?.reduce((acc, draw) => acc + parseFloat(draw.amount || 0), 0) || 0;
 
   return (
     <div className="max-w-4xl mx-auto p-3 bg-white shadow-lg rounded-lg text-sm">
@@ -602,7 +707,10 @@ const ConstructionDraw = ({ propertyId }) => {
                     </tbody>
                   </table>
 
-                  <Receipt drawId={draw.id} />
+                  <Receipt
+                    drawId={draw.id}
+                    onReceiptChange={handleReceiptChange}
+                  />
                 </div>
               </>
             )}
