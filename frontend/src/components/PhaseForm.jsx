@@ -1,7 +1,9 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { PREDEFINED_PHASES } from "../constants/phases";
+import { Search, ChevronDown, ChevronUp } from "lucide-react";
 
 const PhaseForm = ({ onSave, onCancel, initialData }) => {
   const initialFormState = {
@@ -13,6 +15,27 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
   };
 
   const [formData, setFormData] = useState(initialFormState);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const dropdownRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // Filter phases based on search term
+  const filteredPhases = PREDEFINED_PHASES.filter((phase) =>
+    phase.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Handle click outside dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Update form data when initialData changes
   useEffect(() => {
@@ -24,19 +47,38 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
         expectedEndDate: initialData.expectedEndDate || "",
         endDate: initialData.endDate || "",
       });
+      setSearchTerm(initialData.name || "");
     } else {
       setFormData(initialFormState);
+      setSearchTerm("");
     }
   }, [initialData]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    if (name === "name") {
+      setSearchTerm(value);
+    }
+  };
+
+  const handlePhaseSelect = (phaseName) => {
+    setFormData({ ...formData, name: phaseName });
+    setSearchTerm(phaseName);
+    setIsDropdownOpen(false);
   };
 
   const validateFormData = (data) => {
-    // Basic validation example
-    if (!data.name || !data.startDate || !data.endDate) {
-      toast.error("Please fill in all required fields.");
+    if (!data.name) {
+      toast.error("Please enter a phase name");
+      return false;
+    }
+    if (!data.expectedStartDate) {
+      toast.error("Please enter an expected start date");
+      return false;
+    }
+    if (!data.expectedEndDate) {
+      toast.error("Please enter an expected end date");
       return false;
     }
     return true;
@@ -47,43 +89,107 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
     if (validateFormData(formData)) {
       onSave(formData);
       setFormData(initialFormState);
+      setSearchTerm("");
       toast.success("Phase saved successfully!");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md mx-auto">
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md"
+    >
       <ToastContainer />
-      <div className="mb-4">
+
+      {/* Phase Name Combobox */}
+      <div className="mb-4 relative" ref={dropdownRef}>
         <label
           htmlFor="name"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-gray-700 mb-1"
         >
           Phase Name
+          <span className="text-red-500">*</span>
         </label>
-        <input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          className="mt-1 p-2 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        />
+        <div className="relative">
+          <input
+            ref={inputRef}
+            type="text"
+            name="name"
+            value={searchTerm}
+            onChange={(e) => {
+              handleChange(e);
+              setIsDropdownOpen(true);
+            }}
+            onClick={() => setIsDropdownOpen(true)}
+            className="w-full p-2 pr-10 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Type or select a phase name"
+          />
+          <button
+            type="button"
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          >
+            {isDropdownOpen ? (
+              <ChevronUp size={20} />
+            ) : (
+              <ChevronDown size={20} />
+            )}
+          </button>
+        </div>
+
+        {/* Dropdown Menu */}
+        {isDropdownOpen && (
+          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+            <div className="sticky top-0 bg-white p-2 border-b">
+              <div className="relative">
+                <Search
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  size={16}
+                />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-8 p-2 border border-gray-300 rounded-md text-sm"
+                  placeholder="Search phases..."
+                />
+              </div>
+            </div>
+            {filteredPhases.map((phase, index) => (
+              <button
+                key={index}
+                type="button"
+                onClick={() => handlePhaseSelect(phase.name)}
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+              >
+                {phase.name}
+              </button>
+            ))}
+            {filteredPhases.length === 0 && (
+              <div className="px-4 py-2 text-gray-500 text-sm">
+                No matches found. You can use your custom phase name.
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      {/* Date Fields Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="mb-4">
           <label
             htmlFor="expectedStartDate"
             className="block text-sm font-medium text-gray-700"
           >
             Expected Start Date
+            <span className="text-red-500">*</span>
           </label>
           <input
             type="date"
             name="expectedStartDate"
             value={formData.expectedStartDate}
             onChange={handleChange}
-            className="mt-1 p-2 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
@@ -99,25 +205,24 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
             name="startDate"
             value={formData.startDate}
             onChange={handleChange}
-            className="mt-1 p-2 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
-      </div>
 
-      <div className="grid grid-cols-2 gap-4">
         <div className="mb-4">
           <label
             htmlFor="expectedEndDate"
             className="block text-sm font-medium text-gray-700"
           >
             Expected End Date
+            <span className="text-red-500">*</span>
           </label>
           <input
             type="date"
             name="expectedEndDate"
             value={formData.expectedEndDate}
             onChange={handleChange}
-            className="mt-1 p-2 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
@@ -133,24 +238,25 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
             name="endDate"
             value={formData.endDate}
             onChange={handleChange}
-            className="mt-1 p-2 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
       </div>
 
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          Save
-        </button>
+      {/* Action Buttons */}
+      <div className="flex justify-end gap-3 mt-6">
         <button
           type="button"
           onClick={onCancel}
-          className="ml-3 inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200"
         >
           Cancel
+        </button>
+        <button
+          type="submit"
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+        >
+          Save
         </button>
       </div>
     </form>
