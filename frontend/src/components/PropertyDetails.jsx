@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect, useRef, memo } from "react";
+import { useState, useEffect, useRef, memo, useCallback } from "react";
 import { useSwipeable } from "react-swipeable";
 import ConstructionDraw from "./ConstructionDraw";
 import PhaseTimeline from "./PhaseTimeline";
@@ -11,8 +11,16 @@ import CapitalExpenditure from "./CapitalExpenditure";
 import RentalAnalysis from "./RentalAnalysis";
 // import CsvDisplay from "./CsvDisplay";
 // import CsvReader from "./CsvReader";
-import { formatFullCurrency } from "../utils/formatting";
-import { ChevronsUp, ChevronsDown, Download, Printer, Edit2, Save, X, ChevronDown } from "lucide-react";
+import {
+  ChevronsUp,
+  ChevronsDown,
+  Download,
+  Printer,
+  Edit2,
+  Save,
+  X,
+  ChevronDown,
+} from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ResearchDropdown from "./ResearchDropdown";
@@ -27,23 +35,49 @@ const MemoizedRentalAnalysis = memo(RentalAnalysis);
 // Button Styles
 const buttonStyles = {
   primary: `
-    flex items-center gap-2 px-4 py-2
+    flex items-center justify-center gap-2 
+    min-w-[44px] px-4 py-2.5
     text-sm font-medium text-white
     bg-gradient-to-r from-blue-500 to-blue-600
     hover:from-blue-600 hover:to-blue-700
     rounded-lg shadow hover:shadow-lg
     transform hover:scale-105 active:scale-95
     transition-all duration-200
+    sm:min-w-[100px]
   `,
   secondary: `
-    flex items-center gap-2 px-4 py-2
+    flex items-center justify-center gap-2
+    min-w-[44px] px-4 py-2.5
     text-sm font-medium text-gray-700
     bg-white hover:bg-gray-50
     border border-gray-300
     rounded-lg shadow hover:shadow-lg
     transform hover:scale-105 active:scale-95
     transition-all duration-200
-  `
+    sm:min-w-[100px]
+  `,
+  danger: `
+    flex items-center justify-center gap-2
+    min-w-[44px] px-4 py-2.5
+    text-sm font-medium text-white
+    bg-gradient-to-r from-red-500 to-red-600
+    hover:from-red-600 hover:to-red-700
+    rounded-lg shadow hover:shadow-lg
+    transform hover:scale-105 active:scale-95
+    transition-all duration-200
+    sm:min-w-[100px]
+  `,
+  success: `
+    flex items-center justify-center gap-2
+    min-w-[44px] px-4 py-2.5
+    text-sm font-medium text-white
+    bg-gradient-to-r from-green-500 to-green-600
+    hover:from-green-600 hover:to-green-700
+    rounded-lg shadow hover:shadow-lg
+    transform hover:scale-105 active:scale-95
+    transition-all duration-200
+    sm:min-w-[100px]
+  `,
 };
 
 // Loading Skeleton Component
@@ -64,7 +98,7 @@ const ErrorFallback = ({ error, resetError }) => (
   <div className="p-4 bg-red-50 rounded-lg text-red-700">
     <h3 className="font-bold mb-2">Something went wrong</h3>
     <p className="text-sm">{error.message}</p>
-    <button 
+    <button
       onClick={resetError}
       className="mt-4 px-4 py-2 bg-red-100 rounded-lg hover:bg-red-200"
     >
@@ -89,45 +123,41 @@ const FloatingActionButton = ({ onClick }) => (
 // Field Group Component
 const FieldGroup = ({ title, children, isExpanded, onToggle }) => (
   <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-    <div 
+    <div
       className="flex justify-between items-center cursor-pointer"
       onClick={onToggle}
     >
       <h3 className="text-lg font-semibold">{title}</h3>
-      <ChevronDown 
-        size={20} 
+      <ChevronDown
+        size={20}
         className={`transform transition-transform duration-200 ${
-          isExpanded ? 'rotate-180' : ''
+          isExpanded ? "rotate-180" : ""
         }`}
       />
     </div>
-    {isExpanded && (
-      <div className="space-y-4 mt-4">
-        {children}
-      </div>
-    )}
+    {isExpanded && <div className="space-y-4 mt-4">{children}</div>}
   </div>
 );
 
 // Offline Indicator Component
 const OfflineIndicator = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  
+
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
-    
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, []);
 
   if (isOnline) return null;
-  
+
   return (
     <div className="fixed bottom-0 w-full bg-yellow-500 text-white text-center py-2 z-50">
       You are currently offline
@@ -155,6 +185,87 @@ const printStyles = `
   }
 `;
 
+// Sticky Action Bar Component
+const StickyActionBar = ({
+  isEditing,
+  onSave,
+  onCancel,
+  onEdit,
+  onPrint,
+  onToggleGroups,
+  expandedGroups,
+}) => (
+  <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-t border-gray-200 shadow-lg px-4 py-3">
+    <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+      <div className="flex-1 flex justify-start">
+        {!isEditing && (
+          <button
+            onClick={onPrint}
+            className={`${buttonStyles.secondary} hidden sm:flex`}
+            aria-label="Print property information"
+          >
+            <Printer size={18} className="sm:mr-1" />
+            <span className="hidden sm:inline">Print</span>
+          </button>
+        )}
+      </div>
+
+      <div className="flex-1 flex justify-center gap-2">
+        {isEditing ? (
+          <>
+            <button
+              onClick={onCancel}
+              className={`${buttonStyles.danger} flex-1 sm:flex-none max-w-[200px]`}
+              aria-label="Cancel editing"
+            >
+              <X size={18} className="sm:mr-1" />
+              <span className="hidden sm:inline">Cancel</span>
+            </button>
+            <button
+              onClick={onSave}
+              className={`${buttonStyles.success} flex-1 sm:flex-none max-w-[200px]`}
+              aria-label="Save changes"
+            >
+              <Save size={18} className="sm:mr-1" />
+              <span className="hidden sm:inline">Save</span>
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={onEdit}
+            className={`${buttonStyles.primary} flex-1 sm:flex-none max-w-[200px]`}
+            aria-label="Edit property details"
+          >
+            <Edit2 size={18} className="sm:mr-1" />
+            <span className="hidden sm:inline">Edit</span>
+          </button>
+        )}
+      </div>
+
+      <div className="flex-1 flex justify-end">
+        {!isEditing && (
+          <button
+            onClick={onToggleGroups}
+            className={`${buttonStyles.success} hidden sm:flex`}
+            aria-label={
+              expandedGroups ? "Collapse all sections" : "Expand all sections"
+            }
+          >
+            {expandedGroups ? (
+              <ChevronsUp size={18} className="sm:mr-1" />
+            ) : (
+              <ChevronsDown size={18} className="sm:mr-1" />
+            )}
+            <span className="hidden sm:inline">
+              {expandedGroups ? "Collapse" : "Expand"}
+            </span>
+          </button>
+        )}
+      </div>
+    </div>
+  </div>
+);
+
 const PropertyDetails = ({ propertyId }) => {
   const detailsPrintRef = useRef(null);
   const financialsPrintRef = useRef(null);
@@ -165,7 +276,6 @@ const PropertyDetails = ({ propertyId }) => {
   const [editedDetails, setEditedDetails] = useState({});
   const [propertyDetails, setPropertyDetails] = useState(null);
   const [phases, setPhases] = useState([]);
-  const [currentSection, setCurrentSection] = useState(0);
   const [expandedGroups, setExpandedGroups] = useState({
     foreclosureInfo: false,
     location: false,
@@ -183,14 +293,19 @@ const PropertyDetails = ({ propertyId }) => {
     onSwipedLeft: () => handleSectionChange(1),
     onSwipedRight: () => handleSectionChange(-1),
     preventDefaultTouchmoveEvent: true,
-    trackMouse: true
+    trackMouse: true,
   });
 
   const handleSectionChange = (direction) => {
     const sections = Object.keys(expandedSections);
-    const currentIndex = sections.findIndex(section => expandedSections[section]);
-    const nextIndex = Math.max(0, Math.min(sections.length - 1, currentIndex + direction));
-    
+    const currentIndex = sections.findIndex(
+      (section) => expandedSections[section]
+    );
+    const nextIndex = Math.max(
+      0,
+      Math.min(sections.length - 1, currentIndex + direction)
+    );
+
     const newExpandedSections = {};
     sections.forEach((section, index) => {
       newExpandedSections[section] = index === nextIndex;
@@ -200,7 +315,7 @@ const PropertyDetails = ({ propertyId }) => {
 
   // Add style tag for print styles
   useEffect(() => {
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.innerHTML = printStyles;
     document.head.appendChild(style);
     return () => document.head.removeChild(style);
@@ -209,45 +324,48 @@ const PropertyDetails = ({ propertyId }) => {
   // Calculate progress
   const calculateProgress = () => {
     const totalFields = Object.keys(editedDetails).length;
-    const filledFields = Object.values(editedDetails).filter(value => value && value.toString().trim() !== '').length;
+    const filledFields = Object.values(editedDetails).filter(
+      (value) => value && value.toString().trim() !== ""
+    ).length;
     return Math.round((filledFields / totalFields) * 100);
   };
 
   const progress = calculateProgress();
 
-  // Reset error state
   const resetError = () => {
     setError(null);
     fetchPropertyDetails();
   };
 
-  useEffect(() => {
-    const fetchPropertyDetails = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch(
-          `http://localhost:5000/api/properties/${propertyId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Error fetching property details");
+  const fetchPropertyDetails = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        `http://localhost:5000/api/properties/${propertyId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
         }
+      );
 
-        const data = await response.json();
-        setPropertyDetails(data);
-        setEditedDetails(data);
-      } catch (error) {
-        console.error("Error fetching property details:", error);
-        toast.error("Failed to load property details");
-      } finally {
-        setIsLoading(false);
+      if (!response.ok) {
+        throw new Error("Error fetching property details");
       }
-    };
+
+      const data = await response.json();
+      setPropertyDetails(data);
+      setEditedDetails(data);
+    } catch (error) {
+      console.error("Error fetching property details:", error);
+      toast.error("Failed to load property details");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [propertyId]);
+
+  useEffect(() => {
+    fetchPropertyDetails();
 
     const fetchPhases = async () => {
       try {
@@ -271,9 +389,8 @@ const PropertyDetails = ({ propertyId }) => {
       }
     };
 
-    fetchPropertyDetails();
     fetchPhases();
-  }, [propertyId]);
+  }, [propertyId, fetchPropertyDetails]);
 
   const handleEditChange = (e) => {
     setEditedDetails({ ...editedDetails, [e.target.name]: e.target.value });
@@ -284,20 +401,150 @@ const PropertyDetails = ({ propertyId }) => {
   };
 
   const saveChanges = async () => {
-    // Clear any previous error messages
-    setError("");
-
-    // Validate required fields
-    const requiredFields = ["propertyName", "address"]; // Add any other required fields
-    const missingFields = requiredFields.filter(field => !editedDetails[field]);
-
-    if (missingFields.length > 0) {
-      setError(`Please fill in all required fields: ${missingFields.join(", ")}`);
-      toast.error("Please fill in all required fields");
-      return;
-    }
-
     try {
+      // Clear any previous error messages
+      setError("");
+
+      // Only validate required fields from Location section
+      const requiredFields = [
+        "propertyName",
+        "address",
+        "city",
+        "state",
+        "zipCode",
+      ];
+
+      // Validate required fields
+      const missingFields = requiredFields.filter(
+        (field) => !editedDetails[field]?.toString().trim()
+      );
+
+      if (missingFields.length > 0) {
+        const formattedFields = missingFields
+          .map((field) => field.replace(/([A-Z])/g, " $1").toLowerCase())
+          .map((field) => field.charAt(0).toUpperCase() + field.slice(1))
+          .join(", ");
+        setError(`Please fill in required fields: ${formattedFields}`);
+        toast.error("Please fill in all required fields", {
+          position: "bottom-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        return;
+      }
+
+      // Define numeric fields (remove zipCode from this list as it should be a string)
+      const numericFields = [
+        "purchaseCost",
+        "refinanceCost",
+        "equipmentCost",
+        "constructionCost",
+        "largeRepairCost",
+        "renovationCost",
+        "totalRehabCost",
+        "kickStartFunds",
+        "lenderConstructionDrawsReceived",
+        "utilitiesCost",
+        "sewer",
+        "water",
+        "lawn",
+        "garbage",
+        "yearlyPropertyTaxes",
+        "mortgagePaid",
+        "homeownersInsurance",
+        "expectedYearlyRent",
+        "rentalIncomeReceived",
+        "numUnits",
+        "vacancyRate",
+        "avgTenantStay",
+        "otherMonthlyIncome",
+        "vacancyLoss",
+        "managementFees",
+        "maintenanceCosts",
+        "totalEquity",
+        "arvSalePrice",
+        "realtorFees",
+        "propTaxTillEndOfYear",
+        "lenderLoanBalance",
+        "payOffStatement",
+        "attorneyFees",
+        "miscFees",
+        "utilities",
+        "cash2closeFromPurchase",
+        "cash2closeFromRefinance",
+        "totalRehabCosts",
+        "expectedRemainingRentEndToYear",
+        "totalExpenses",
+        "totalConstructionDrawsReceived",
+        "projectNetProfitIfSold",
+        "cashFlow",
+        "cashRoi",
+        "rule2Percent",
+        "rule50Percent",
+        "financeAmount",
+        "purchaseCapRate",
+        "downPaymentPercentage",
+        "loanInterestRate",
+        "pmiPercentage",
+        "mortgageYears",
+        "lenderPointsAmount",
+        "otherFees",
+      ];
+
+      // Define fields that should always be strings, even if they contain numbers
+      const stringFields = [
+        "propertyName",
+        "address",
+        "city",
+        "state",
+        "zipCode",
+        "waterAccountNumber",
+        "electricAccountNumber",
+        "gasOrOilAccountNumber",
+        "sewerAccountNumber",
+        "loanNumber",
+        "phoneNumbers",
+      ];
+
+      // Clean and prepare the data
+      const cleanedDetails = {};
+
+      // Process each field in editedDetails
+      for (const [key, value] of Object.entries(editedDetails)) {
+        // Handle null/undefined/empty values
+        if (value === undefined || value === null || value === "") {
+          cleanedDetails[key] = null;
+          continue;
+        }
+
+        // Convert value to string and trim
+        const trimmedValue = value.toString().trim();
+
+        // Handle empty strings after trimming
+        if (trimmedValue === "") {
+          cleanedDetails[key] = null;
+          continue;
+        }
+
+        if (stringFields.includes(key)) {
+          // Always keep these fields as strings
+          cleanedDetails[key] = trimmedValue;
+        } else if (numericFields.includes(key)) {
+          // Convert to number only for numeric fields
+          const numValue = Number(trimmedValue);
+          cleanedDetails[key] = isNaN(numValue) ? null : numValue;
+        } else {
+          // For all other fields, keep as trimmed string
+          cleanedDetails[key] = trimmedValue;
+        }
+      }
+
+      // Log the cleaned data for debugging
+      console.log("Sending data to server:", cleanedDetails);
+
       const response = await fetch(
         `http://localhost:5000/api/properties/${propertyId}`,
         {
@@ -306,22 +553,74 @@ const PropertyDetails = ({ propertyId }) => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
-          body: JSON.stringify(editedDetails),
+          body: JSON.stringify(cleanedDetails),
         }
       );
 
-      if (!response.ok) {
-        throw new Error("Error saving property details");
+      // Log the raw response for debugging
+      console.log("Server response status:", response.status);
+
+      let data;
+      const responseText = await response.text();
+      console.log("Server response text:", responseText);
+
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        console.error("Error parsing response:", e);
+        throw new Error("Invalid response from server");
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        const errorMessage =
+          data.message || data.error || "Error saving property details";
+        throw new Error(errorMessage);
+      }
+
+      // Update both state variables with the new data
       setPropertyDetails(data);
+      setEditedDetails(data);
+
+      // Toggle edit mode after state updates
       toggleEditMode();
-      toast.success("Property details saved successfully!");
+
+      toast.success("Property details saved successfully!", {
+        position: "bottom-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+
+      // Force a re-fetch of the data to ensure we have the latest state
+      const refreshResponse = await fetch(
+        `http://localhost:5000/api/properties/${propertyId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      );
+
+      if (refreshResponse.ok) {
+        const refreshedData = await refreshResponse.json();
+        setPropertyDetails(refreshedData);
+        setEditedDetails(refreshedData);
+      }
     } catch (error) {
       console.error("Error saving property details:", error);
-      setError("Failed to save property details.");
-      toast.error("Failed to save property details.");
+      const errorMessage = error.message || "Failed to save property details.";
+      setError(errorMessage);
+
+      toast.error(errorMessage, {
+        position: "bottom-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     }
   };
 
@@ -329,11 +628,27 @@ const PropertyDetails = ({ propertyId }) => {
     setEditedDetails(propertyDetails);
     setError("");
     toggleEditMode();
+
+    toast.info("Changes cancelled", {
+      position: "bottom-center",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
   };
 
   const renderInputField = (label, name, type = "text", isNumber = false) => {
     const value = isEditing ? editedDetails[name] : propertyDetails[name];
-    const hasError = error && !value && type !== "number";
+    const isRequired = [
+      "propertyName",
+      "address",
+      "city",
+      "state",
+      "zipCode",
+    ].includes(name);
+    const hasError = error && isRequired && !value && type !== "number";
 
     return (
       <div className="form-group mb-4">
@@ -342,25 +657,26 @@ const PropertyDetails = ({ propertyId }) => {
           htmlFor={name}
         >
           {label}
+          {isRequired && <span className="text-red-500 ml-1">*</span>}
         </label>
-          <input
+        <input
           id={name}
-            type={type}
-            name={name}
+          type={type}
+          name={name}
           value={value || ""}
-            onChange={handleEditChange}
+          onChange={handleEditChange}
+          required={isRequired}
           className={`
             w-full px-3 py-2 rounded-lg border
             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
             transition duration-150 ease-in-out
             ${isNumber ? "text-right" : ""}
             ${hasError ? "border-red-500" : "border-gray-300"}
+            ${isRequired ? "bg-gray-50" : ""}
           `}
         />
         {hasError && (
-          <p className="mt-1 text-sm text-red-500">
-            {`${label} is required`}
-          </p>
+          <p className="mt-1 text-sm text-red-500">{`${label} is required`}</p>
         )}
       </div>
     );
@@ -481,10 +797,10 @@ const PropertyDetails = ({ propertyId }) => {
   };
 
   const toggleAllGroups = () => {
-    const allExpanded = Object.values(expandedGroups).every(val => val);
-    setExpandedGroups(prevGroups => {
+    const allExpanded = Object.values(expandedGroups).every((val) => val);
+    setExpandedGroups((prevGroups) => {
       const newGroups = {};
-      Object.keys(prevGroups).forEach(key => {
+      Object.keys(prevGroups).forEach((key) => {
         newGroups[key] = !allExpanded;
       });
       return newGroups;
@@ -527,7 +843,10 @@ const PropertyDetails = ({ propertyId }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8" {...swipeHandlers}>
+    <div
+      className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 pb-24"
+      {...swipeHandlers}
+    >
       <ToastContainer
         position="bottom-center"
         autoClose={3000}
@@ -542,16 +861,19 @@ const PropertyDetails = ({ propertyId }) => {
         className="sm:bottom-4 bottom-2 sm:right-4 right-2"
         toastClassName="sm:min-w-[300px] min-w-[250px] shadow-lg"
       />
-      
+
       <OfflineIndicator />
-      
+
       {/* Floating Action Button for mobile */}
       <FloatingActionButton onClick={toggleEditMode} />
 
       {/* Header Section */}
-      <header className="max-w-7xl mx-auto mb-4 sm:mb-6 lg:mb-8 px-4 sm:px-6 lg:px-8" role="banner">
+      <header
+        className="max-w-7xl mx-auto mb-4 sm:mb-6 lg:mb-8 px-4 sm:px-6 lg:px-8"
+        role="banner"
+      >
         <div className="text-center sm:text-left">
-          <h1 
+          <h1
             className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-2 
                        break-words leading-tight"
             aria-label={`Property Details for ${propertyDetails.propertyName}`}
@@ -574,7 +896,9 @@ const PropertyDetails = ({ propertyId }) => {
         {/* Construction Progress Card */}
         <section className={`${cardStyles} p-6`}>
           <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <span role="img" aria-label="Construction">🏗️</span>
+            <span role="img" aria-label="Construction">
+              🏗️
+            </span>
             Construction Progress
           </h2>
           <ConstructionDraw propertyId={propertyId} />
@@ -584,7 +908,9 @@ const PropertyDetails = ({ propertyId }) => {
         <section className={`${cardStyles} p-6`}>
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <span role="img" aria-label="Timeline">📅</span>
+              <span role="img" aria-label="Timeline">
+                📅
+              </span>
               Project Timeline
             </h2>
             <button
@@ -612,69 +938,26 @@ const PropertyDetails = ({ propertyId }) => {
         </section>
 
         {/* Property Information Card */}
-        <section className={`${cardStyles} p-6`}>
-          <div className="flex justify-between items-center mb-6">
+        <section className={`${cardStyles} p-6`} ref={detailsPrintRef}>
+          <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <span role="img" aria-label="Details">📋</span>
+              <span role="img" aria-label="Details">
+                📋
+              </span>
               Property Information
             </h2>
-            <div className="flex gap-2">
-              {isEditing ? (
-                <>
-                  <button
-                    onClick={saveChanges}
-                    className={buttonStyles.primary}
-                    aria-label="Save changes"
-                  >
-                    <Save size={18} />
-                    <span className="sr-only sm:not-sr-only">Save</span>
-                  </button>
-                  <button
-                    onClick={cancelChanges}
-                    className={buttonStyles.secondary}
-                    aria-label="Cancel editing"
-                  >
-                    <X size={18} />
-                    <span className="sr-only sm:not-sr-only">Cancel</span>
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={toggleAllGroups}
-                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2 transition-all duration-200"
-                    aria-label={Object.values(expandedGroups).every(val => val) ? "Collapse all sections" : "Expand all sections"}
-                  >
-                    {Object.values(expandedGroups).every(val => val) ? (
-                      <ChevronsUp size={18} className="transition-transform duration-200" />
-                    ) : (
-                      <ChevronsDown size={18} className="transition-transform duration-200" />
-                    )}
-                    <span className="sr-only sm:not-sr-only">
-                      {Object.values(expandedGroups).every(val => val) ? "Collapse All" : "Expand All"}
-                    </span>
-                  </button>
-                  <button
-                    onClick={toggleEditMode}
-                    className={buttonStyles.primary}
-                    aria-label="Edit property details"
-                  >
-                    <Edit2 size={18} />
-                    <span className="sr-only sm:not-sr-only">Edit</span>
-                  </button>
-                </>
-              )}
-            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <FieldGroup
               title="Foreclosure Information"
               isExpanded={expandedGroups.foreclosureInfo}
-              onToggle={() => setExpandedGroups(prev => ({
-                ...prev,
-                foreclosureInfo: !prev.foreclosureInfo
-              }))}
+              onToggle={() =>
+                setExpandedGroups((prev) => ({
+                  ...prev,
+                  foreclosureInfo: !prev.foreclosureInfo,
+                }))
+              }
             >
               {renderInputField("Detail Link", "detail_link")}
               {renderInputField("Property ID", "property_id")}
@@ -688,10 +971,12 @@ const PropertyDetails = ({ propertyId }) => {
             <FieldGroup
               title="Location"
               isExpanded={expandedGroups.location}
-              onToggle={() => setExpandedGroups(prev => ({
-                ...prev,
-                location: !prev.location
-              }))}
+              onToggle={() =>
+                setExpandedGroups((prev) => ({
+                  ...prev,
+                  location: !prev.location,
+                }))
+              }
             >
               {renderInputField("Property Name", "propertyName")}
               {renderInputField("Address", "address")}
@@ -708,55 +993,168 @@ const PropertyDetails = ({ propertyId }) => {
             <FieldGroup
               title="Departments"
               isExpanded={expandedGroups.departments}
-              onToggle={() => setExpandedGroups(prev => ({
-                ...prev,
-                departments: !prev.departments
-              }))}
+              onToggle={() =>
+                setExpandedGroups((prev) => ({
+                  ...prev,
+                  departments: !prev.departments,
+                }))
+              }
             >
-              {renderInputField("Municipal Building Address", "municipalBuildingAddress")}
+              {renderInputField(
+                "Municipal Building Address",
+                "municipalBuildingAddress"
+              )}
               {renderInputField("Building Dept", "buildingDepartmentContact")}
               {renderInputField("Electric Dept", "electricDepartmentContact")}
               {renderInputField("Plumbing Dept", "plumbingDepartmentContact")}
               {renderInputField("Fire Dept", "fireDepartmentContact")}
-              {renderInputField("Homeowners Association", "homeownersAssociationContact")}
-              {renderInputField("Environmental Dept", "environmentalDepartmentContact")}
+              {renderInputField(
+                "Homeowners Association",
+                "homeownersAssociationContact"
+              )}
+              {renderInputField(
+                "Environmental Dept",
+                "environmentalDepartmentContact"
+              )}
             </FieldGroup>
 
             <FieldGroup
               title="Total Outlay To Date"
               isExpanded={expandedGroups.outlayToDate}
-              onToggle={() => setExpandedGroups(prev => ({
-                ...prev,
-                outlayToDate: !prev.outlayToDate
-              }))}
+              onToggle={() =>
+                setExpandedGroups((prev) => ({
+                  ...prev,
+                  outlayToDate: !prev.outlayToDate,
+                }))
+              }
             >
-              {renderInputField("Purchase Cost", "purchaseCost", "number", true)}
-              {renderInputField("Refinance Cost", "refinanceCost", "number", true)}
-              {renderInputField("Equipment Cost", "equipmentCost", "number", true)}
-              {renderInputField("Construction Cost", "constructionCost", "number", true)}
-              {renderInputField("Large Repair Cost", "largeRepairCost", "number", true)}
-              {renderInputField("Renovation Cost", "renovationCost", "number", true)}
-              {renderInputField("Total Rehab Cost", "totalRehabCost", "number", true)}
-              {renderInputField("Kick Start Funds", "kickStartFunds", "number", true)}
-              {renderInputField("Lender Construction Draws Received", "lenderConstructionDrawsReceived", "number", true)}
+              {renderInputField(
+                "Purchase Cost",
+                "purchaseCost",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Refinance Cost",
+                "refinanceCost",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Equipment Cost",
+                "equipmentCost",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Construction Cost",
+                "constructionCost",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Large Repair Cost",
+                "largeRepairCost",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Renovation Cost",
+                "renovationCost",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Total Rehab Cost",
+                "totalRehabCost",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Kick Start Funds",
+                "kickStartFunds",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Lender Construction Draws Received",
+                "lenderConstructionDrawsReceived",
+                "number",
+                true
+              )}
               <div className="border-t-2 border-black border-solid my-4"></div>
-              {renderInputField("Utilities Cost", "utilitiesCost", "number", true)}
+              {renderInputField(
+                "Utilities Cost",
+                "utilitiesCost",
+                "number",
+                true
+              )}
               {renderInputField("Sewer Yearly Cost", "sewer", "number", true)}
               {renderInputField("Water Yearly Cost", "water", "number", true)}
               {renderInputField("Lawn Yearly Cost", "lawn", "number", true)}
-              {renderInputField("Garbage Yearly Cost", "garbage", "number", true)}
-              {renderInputField("Yearly Property Taxes", "yearlyPropertyTaxes", "number", true)}
-              {renderInputField("Mortgage Paid", "mortgagePaid", "number", true)}
-              {renderInputField("Homeowners Insurance", "homeownersInsurance", "number", true)}
-              {renderInputField("Expected Yearly Rent", "expectedYearlyRent", "number", true)}
-              {renderInputField("Rental Income Received", "rentalIncomeReceived", "number", true)}
+              {renderInputField(
+                "Garbage Yearly Cost",
+                "garbage",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Yearly Property Taxes",
+                "yearlyPropertyTaxes",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Mortgage Paid",
+                "mortgagePaid",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Homeowners Insurance",
+                "homeownersInsurance",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Expected Yearly Rent",
+                "expectedYearlyRent",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Rental Income Received",
+                "rentalIncomeReceived",
+                "number",
+                true
+              )}
               {renderInputField("Number of Units", "numUnits", "number", true)}
               {renderInputField("Vacancy Rate", "vacancyRate", "number", true)}
-              {renderInputField("Average Tenant Stay", "avgTenantStay", "number", true)}
-              {renderInputField("Other Monthly Income", "otherMonthlyIncome", "number", true)}
+              {renderInputField(
+                "Average Tenant Stay",
+                "avgTenantStay",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Other Monthly Income",
+                "otherMonthlyIncome",
+                "number",
+                true
+              )}
               {renderInputField("Vacancy Loss", "vacancyLoss", "number", true)}
-              {renderInputField("Management Fees", "managementFees", "number", true)}
-              {renderInputField("Maintenance Costs", "maintenanceCosts", "number", true)}
+              {renderInputField(
+                "Management Fees",
+                "managementFees",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Maintenance Costs",
+                "maintenanceCosts",
+                "number",
+                true
+              )}
               <div className="border-t-2 border-black border-solid my-4"></div>
               {renderInputField("Total Equity", "totalEquity", "number", true)}
             </FieldGroup>
@@ -764,56 +1162,154 @@ const PropertyDetails = ({ propertyId }) => {
             <FieldGroup
               title="Sale Projection"
               isExpanded={expandedGroups.saleProjection}
-              onToggle={() => setExpandedGroups(prev => ({
-                ...prev,
-                saleProjection: !prev.saleProjection
-              }))}
+              onToggle={() =>
+                setExpandedGroups((prev) => ({
+                  ...prev,
+                  saleProjection: !prev.saleProjection,
+                }))
+              }
             >
-              {renderInputField("ARV Sale Price", "arvSalePrice", "number", true)}
+              {renderInputField(
+                "ARV Sale Price",
+                "arvSalePrice",
+                "number",
+                true
+              )}
               <div className="border-t-2 border-black border-solid my-4"></div>
               {renderInputField("Realtor Fees", "realtorFees", "number", true)}
-              {renderInputField("Remaining Property Tax", "propTaxTillEndOfYear", "number", true)}
-              {renderInputField("Lender Loan Balance", "lenderLoanBalance", "number", true)}
-              {renderInputField("Pay Off Statement", "payOffStatement", "number", true)}
-              {renderInputField("Attorney Fees", "attorneyFees", "number", true)}
+              {renderInputField(
+                "Remaining Property Tax",
+                "propTaxTillEndOfYear",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Lender Loan Balance",
+                "lenderLoanBalance",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Pay Off Statement",
+                "payOffStatement",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Attorney Fees",
+                "attorneyFees",
+                "number",
+                true
+              )}
               {renderInputField("Misc Fees", "miscFees", "number", true)}
               {renderInputField("Utilities", "utilities", "number", true)}
-              {renderInputField("Cash to Close from Purchase", "cash2closeFromPurchase", "number", true)}
-              {renderInputField("Cash to Close from Refinance", "cash2closeFromRefinance", "number", true)}
-              {renderInputField("Total Rehab Costs", "totalRehabCosts", "number", true)}
-              {renderInputField("Expected Remaining Rent End To Year", "expectedRemainingRentEndToYear", "number", true)}
-              {renderInputField("Mortgage Paid", "mortgagePaid", "number", true)}
+              {renderInputField(
+                "Cash to Close from Purchase",
+                "cash2closeFromPurchase",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Cash to Close from Refinance",
+                "cash2closeFromRefinance",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Total Rehab Costs",
+                "totalRehabCosts",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Expected Remaining Rent End To Year",
+                "expectedRemainingRentEndToYear",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Mortgage Paid",
+                "mortgagePaid",
+                "number",
+                true
+              )}
               <div className="border-t-2 border-black border-solid my-4"></div>
-              {renderInputField("Total Expenses", "totalExpenses", "number", true)}
-              {renderInputField("Total Expected Draws In", "totalConstructionDrawsReceived", "number", true)}
+              {renderInputField(
+                "Total Expenses",
+                "totalExpenses",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Total Expected Draws In",
+                "totalConstructionDrawsReceived",
+                "number",
+                true
+              )}
               <div className="border-t-2 border-black border-solid my-4"></div>
-              {renderInputField("Project Net Profit If Sold", "projectNetProfitIfSold", "number", true)}
+              {renderInputField(
+                "Project Net Profit If Sold",
+                "projectNetProfitIfSold",
+                "number",
+                true
+              )}
               {renderInputField("Cash Flow", "cashFlow", "number", true)}
               {renderInputField("Cash ROI", "cashRoi", "number", true)}
-              {renderInputField("Rule 2 Percent", "rule2Percent", "number", true)}
-              {renderInputField("Rule 50 Percent", "rule50Percent", "number", true)}
-              {renderInputField("Finance Amount", "financeAmount", "number", true)}
-              {renderInputField("Purchase Cap Rate", "purchaseCapRate", "number", true)}
+              {renderInputField(
+                "Rule 2 Percent",
+                "rule2Percent",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Rule 50 Percent",
+                "rule50Percent",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Finance Amount",
+                "financeAmount",
+                "number",
+                true
+              )}
+              {renderInputField(
+                "Purchase Cap Rate",
+                "purchaseCapRate",
+                "number",
+                true
+              )}
             </FieldGroup>
 
             <FieldGroup
               title="Utility Information"
               isExpanded={expandedGroups.utilityInformation}
-              onToggle={() => setExpandedGroups(prev => ({
-                ...prev,
-                utilityInformation: !prev.utilityInformation
-              }))}
+              onToggle={() =>
+                setExpandedGroups((prev) => ({
+                  ...prev,
+                  utilityInformation: !prev.utilityInformation,
+                }))
+              }
             >
-              {renderInputField("Type of Heating & Cooling", "typeOfHeatingAndCooling")}
+              {renderInputField(
+                "Type of Heating & Cooling",
+                "typeOfHeatingAndCooling"
+              )}
               <div className="border-t-2 border-transparent my-2"></div>
               {renderInputField("Water Company", "waterCompany")}
               {renderInputField("Water Account Number", "waterAccountNumber")}
               <div className="border-t-2 border-transparent my-2"></div>
               {renderInputField("Electric Company", "electricCompany")}
-              {renderInputField("Electric Account Number", "electricAccountNumber")}
+              {renderInputField(
+                "Electric Account Number",
+                "electricAccountNumber"
+              )}
               <div className="border-t-2 border-transparent my-2"></div>
               {renderInputField("Gas or Oil Company", "gasOrOilCompany")}
-              {renderInputField("Gas or Oil Account Number", "gasOrOilAccountNumber")}
+              {renderInputField(
+                "Gas or Oil Account Number",
+                "gasOrOilAccountNumber"
+              )}
               <div className="border-t-2 border-transparent my-2"></div>
               {renderInputField("Sewer Company", "sewerCompany")}
               {renderInputField("Sewer Account Number", "sewerAccountNumber")}
@@ -822,41 +1318,63 @@ const PropertyDetails = ({ propertyId }) => {
             <FieldGroup
               title="Lender Information"
               isExpanded={expandedGroups.lender}
-              onToggle={() => setExpandedGroups(prev => ({
-                ...prev,
-                lender: !prev.lender
-              }))}
+              onToggle={() =>
+                setExpandedGroups((prev) => ({
+                  ...prev,
+                  lender: !prev.lender,
+                }))
+              }
             >
               {renderInputField("Lender", "lender")}
               {renderInputField("Lender Phone", "lenderPhone")}
               <div className="border-t-2 border-transparent my-2"></div>
               {renderInputField("Refinance Lender", "refinanceLender")}
-              {renderInputField("Refinance Lender Phone", "refinanceLenderPhone")}
+              {renderInputField(
+                "Refinance Lender Phone",
+                "refinanceLenderPhone"
+              )}
               <div className="border-t-2 border-transparent my-2"></div>
               {renderInputField("Loan Officer", "loanOfficer")}
               {renderInputField("Loan Officer Phone", "loanOfficerPhone")}
               {renderInputField("Loan Number", "loanNumber")}
-              {renderInputField("Down Payment Percentage", "downPaymentPercentage", "number")}
-              {renderInputField("Loan Interest Rate", "loanInterestRate", "number")}
+              {renderInputField(
+                "Down Payment Percentage",
+                "downPaymentPercentage",
+                "number"
+              )}
+              {renderInputField(
+                "Loan Interest Rate",
+                "loanInterestRate",
+                "number"
+              )}
               {renderInputField("PMI Percentage", "pmiPercentage", "number")}
               {renderInputField("Mortgage Years", "mortgageYears", "number")}
-              {renderInputField("Lender Points Amount", "lenderPointsAmount", "number")}
+              {renderInputField(
+                "Lender Points Amount",
+                "lenderPointsAmount",
+                "number"
+              )}
               {renderInputField("Other Fees", "otherFees", "number")}
             </FieldGroup>
 
             <FieldGroup
               title="Key Players"
               isExpanded={expandedGroups.keyPlayers}
-              onToggle={() => setExpandedGroups(prev => ({
-                ...prev,
-                keyPlayers: !prev.keyPlayers
-              }))}
+              onToggle={() =>
+                setExpandedGroups((prev) => ({
+                  ...prev,
+                  keyPlayers: !prev.keyPlayers,
+                }))
+              }
             >
               {renderInputField("Seller's Agent", "sellersAgent")}
               {renderInputField("Seller's Broker", "sellersBroker")}
               {renderInputField("Seller's Agent Phone", "sellersAgentPhone")}
               {renderInputField("Seller's Attorney", "sellersAttorney")}
-              {renderInputField("Seller's Attorney Phone", "sellersAttorneyPhone")}
+              {renderInputField(
+                "Seller's Attorney Phone",
+                "sellersAttorneyPhone"
+              )}
               <div className="border-t-2 border-black border-solid my-4"></div>
               {renderInputField("Escrow Company", "escrowCompany")}
               {renderInputField("Escrow Agent", "escrowAgent")}
@@ -866,9 +1384,15 @@ const PropertyDetails = ({ propertyId }) => {
               {renderInputField("Buyer's Broker", "buyersBroker")}
               {renderInputField("Buyer's Agent Phone", "buyersAgentPhone")}
               {renderInputField("Buyer's Attorney", "buyersAttorney")}
-              {renderInputField("Buyer's Attorney Phone", "buyersAttorneyPhone")}
+              {renderInputField(
+                "Buyer's Attorney Phone",
+                "buyersAttorneyPhone"
+              )}
               <div className="border-t-2 border-black border-solid my-4"></div>
-              {renderInputField("Title Insurance Company", "titleInsuranceCompany")}
+              {renderInputField(
+                "Title Insurance Company",
+                "titleInsuranceCompany"
+              )}
               {renderInputField("Title Agent", "titleAgent")}
               {renderInputField("Title Agent Phone", "titleAgentPhone")}
               {renderInputField("Title Company Phone", "titlePhone")}
@@ -877,15 +1401,26 @@ const PropertyDetails = ({ propertyId }) => {
             <FieldGroup
               title="Sales & Marketing"
               isExpanded={expandedGroups.salesAndMarketing}
-              onToggle={() => setExpandedGroups(prev => ({
-                ...prev,
-                salesAndMarketing: !prev.salesAndMarketing
-              }))}
+              onToggle={() =>
+                setExpandedGroups((prev) => ({
+                  ...prev,
+                  salesAndMarketing: !prev.salesAndMarketing,
+                }))
+              }
             >
               {renderInputField("Property Manager", "propertyManager")}
-              {renderInputField("Property Manager Phone", "propertyManagerPhone")}
-              {renderInputField("Property Management Company", "propertyManagementCompany")}
-              {renderInputField("Property Management Phone", "propertyManagementPhone")}
+              {renderInputField(
+                "Property Manager Phone",
+                "propertyManagerPhone"
+              )}
+              {renderInputField(
+                "Property Management Company",
+                "propertyManagementCompany"
+              )}
+              {renderInputField(
+                "Property Management Phone",
+                "propertyManagementPhone"
+              )}
               <div className="border-t-2 border-black border-solid my-4"></div>
               {renderInputField("Photographer", "photographer")}
               {renderInputField("Photographer Phone", "photographerPhone")}
@@ -907,7 +1442,10 @@ const PropertyDetails = ({ propertyId }) => {
         </section>
 
         {/* Financial Analysis Section */}
-        <section className={`${cardStyles} print-full-width`} ref={financialsPrintRef}>
+        <section
+          className={`${cardStyles} print-full-width`}
+          ref={financialsPrintRef}
+        >
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4 sm:gap-0">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
               Financial Analysis
@@ -919,7 +1457,9 @@ const PropertyDetails = ({ propertyId }) => {
                 aria-label="Print financial analysis"
               >
                 <Printer size={16} className="sm:mr-2" />
-                <span className="hidden sm:inline">Print Financial Analysis</span>
+                <span className="hidden sm:inline">
+                  Print Financial Analysis
+                </span>
                 <span className="sm:hidden">Print</span>
               </button>
             </div>
@@ -970,7 +1510,10 @@ const PropertyDetails = ({ propertyId }) => {
                 </h3>
                 <button
                   onClick={() =>
-                    exportToCSV(propertyDetails.rentalIncomeData, "rental-income")
+                    exportToCSV(
+                      propertyDetails.rentalIncomeData,
+                      "rental-income"
+                    )
                   }
                   className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
                 >
@@ -987,7 +1530,10 @@ const PropertyDetails = ({ propertyId }) => {
                 </h3>
                 <button
                   onClick={() =>
-                    exportToCSV(propertyDetails.capExData, "capital-expenditure")
+                    exportToCSV(
+                      propertyDetails.capExData,
+                      "capital-expenditure"
+                    )
                   }
                   className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
                 >
@@ -1031,6 +1577,17 @@ const PropertyDetails = ({ propertyId }) => {
           </p>
         </div>
       </div>
+
+      {/* Add the sticky action bar */}
+      <StickyActionBar
+        isEditing={isEditing}
+        onSave={saveChanges}
+        onCancel={cancelChanges}
+        onEdit={toggleEditMode}
+        onPrint={handlePrintDetails}
+        onToggleGroups={toggleAllGroups}
+        expandedGroups={Object.values(expandedGroups).every((val) => val)}
+      />
     </div>
   );
 };
