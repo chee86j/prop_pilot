@@ -17,6 +17,16 @@ const ConstructionDraw = ({ propertyId }) => {
     is_approved: false,
   });
   const [showAddDrawForm, setShowAddDrawForm] = useState(false);
+  const [drawStats, setDrawStats] = useState({
+    totalDraws: 0,
+    totalReceipts: 0,
+    completionPercentage: 0,
+    remainingBalance: 0,
+  });
+  const [validationErrors, setValidationErrors] = useState({
+    draw: null,
+    receipt: null,
+  });
 
   useEffect(() => {
     const fetchDraws = async () => {
@@ -127,6 +137,7 @@ const ConstructionDraw = ({ propertyId }) => {
 
   const handleAddDraw = async (e) => {
     e.preventDefault();
+    setValidationErrors((prev) => ({ ...prev, draw: null }));
 
     try {
       // Ensure the date is in ISO format for the API
@@ -148,18 +159,18 @@ const ConstructionDraw = ({ propertyId }) => {
         }
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to add construction draw");
-      }
+      const data = await response.json();
 
-      const addedDraw = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to add construction draw");
+      }
 
       // Update the draws state with the properly formatted date
       setDraws((prevDraws) => {
         const newDraws = [
           ...prevDraws,
           {
-            ...addedDraw,
+            ...data,
             release_date: new Date(formattedDate).toISOString(),
           },
         ].sort((a, b) => new Date(a.release_date) - new Date(b.release_date));
@@ -173,14 +184,10 @@ const ConstructionDraw = ({ propertyId }) => {
         is_approved: false,
       });
       setShowAddDrawForm(false);
-      toast.success("Construction draw added successfully", {
-        autoClose: 3000,
-      });
+      toast.success("Construction draw added successfully");
     } catch (error) {
-      setError(error.message);
-      toast.error("Failed to add construction draw", {
-        autoClose: 3000,
-      });
+      toast.error(error.message);
+      setValidationErrors((prev) => ({ ...prev, draw: error.message }));
     }
   };
 
@@ -196,21 +203,117 @@ const ConstructionDraw = ({ propertyId }) => {
         }
       );
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to delete construction draw");
+        throw new Error(data.error || "Failed to delete construction draw");
       }
 
       setDraws(draws.filter((draw) => draw.id !== drawId));
-      toast.success("Construction draw deleted successfully", {
-        autoClose: 3000,
-      });
+      toast.success("Construction draw deleted successfully");
     } catch (error) {
-      setError(error.message);
-      toast.error("Failed to delete construction draw", {
-        autoClose: 3000,
-      });
+      toast.error(error.message);
+      setValidationErrors((prev) => ({ ...prev, draw: error.message }));
     }
   };
+
+  useEffect(() => {
+    if (draws.length > 0) {
+      const totalDrawAmount = draws.reduce(
+        (sum, draw) => sum + parseFloat(draw.amount),
+        0
+      );
+      const totalReceiptAmount = draws.reduce(
+        (sum, draw) =>
+          sum +
+          draw.receipts.reduce(
+            (rSum, receipt) => rSum + parseFloat(receipt.amount),
+            0
+          ),
+        0
+      );
+
+      setDrawStats({
+        totalDraws: totalDrawAmount,
+        totalReceipts: totalReceiptAmount,
+        completionPercentage: (totalReceiptAmount / totalDrawAmount) * 100,
+        remainingBalance: totalDrawAmount - totalReceiptAmount,
+      });
+    }
+  }, [draws]);
+
+  const ValidationError = ({ error }) => {
+    if (!error) return null;
+
+    return (
+      <div className="bg-red-50 border-l-4 border-red-500 p-4 my-4">
+        <div className="flex">
+          <div className="flex-shrink-0">
+            <svg
+              className="h-5 w-5 text-red-400"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+          <div className="ml-3">
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const ProgressIndicator = ({ percentage }) => {
+    const getColorClass = (percent) => {
+      if (percent < 33) return "bg-red-500";
+      if (percent < 66) return "bg-yellow-500";
+      return "bg-green-500";
+    };
+
+    return (
+      <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 my-4">
+        <div
+          className={`h-2.5 rounded-full ${getColorClass(percentage)}`}
+          style={{ width: `${Math.min(percentage, 100)}%` }}
+        ></div>
+      </div>
+    );
+  };
+
+  const DrawStatistics = ({ stats }) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="bg-white p-4 rounded-lg shadow">
+        <h3 className="text-sm font-medium text-gray-500">Total Draws</h3>
+        <p className="text-2xl font-semibold text-gray-900">
+          {formatCurrency(stats.totalDraws)}
+        </p>
+      </div>
+      <div className="bg-white p-4 rounded-lg shadow">
+        <h3 className="text-sm font-medium text-gray-500">Total Receipts</h3>
+        <p className="text-2xl font-semibold text-gray-900">
+          {formatCurrency(stats.totalReceipts)}
+        </p>
+      </div>
+      <div className="bg-white p-4 rounded-lg shadow">
+        <h3 className="text-sm font-medium text-gray-500">Completion</h3>
+        <p className="text-2xl font-semibold text-gray-900">
+          {stats.completionPercentage.toFixed(1)}%
+        </p>
+      </div>
+      <div className="bg-white p-4 rounded-lg shadow">
+        <h3 className="text-sm font-medium text-gray-500">Remaining Balance</h3>
+        <p className="text-2xl font-semibold text-gray-900">
+          {formatCurrency(stats.remainingBalance)}
+        </p>
+      </div>
+    </div>
+  );
 
   if (error) {
     return <div className="text-red-500">Error: {error}</div>;
@@ -228,6 +331,11 @@ const ConstructionDraw = ({ propertyId }) => {
       <h2 className="text-xl md:text-2xl font-bold text-gray-700 mb-6">
         Construction Draws
       </h2>
+
+      <DrawStatistics stats={drawStats} />
+
+      <ValidationError error={validationErrors.draw} />
+      <ValidationError error={validationErrors.receipt} />
 
       <button
         onClick={() => setShowAddDrawForm(!showAddDrawForm)}

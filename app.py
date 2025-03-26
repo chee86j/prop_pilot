@@ -14,6 +14,7 @@ from datetime import timedelta
 
 from models import db, User, Property, Phase, ConstructionDraw, Receipt, Tenant, Lease, PropertyMaintenanceRequest
 from routes import api
+from routes.auth import auth_routes
 
 # Load environment variables from .env file
 load_dotenv()
@@ -21,6 +22,18 @@ load_dotenv()
 def create_app():
     """Create and configure the Flask application"""
     app = Flask(__name__)
+    
+    # Configure CORS
+    CORS(app, 
+         resources={
+             r"/api/*": {
+                 "origins": ["http://localhost:5173"],
+                 "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+                 "allow_headers": ["Content-Type", "Authorization"],
+                 "supports_credentials": True
+             }
+         }
+    )
     
     # Configure the Flask app
     if os.getenv('FLASK_ENV') == 'testing':
@@ -43,10 +56,10 @@ def create_app():
     db.init_app(app)
     migrate = Migrate(app, db)  # Initialize Flask-Migrate
     jwt = JWTManager(app)
-    CORS(app)
     
     # Register blueprints
     app.register_blueprint(api, url_prefix='/api')
+    app.register_blueprint(auth_routes, url_prefix='/api')
     
     # Create database tables
     with app.app_context():

@@ -1,11 +1,19 @@
 from flask import Blueprint, request, jsonify
-from models import db, User, Property, Phase
+from models import db, User, Property, Phase, ConstructionDraw, Receipt
 from models.base import ValidationError
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
 from services.scraper.main import main as run_scraper
 import pandas as pd
 import os
+from models.exceptions import (
+    DrawSequenceError, 
+    DrawAmountError, 
+    DrawApprovalError,
+    ReceiptAmountError,
+    ReceiptDateError,
+    ReceiptDuplicateError
+)
 
 property_routes = Blueprint('property', __name__)
 
@@ -466,4 +474,84 @@ def get_scraped_properties():
         return jsonify({
             'status': 'error',
             'error': str(e)
-        }), 500 
+        }), 500
+
+@property_routes.route('/construction-draws/<int:draw_id>', methods=['DELETE'])
+@jwt_required()
+def delete_construction_draw(draw_id):
+    try:
+        draw = ConstructionDraw.query.get_or_404(draw_id)
+        
+        # Validate deletion
+        draw.validate_for_deletion()
+        
+        db.session.delete(draw)
+        db.session.commit()
+        
+        return jsonify({'message': 'Construction draw deleted successfully'}), 200
+        
+    except DrawSequenceError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@property_routes.route('/construction-draws', methods=['POST'])
+@jwt_required()
+def create_construction_draw():
+    try:
+        data = request.get_json()
+        
+        new_draw = ConstructionDraw(
+            property_id=data['property_id'],
+            release_date=datetime.strptime(data['release_date'], '%Y-%m-%d').date(),
+            amount=float(data['amount']),
+            bank_account_number=data.get('bank_account_number'),
+            is_approved=data.get('is_approved', False)
+        )
+        
+        # Validate creation
+        new_draw.validate_for_creation()
+        
+        db.session.add(new_draw)
+        db.session.commit()
+        
+        return jsonify(new_draw.to_dict()), 201
+        
+    except (DrawApprovalError, DrawSequenceError, DrawAmountError) as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@property_routes.route('/receipts', methods=['POST'])
+@jwt_required()
+def create_receipt():
+    try:
+        data = request.get_json()
+        
+        draw = ConstructionDraw.query.get_or_404(data['construction_draw_id'])
+        
+        new_receipt = Receipt(
+            construction_draw_id=data['construction_draw_id'],
+            date=datetime.strptime(data['date'], '%Y-%m-%d').date(),
+            vendor=data['vendor'],
+            amount=float(data['amount']),
+            description=data['description'],
+            pointofcontact=data.get('pointofcontact'),
+            ccnumber=data.get('ccnumber')
+        )
+        
+        # Validate receipt
+        draw.validate_receipt(new_receipt)
+        
+        db.session.add(new_receipt)
+        db.session.commit()
+        
+        return jsonify(new_receipt.to_dict()), 201
+        
+    except (ReceiptAmountError, ReceiptDateError, ReceiptDuplicateError) as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500 

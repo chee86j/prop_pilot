@@ -9,6 +9,7 @@ import LogoIcon from "../assets/icons/logo.svg";
 import AuthFormImage from "../assets/images/authform02.jpeg";
 import { Eye, EyeOff } from "lucide-react";
 import { useGoogleLogin } from "@react-oauth/google";
+import logger from "../utils/logger";
 
 const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -31,7 +32,11 @@ const AuthForm = () => {
   const googleLogin = useGoogleLogin({
     onSuccess: async (response) => {
       try {
-        console.log("Google login response:", response); // Debug log
+        logger.debug("Google OAuth response received", {
+          tokenType: response.token_type,
+          expiresIn: response.expires_in,
+          scope: response.scope,
+        });
 
         // Get user info using the access token
         const userInfoResponse = await fetch(
@@ -48,45 +53,59 @@ const AuthForm = () => {
         }
 
         const userInfo = await userInfoResponse.json();
-        console.log("User info from Google:", userInfo); // Debug log
+        logger.debug("User info retrieved", {
+          name: userInfo.name,
+          email: userInfo.email,
+        });
 
+        // Send to backend
         const backendResponse = await fetch(
           `${import.meta.env.VITE_API_URL}/auth/google`,
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              Accept: "application/json",
             },
+            credentials: "include",
             body: JSON.stringify({
               credential: response.access_token,
-              userInfo: userInfo,
+              userInfo,
             }),
           }
         );
 
-        const data = await backendResponse.json();
-        console.log("Backend response:", data); // Debug log
-
-        if (backendResponse.ok) {
-          localStorage.setItem("accessToken", data.access_token);
-          navigate("/propertylist");
-        } else {
-          setErrorMessage(data.error || "Google authentication failed");
+        if (!backendResponse.ok) {
+          const errorData = await backendResponse.json();
+          throw new Error(
+            errorData.error || "Failed to authenticate with backend"
+          );
         }
+
+        const data = await backendResponse.json();
+        localStorage.setItem("accessToken", data.access_token);
+        logger.info("User successfully authenticated");
+        navigate("/propertylist");
       } catch (error) {
-        console.error("Google auth error:", error);
-        setErrorMessage("An error occurred during Google authentication");
+        logger.error("Google authentication error", error);
+        setErrorMessage(
+          error.message || "An error occurred during Google authentication"
+        );
       }
     },
     onError: (error) => {
-      console.error("Google login error:", error);
+      logger.error("Google login error", error);
       setErrorMessage("Google authentication failed");
     },
     flow: "implicit",
     scope: "email profile",
+    prompt: "select_account",
+    ux_mode: "popup",
+    cookiePolicy: "single_host_origin",
   });
 
   const handleGoogleLogin = () => {
+    setErrorMessage("");
     googleLogin();
   };
 
