@@ -482,19 +482,28 @@ def delete_construction_draw(draw_id):
     try:
         draw = ConstructionDraw.query.get_or_404(draw_id)
         
-        # Validate deletion
-        draw.validate_for_deletion()
+        # Validate before starting any database operations
+        if draw.receipts.count() > 0:
+            return jsonify({
+                "error": "Cannot delete construction draw with associated receipts. Please delete the receipts first."
+            }), 400
+            
+        # Store draw data before deletion for response
+        draw_data = draw.to_dict()
         
+        # Now perform the deletion
         db.session.delete(draw)
         db.session.commit()
         
-        return jsonify({'message': 'Construction draw deleted successfully'}), 200
+        return jsonify({
+            "message": "Construction draw deleted successfully",
+            "draw": draw_data
+        }), 200
         
-    except DrawSequenceError as e:
-        return jsonify({'error': str(e)}), 400
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        print(f"Error deleting construction draw: {str(e)}")  # Debug log
+        return jsonify({"error": str(e)}), 500
 
 @property_routes.route('/construction-draws', methods=['POST'])
 @jwt_required()

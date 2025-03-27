@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from models import db, ConstructionDraw, Receipt
 from flask_jwt_extended import jwt_required
 from datetime import datetime
+from models.base import ValidationError
 
 financial_routes = Blueprint('financial', __name__)
 
@@ -9,37 +10,91 @@ financial_routes = Blueprint('financial', __name__)
 @jwt_required()
 def get_construction_draws(property_id):
     draws = ConstructionDraw.query.filter_by(property_id=property_id).all()
-    return jsonify([{
-        'id': draw.id,
-        'property_id': draw.property_id,
-        'release_date': draw.release_date.isoformat(),
-        'amount': draw.amount,
-        'bank_account_number': draw.bank_account_number,
-        'is_approved': draw.is_approved
-    } for draw in draws]), 200
+    return jsonify([draw.to_dict() for draw in draws]), 200
 
 @financial_routes.route('/construction-draws', methods=['POST'])
 @jwt_required()
 def add_construction_draw():
     try:
         data = request.get_json()
+        print("Received data:", data)  # Debug log
+        
+        # Validate required fields
+        required_fields = ['property_id', 'release_date', 'amount', 'bank_account_number']
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            return jsonify({
+                "error": f"Missing required fields: {', '.join(missing_fields)}"
+            }), 400
+
+        # Validate property_id
+        try:
+            property_id = int(data['property_id'])
+            if property_id <= 0:
+                return jsonify({"error": "Property ID must be a positive integer"}), 400
+        except (ValueError, TypeError):
+            return jsonify({"error": "property_id must be a positive integer"}), 400
+
+        # Validate and parse date - handle ISO format with timezone
+        try:
+            # Split at 'T' and take just the date part
+            date_str = data['release_date'].split('T')[0]
+            release_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except (ValueError, AttributeError) as e:
+            return jsonify({"error": f"Invalid date format: {str(e)}"}), 400
+
+        # Validate amount
+        try:
+            amount = float(data['amount'])
+            if amount <= 0:
+                return jsonify({"error": "Amount must be greater than 0"}), 400
+        except (ValueError, TypeError):
+            return jsonify({"error": "Invalid amount format"}), 400
+
+        # Create the draw with validated data
         draw = ConstructionDraw(
-            property_id=data['property_id'],
-            release_date=datetime.fromisoformat(data['release_date']).date(),
-            amount=float(data['amount']),
+            property_id=property_id,
+            release_date=release_date,
+            amount=amount,
             bank_account_number=str(data['bank_account_number']),
             is_approved=bool(data.get('is_approved', False))
         )
-        db.session.add(draw)
-        db.session.commit()
-        return jsonify({"message": "Construction draw added successfully", "id": draw.id}), 201
+
+        print("Creating draw:", {  # Debug log
+            'property_id': draw.property_id,
+            'release_date': draw.release_date,
+            'amount': draw.amount,
+            'bank_account_number': draw.bank_account_number,
+            'is_approved': draw.is_approved
+        })
+
+        try:
+            # This will trigger the validation through the event listener
+            db.session.add(draw)
+            db.session.commit()
+        except ValidationError as e:
+            db.session.rollback()
+            return jsonify({"error": str(e)}), 400
+        except Exception as e:
+            db.session.rollback()
+            print("Database error:", str(e))  # Debug log
+            return jsonify({"error": "Failed to save construction draw"}), 500
+
+        return jsonify({
+            "message": "Construction draw added successfully",
+            "id": draw.id,
+            "draw": draw.to_dict()
+        }), 201
+
     except KeyError as e:
+        print("KeyError:", str(e))  # Debug log
         return jsonify({"error": f"Missing required field: {str(e)}"}), 400
     except ValueError as e:
+        print("ValueError:", str(e))  # Debug log
         return jsonify({"error": f"Invalid value: {str(e)}"}), 400
     except Exception as e:
-        db.session.rollback()
-        return jsonify({"error": str(e)}), 500
+        print("Unexpected error:", str(e))  # Debug log
+        return jsonify({"error": str(e)}), 400  # Changed from 500 to 400 for validation errors
 
 @financial_routes.route('/construction-draws/<int:draw_id>', methods=['PUT'])
 @jwt_required()
@@ -59,13 +114,30 @@ def update_construction_draw(draw_id):
 @financial_routes.route('/construction-draws/<int:draw_id>', methods=['DELETE'])
 @jwt_required()
 def delete_construction_draw(draw_id):
-    draw = ConstructionDraw.query.get_or_404(draw_id)
     try:
+        draw = ConstructionDraw.query.get_or_404(draw_id)
+        
+        # Validate before starting any database operations
+        if draw.receipts.count() > 0:
+            return jsonify({
+                "error": "Cannot delete construction draw with associated receipts. Please delete the receipts first."
+            }), 400
+            
+        # Store draw data before deletion for response
+        draw_data = draw.to_dict()
+        
+        # Now perform the deletion
         db.session.delete(draw)
         db.session.commit()
-        return jsonify({"message": "Construction draw deleted successfully"}), 200
+        
+        return jsonify({
+            "message": "Construction draw deleted successfully",
+            "draw": draw_data
+        }), 200
+        
     except Exception as e:
         db.session.rollback()
+        print(f"Error deleting construction draw: {str(e)}")  # Debug log
         return jsonify({"error": str(e)}), 500
 
 @financial_routes.route('/receipts/<int:draw_id>', methods=['GET'])
