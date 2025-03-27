@@ -94,7 +94,37 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
 
     return {
       title: phase.name,
-      cardTitle: phase.name,
+      cardTitle: (
+        <div className="flex items-center justify-between w-full">
+          <span>{phase.name}</span>
+          <div className="flex gap-2">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onEdit(phase);
+                toast.info("Editing phase...");
+              }}
+              className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors duration-200"
+              aria-label="Edit phase"
+            >
+              <Edit2 size={18} />
+            </button>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onDelete(phase.id);
+                toast.success("Phase deleted");
+              }}
+              className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors duration-200"
+              aria-label="Delete phase"
+            >
+              <Trash2 size={18} />
+            </button>
+          </div>
+        </div>
+      ),
       cardSubtitle: `Expected: ${formatDate(
         phase.expectedStartDate
       )} - ${formatDate(phase.expectedEndDate)}`,
@@ -233,10 +263,19 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
                 cardBgColor: "rgb(255, 255, 255)",
                 cardForeColor: "rgb(55, 65, 81)",
                 titleColor: "rgb(55, 65, 81)",
+                cardTitleColor: "rgb(55, 65, 81)",
+                cardSubtitleColor: "rgb(107, 114, 128)",
+                cardDetailsColor: "rgb(107, 114, 128)",
               }}
-              cardHeight={150}
+              cardHeight={180}
               scrollable
               useReadMore={false}
+              classNames={{
+                card: "hover:shadow-lg transition-shadow duration-200",
+                cardTitle: "flex items-center justify-between w-full",
+                cardSubtitle: "text-sm",
+                cardText: "text-sm",
+              }}
             />
           ) : (
             <div className="flex items-center justify-center h-full">
