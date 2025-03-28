@@ -1,16 +1,17 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from models import db, User
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, set_access_cookies
 from sqlalchemy.exc import IntegrityError
 from google.oauth2 import id_token
 from google.auth.transport import requests
-from datetime import timedelta
+from datetime import timedelta, datetime
 import os
 import re
 from utils.images import url_to_base64
 import logging
 from typing import Tuple, Dict, Any
 from http import HTTPStatus
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -27,12 +28,22 @@ def create_auth_response(user: User, message: str = None) -> Tuple[Dict[str, Any
     Returns:
         Tuple of response dict and status code
     """
+    # Create access token with enhanced security
     access_token = create_access_token(
         identity=user.email,
-        expires_delta=timedelta(days=1)
+        fresh=True,
+        additional_claims={
+            'email': user.email,
+            'auth_time': int(time.time())
+        }
     )
     
-    response = {
+    # Set session data
+    session['user_id'] = user.id
+    session['last_login'] = datetime.utcnow().isoformat()
+    session['auth_method'] = 'email'
+    
+    response = jsonify({
         'access_token': access_token,
         'user': {
             'email': user.email,
@@ -40,11 +51,14 @@ def create_auth_response(user: User, message: str = None) -> Tuple[Dict[str, Any
             'last_name': user.last_name,
             'avatar': user.avatar
         }
-    }
+    })
     
     if message:
-        response['message'] = message
-        
+        response.json['message'] = message
+    
+    # Set secure cookie with the JWT
+    set_access_cookies(response, access_token)
+    
     return response, HTTPStatus.OK
 
 def validate_email(email: str) -> bool:
@@ -52,8 +66,25 @@ def validate_email(email: str) -> bool:
     return bool(re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email))
 
 def validate_password(password: str) -> bool:
-    """Validate password requirements"""
-    return len(password) >= 8
+    """
+    Validate password requirements:
+    - Minimum 12 characters
+    - At least one uppercase letter
+    - At least one lowercase letter
+    - At least one number
+    - At least one special character
+    """
+    if len(password) < 12:
+        return False
+    if not re.search(r'[A-Z]', password):
+        return False
+    if not re.search(r'[a-z]', password):
+        return False
+    if not re.search(r'\d', password):
+        return False
+    if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+        return False
+    return True
 
 @auth_routes.route('/register', methods=['POST'])
 def register():
@@ -120,12 +151,39 @@ def login():
 def google_auth():
     try:
         data = request.json
-        if not data or 'credential' not in data or 'userInfo' not in data:
+        if not data or 'token_info' not in data or 'userInfo' not in data:
+            logger.error("❌ Missing required data in request")
             return jsonify({'error': 'Missing required data'}), HTTPStatus.BAD_REQUEST
             
+        token_info = data['token_info']
         user_info = data['userInfo']
-        email = user_info.get('email')
         
+        logger.debug("🔍 Received Google auth request", {
+            'email': user_info.get('email'),
+            'name': user_info.get('name')
+        })
+
+        # Verify the token info
+        try:
+            # Verify token hasn't expired
+            if float(token_info.get('exp', 0)) < time.time():
+                raise ValueError('Token has expired.')
+                
+            # Verify audience matches our client ID
+            if token_info.get('aud') != os.getenv('VITE_GOOGLE_CLIENT_ID'):
+                raise ValueError('Wrong audience.')
+                
+            # Verify email is verified
+            if not user_info.get('email_verified'):
+                raise ValueError('Email not verified by Google.')
+                
+            logger.debug("✅ Token info verified successfully")
+            
+        except ValueError as e:
+            logger.error(f"❌ Token verification failed: {str(e)}")
+            return jsonify({'error': f'Invalid token: {str(e)}'}), HTTPStatus.UNAUTHORIZED
+
+        email = user_info.get('email')
         if not email:
             return jsonify({'error': 'Email not found in user info'}), HTTPStatus.BAD_REQUEST
 
@@ -148,8 +206,29 @@ def google_auth():
             logger.info(f"🔄 Updated avatar for: {email}")
             
         db.session.commit()
+        
+        # Set auth method to 'google' for this session
+        session['auth_method'] = 'google'
+        
         return create_auth_response(user)
 
     except Exception as e:
         logger.error(f"❌ Google auth error: {str(e)}")
+        return jsonify({'error': str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR
+
+@auth_routes.route('/logout', methods=['POST'])
+def logout():
+    try:
+        # Clear session
+        session.clear()
+        
+        response = jsonify({'message': 'Successfully logged out'})
+        response.delete_cookie('access_token_cookie')
+        response.delete_cookie('csrf_access_token')
+        
+        logger.info("👋 User logged out successfully")
+        return response, HTTPStatus.OK
+        
+    except Exception as e:
+        logger.error(f"❌ Logout error: {str(e)}")
         return jsonify({'error': str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR 

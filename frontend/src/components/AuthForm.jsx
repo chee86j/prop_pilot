@@ -10,6 +10,7 @@ import AuthFormImage from "../assets/images/authform02.jpeg";
 import { Eye, EyeOff } from "lucide-react";
 import { useGoogleLogin } from "@react-oauth/google";
 import logger from "../utils/logger";
+import AuthManager from "../utils/auth";
 
 const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -21,8 +22,15 @@ const AuthForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [state, setState] = useState("");
 
   const navigate = useNavigate();
+
+  const generateState = () => {
+    const array = new Uint8Array(32);
+    window.crypto.getRandomValues(array);
+    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+  };
 
   const toggleForm = () => {
     setIsLogin(!isLogin);
@@ -37,6 +45,12 @@ const AuthForm = () => {
           expiresIn: response.expires_in,
           scope: response.scope,
         });
+
+        // Verify state parameter to prevent CSRF
+        const storedState = sessionStorage.getItem('oauth_state');
+        if (state !== storedState) {
+          throw new Error('Invalid state parameter - possible CSRF attack');
+        }
 
         // Get user info using the access token
         const userInfoResponse = await fetch(
@@ -58,6 +72,17 @@ const AuthForm = () => {
           email: userInfo.email,
         });
 
+        // Get ID token using tokeninfo endpoint
+        const tokenInfoResponse = await fetch(
+          `https://oauth2.googleapis.com/tokeninfo?access_token=${response.access_token}`
+        );
+
+        if (!tokenInfoResponse.ok) {
+          throw new Error("Failed to verify token with Google");
+        }
+
+        const tokenInfo = await tokenInfoResponse.json();
+
         // Send to backend
         const backendResponse = await fetch(
           `${import.meta.env.VITE_API_URL}/auth/google`,
@@ -69,7 +94,7 @@ const AuthForm = () => {
             },
             credentials: "include",
             body: JSON.stringify({
-              credential: response.access_token,
+              token_info: tokenInfo,
               userInfo,
             }),
           }
@@ -83,7 +108,7 @@ const AuthForm = () => {
         }
 
         const data = await backendResponse.json();
-        localStorage.setItem("accessToken", data.access_token);
+        AuthManager.setToken(data.access_token);
         logger.info("User successfully authenticated");
         navigate("/propertylist");
       } catch (error) {
@@ -99,22 +124,23 @@ const AuthForm = () => {
     },
     flow: "implicit",
     scope: "email profile",
-    prompt: "select_account",
-    ux_mode: "popup",
-    cookiePolicy: "single_host_origin",
   });
 
   const handleGoogleLogin = () => {
     setErrorMessage("");
+    const newState = generateState();
+    setState(newState);
+    sessionStorage.setItem('oauth_state', newState);
     googleLogin();
   };
 
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
-      const response = await fetch("http://localhost:5000/api/login", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           email,
           password,
@@ -124,10 +150,7 @@ const AuthForm = () => {
       });
       const data = await response.json();
       if (response.ok) {
-        const currentTime = new Date().getTime();
-        const expiryTime = currentTime + 1 * 24 * 60 * 60 * 1000; // token expires after 1 day locally
-        localStorage.setItem("accessToken", data.access_token);
-        localStorage.setItem("expiryTime", expiryTime);
+        AuthManager.setToken(data.access_token);
         navigate("/propertylist");
       } else {
         setErrorMessage(data.message || "Login failed.");
@@ -154,9 +177,10 @@ const AuthForm = () => {
       return;
     }
     try {
-      const response = await fetch("http://localhost:5000/api/register", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           first_name: firstName,
           last_name: lastName,
@@ -166,15 +190,11 @@ const AuthForm = () => {
       });
       const data = await response.json();
       if (response.ok) {
-        const currentTime = new Date().getTime();
-        const expiryTime = currentTime + 1 * 24 * 60 * 60 * 1000; // token expires after 1 day
-        localStorage.setItem("accessToken", data.access_token);
-        localStorage.setItem("expiryTime", expiryTime);
+        AuthManager.setToken(data.access_token);
         setIsLogin(true);
         setErrorMessage("");
       } else {
         if (response.status === 409) {
-          // Check if status is Conflict (409)
           setErrorMessage("Email Already Registered.");
         } else {
           setErrorMessage(data.message || "Registration Failed.");

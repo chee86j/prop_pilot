@@ -23,10 +23,13 @@ def create_app():
     """Create and configure the Flask application"""
     app = Flask(__name__)
     
+    # Set the Flask secret key
+    app.secret_key = os.getenv('FLASK_SECRET_KEY', os.urandom(24))
+    
     # Configure CORS
     CORS(app, 
          resources={
-             r"/api/*": {
+             r"/*": {  # Changed from /api/* to /* to match all routes
                  "origins": ["http://localhost:5173"],
                  "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
                  "allow_headers": ["Content-Type", "Authorization"],
@@ -35,10 +38,7 @@ def create_app():
                  "max_age": 120,
                  "send_wildcard": False
              }
-         },
-         allow_headers=["Content-Type", "Authorization"],
-         expose_headers=["Content-Type", "Authorization"],
-         supports_credentials=True
+         }
     )
     
     # Configure the Flask app
@@ -55,7 +55,16 @@ def create_app():
         'SQLALCHEMY_DATABASE_URI': database_url,
         'SQLALCHEMY_TRACK_MODIFICATIONS': False,
         'JWT_SECRET_KEY': os.getenv('JWT_SECRET_KEY', 'dev-secret-key'),
-        'JWT_ACCESS_TOKEN_EXPIRES': timedelta(hours=1)
+        'JWT_ACCESS_TOKEN_EXPIRES': timedelta(hours=1),
+        # Enhanced security config (1 hr access token, secure cookies, CSRF protection, HTTP-only cookies, and secure sec
+        'JWT_COOKIE_SECURE': True,
+        'JWT_COOKIE_CSRF_PROTECT': True,
+        'JWT_CSRF_CHECK_FORM': True,
+        'SESSION_COOKIE_SECURE': True,
+        'SESSION_COOKIE_HTTPONLY': True,
+        'SESSION_COOKIE_SAMESITE': 'Lax',
+        'PERMANENT_SESSION_LIFETIME': timedelta(hours=1),
+        'SESSION_REFRESH_EACH_REQUEST': True
     })
     
     # Initialize extensions with the app
@@ -80,14 +89,18 @@ def create_app():
             
         except Exception as e:
             print(f"[ERROR] Database connection failed: {e}")
-            
-    # Add OPTIONS method handler for all routes
+    
+    # Add security headers to all responses
     @app.after_request
     def after_request(response):
-        response.headers.add('Access-Control-Allow-Origin', 'http://localhost:5173')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        # Security headers
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+        response.headers['Content-Security-Policy'] = "default-src 'self' https://accounts.google.com https://www.googleapis.com; img-src 'self' data: https: blob:; script-src 'self' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline'"
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'DENY'
+        response.headers['X-XSS-Protection'] = '1; mode=block'
+        response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+        
         return response
     
     return app

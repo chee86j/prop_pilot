@@ -34,7 +34,60 @@ making it easy to handle large datasets efficiently. The grid is integrated into
 React frontend and styled using Tailwind CSS to ensure a consistent look and feel with
 the rest of the application.
 
-## Project Setup
+## Security Features
+
+Prop Pilot implements industry-standard security measures across its stack:
+
+### Authentication & Data Protection
+   - JWT-based authentication with secure session management and 1-hour expiration
+   - Fresh token validation with additional security claims
+   - Google OAuth 2.0 integration with state validation
+   - Strong password requirements and input validation
+   - HTTP-only cookies with secure flags and SameSite policy
+   - Parameterized SQL queries to prevent injection
+   - Session management with 1-hour lifetime and automatic refresh
+
+### Frontend Security
+   - **CSRF Protection**: State parameter validation for OAuth flows
+   - **Secure Token Storage**: Client-side token management with expiration checks
+   - **Input Validation**: Comprehensive validation for all user inputs
+   - **Secure Communication**: All API requests use HTTPS with proper headers
+   - **Session Security**: Automatic token refresh and secure storage
+
+### Backend Security
+   - **Environment Configuration**: Secure secrets management using environment variables
+   - **JWT Configuration**:
+   ```python
+   JWT_COOKIE_SECURE = True
+   JWT_COOKIE_CSRF_PROTECT = True
+   JWT_CSRF_CHECK_FORM = True
+   SESSION_COOKIE_SECURE = True
+   SESSION_COOKIE_HTTPONLY = True
+   SESSION_COOKIE_SAMESITE = 'Lax'
+   JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
+   PERMANENT_SESSION_LIFETIME = timedelta(hours=1)
+   SESSION_REFRESH_EACH_REQUEST = True
+   ```
+
+### Headers & CORS
+   - Security headers:
+     - HSTS (Strict-Transport-Security)
+     - CSP (Content-Security-Policy) with strict source definitions
+     - X-Frame-Options: DENY
+     - X-Content-Type-Options: nosniff
+     - X-XSS-Protection
+     - Referrer-Policy: strict-origin-when-cross-origin
+   - Strict CORS policy with:
+     - Configured origins (http://localhost:5173)
+     - Allowed methods (GET, POST, PUT, DELETE, OPTIONS)
+     - Exposed headers
+     - Credentials support
+     - Max age configuration
+   - Secure error handling to prevent information leakage
+
+For detailed security configuration, check the troubleshooting section below.
+
+## -----PROJECT SETUP----- ##
 
 ### Install Dependencies
 
@@ -82,6 +135,9 @@ the rest of the application.
 
    # JWT Configuration
    JWT_SECRET_KEY=your_secret_key
+   
+   # Flask Configuration
+   FLASK_SECRET_KEY=your_flask_secret_key
 
    # Frontend Configuration
    VITE_API_URL=http://localhost:5000/api
@@ -92,12 +148,21 @@ the rest of the application.
 
 ### Troubleshooting
 
-- Ensure that the `.env` file is added to the `.gitignore` file to prevent it from
-  being tracked by version control.
-  -If you see COOP (Cross-Origin-Opener-Policy) warnings in the console, these are informational and don't affect functionality
-- Ensure all environment variables are correctly set and accessible
-- Verify Google Cloud Console settings match your application URLs
-- Check browser console and backend logs for detailed error messages
+- If you encounter CORS issues, verify that your CORS configuration matches the security settings
+- If you see session-related errors, ensure both `JWT_SECRET_KEY` and `FLASK_SECRET_KEY` are properly set
+- If you see COOP (Cross-Origin-Opener-Policy) warnings in the console, these are informational and don't affect functionality
+- For Google OAuth issues:
+  - Ensure all environment variables are correctly set and accessible
+  - Verify Google Cloud Console settings match your application URLs
+  - Check that the Client ID matches in both frontend and backend
+- For security-related issues:
+  - Check browser console and backend logs for detailed error messages
+  - Verify all security headers are being properly set
+  - Ensure cookies are being properly handled with secure flags
+- For database connection issues:
+  - Verify database credentials and permissions
+  - Check that all necessary tables are created
+  - Ensure proper connection string format
 
 ### Setup PostgreSQL Database
 
@@ -110,7 +175,7 @@ Windows - `pgAdmin` or `DBeaver` or `HeidiSQL`as your db management tool
    & enter your password plus
    a. add the bin path in your `Advanced System Settings`-->`Environment Variables`-->`System Variables`-->Select `Edit` for your path and add the path to your PostgreSQL /bin folder
 
-# Database Setup
+### Database Setup
 
 1. Run the following in the root folder:
    `psql -U postgres`
