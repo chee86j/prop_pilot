@@ -636,7 +636,8 @@ const AddProperty = () => {
       city: parsedAddress.city,
       state: parsedAddress.state,
       zipCode: parsedAddress.zipCode,
-      county: parsedAddress.county || "",
+      // Use the county from scraped data if available, otherwise use parsed address county
+      county: scrapedProperty.county || parsedAddress.county || "",
 
       // Financial data
       purchaseCost: parseFloat(scrapedProperty.price) || 0,

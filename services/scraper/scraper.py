@@ -61,6 +61,23 @@ def parse_page_selenium(url):
         data = []
         rows = table.find('tbody').find_all('tr') if table.find('tbody') else []
         
+        # Determine county based on URL
+        county_mapping = {
+            'countyId=7': 'Bergen County',
+            'countyId=10': 'Hudson County',
+            'countyId=2': 'Essex County',
+            'countyId=9': 'Morris County',
+            'countyId=15': 'Union County',
+            'countyId=19': 'Sussex County',
+            'countyId=21': 'Warren County'
+        }
+        
+        county = None
+        for county_id, county_name in county_mapping.items():
+            if county_id in url:
+                county = county_name
+                break
+        
         # Determine if it's Hudson County by checking the URL
         is_hudson_county = 'countyId=10' in url
         
@@ -86,7 +103,8 @@ def parse_page_selenium(url):
                         'address': cells[3].text.strip() if len(cells) > 3 else None,
                         'plaintiff': cells[4].text.strip() if len(cells) > 4 else None,
                         'defendant': cells[5].text.strip() if len(cells) > 5 else None,
-                        'price': int(cells[6].text.strip().replace('$', '').replace(',', '')) if len(cells) > 6 and cells[6].text.strip() else 0
+                        'price': int(cells[6].text.strip().replace('$', '').replace(',', '')) if len(cells) > 6 and cells[6].text.strip() else 0,
+                        'county': county
                     }
                 else:
                     # Standard column order for other counties
@@ -98,7 +116,8 @@ def parse_page_selenium(url):
                         'plaintiff': cells[3].text.strip() if len(cells) > 3 else None,
                         'defendant': cells[4].text.strip() if len(cells) > 4 else None,
                         'address': cells[5].text.strip() if len(cells) > 5 else None,
-                        'price': int(cells[6].text.strip().replace('$', '').replace(',', '')) if len(cells) > 6 and cells[6].text.strip() else 0
+                        'price': int(cells[6].text.strip().replace('$', '').replace(',', '')) if len(cells) > 6 and cells[6].text.strip() else 0,
+                        'county': county
                     }
 
                 data.append(row_data)
