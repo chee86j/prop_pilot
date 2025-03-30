@@ -1,3 +1,12 @@
+/* This file contains tools for speed improvements. 
+   1. The debounce function prevents too many rapid-fire events (like saving
+      while typing)
+   2. Throttle ensures smooth scrolling by limiting how often functions run.
+   3. memoize groups multiple operations together (batchCalls), and manage loading images 
+      only when they're about to be visible on screen
+   4. Stopwatch (measurePerformance) to help you find slow parts of code
+ */
+
 // Performance optimization utilities
 
 /**

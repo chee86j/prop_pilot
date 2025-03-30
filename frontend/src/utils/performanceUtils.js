@@ -1,3 +1,10 @@
+/* Simplified version of our performance tools, focusing on the most essential speed improvements.
+   1. Spacing out events (debounce), 
+   2. Controlling scroll updates (throttle)
+   3. Loading images efficiently (createOptimizedObserver)
+   4. Measure how fast your code runs during development (measurePerformance)
+ */
+
 /**
  * Creates a debounced version of a function that delays execution until after wait milliseconds
  * @param {Function} func - The function to debounce
@@ -61,7 +68,7 @@ export function createOptimizedObserver(callback, options = {}) {
  */
 export function measurePerformance(func, label = "Function Performance") {
   return function measured(...args) {
-    if (process.env.NODE_ENV !== "production") {
+    if (import.meta.env.MODE !== "production") {
       performance.mark(`${label}-start`);
       const result = func.apply(this, args);
       performance.mark(`${label}-end`);

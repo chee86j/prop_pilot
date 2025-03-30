@@ -1,9 +1,8 @@
 // Performance monitoring utility
-/*
-This file served to track performance metrics using web-vitals,
-1. Collects and sends performance metrics to a remote analytics service
-2. Implements performance marks and measures to track time to interactive
-3. Handles different browser behaviors for sending metrics
+/*  This file served to track performance metrics using web-vitals,
+    1. Collects and sends performance metrics to a remote analytics service
+    2. Implements performance marks and measures to track time to interactive
+    3. Handles different browser behaviors for sending metrics
 */
 import { onCLS, onFID, onLCP, onTTFB, onFCP } from "web-vitals";
 
