@@ -5,28 +5,37 @@ import {
   Navigate,
   useParams,
 } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense, lazy } from "react";
 import Navbar from "./components/Navbar";
-import PropertyDetails from "./components/PropertyDetails";
-import Home from "./components/Home";
-import Testimonials from "./components/Testimonials";
-import About from "./components/About";
-import AuthForm from "./components/AuthForm";
-import Contact from "./components/Contact";
-import Faq from "./components/FAQ";
-import Lender from "./components/Lender";
-import Profile from "./components/Profile";
-import PropertyList from "./components/PropertyList";
-import AddProperty from "./components/AddProperty";
-import ConstructionDraw from "./components/ConstructionDraw";
-import Receipt from "./components/Receipt";
-import ExcelStyleGrid from "./components/ExcelStyleGrid";
 import { fetchUserProfile } from "./utils/fetchUserProfile";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+
+// Lazy load components
+const PropertyDetails = lazy(() => import("./components/PropertyDetails"));
+const Home = lazy(() => import("./components/Home"));
+const Testimonials = lazy(() => import("./components/Testimonials"));
+const About = lazy(() => import("./components/About"));
+const AuthForm = lazy(() => import("./components/AuthForm"));
+const Contact = lazy(() => import("./components/Contact"));
+const Faq = lazy(() => import("./components/FAQ"));
+const Lender = lazy(() => import("./components/Lender"));
+const Profile = lazy(() => import("./components/Profile"));
+const PropertyList = lazy(() => import("./components/PropertyList"));
+const AddProperty = lazy(() => import("./components/AddProperty"));
+const ConstructionDraw = lazy(() => import("./components/ConstructionDraw"));
+const Receipt = lazy(() => import("./components/Receipt"));
+const ExcelStyleGrid = lazy(() => import("./components/ExcelStyleGrid"));
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center min-h-[200px]">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+  </div>
+);
 
 function App() {
   const [auth, setAuth] = useState({
@@ -90,32 +99,37 @@ function App() {
             theme="light"
             containerId="root-toast"
           />
-          <Routes>
-            <Route path="/" element={<Navigate to="/home" />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="/profile" element={<Profile auth={auth} />} />
-            <Route
-              path="/propertylist"
-              element={<PropertyList auth={auth} />}
-            />
-            <Route path="/addproperty" element={<AddProperty auth={auth} />} />
-            <Route
-              path="/property/:propertyId"
-              element={<PropertyDetailsWrapper auth={auth} />}
-            />
-            <Route
-              path="/constructiondraw/:propertyId"
-              element={<ConstructionDrawWrapper />}
-            />
-            <Route path="/excelstylegrid" element={<ExcelStyleGrid />} />
-            <Route path="/receipts/:drawId" element={<ReceiptsWrapper />} />
-            <Route path="/testimonials" element={<Testimonials />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/authform" element={<AuthForm />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/faq" element={<Faq />} />
-            <Route path="/lender" element={<Lender />} />
-          </Routes>
+          <Suspense fallback={<LoadingFallback />}>
+            <Routes>
+              <Route path="/" element={<Navigate to="/home" />} />
+              <Route path="/home" element={<Home />} />
+              <Route path="/profile" element={<Profile auth={auth} />} />
+              <Route
+                path="/propertylist"
+                element={<PropertyList auth={auth} />}
+              />
+              <Route
+                path="/addproperty"
+                element={<AddProperty auth={auth} />}
+              />
+              <Route
+                path="/property/:propertyId"
+                element={<PropertyDetailsWrapper auth={auth} />}
+              />
+              <Route
+                path="/constructiondraw/:propertyId"
+                element={<ConstructionDrawWrapper />}
+              />
+              <Route path="/excelstylegrid" element={<ExcelStyleGrid />} />
+              <Route path="/receipts/:drawId" element={<ReceiptsWrapper />} />
+              <Route path="/testimonials" element={<Testimonials />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/authform" element={<AuthForm />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/faq" element={<Faq />} />
+              <Route path="/lender" element={<Lender />} />
+            </Routes>
+          </Suspense>
         </div>
       </Router>
     </GoogleOAuthProvider>

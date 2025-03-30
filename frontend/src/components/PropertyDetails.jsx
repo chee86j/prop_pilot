@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect, useRef, memo, useCallback } from "react";
 import { useSwipeable } from "react-swipeable";
+import { debounce, throttle } from "../utils/performanceUtils";
 import ConstructionDraw from "./ConstructionDraw";
 import PhaseTimeline from "./PhaseTimeline";
 import PhaseForm from "./PhaseForm";
@@ -392,159 +393,8 @@ const PropertyDetails = ({ propertyId }) => {
     fetchPhases();
   }, [propertyId, fetchPropertyDetails]);
 
-  const handleEditChange = (e) => {
-    setEditedDetails({ ...editedDetails, [e.target.name]: e.target.value });
-  };
-
-  const toggleEditMode = () => {
-    setIsEditing(!isEditing);
-  };
-
-  const saveChanges = async () => {
+  const saveChanges = async (details) => {
     try {
-      // Clear any previous error messages
-      setError("");
-
-      // Only validate required fields from Location section
-      const requiredFields = [
-        "propertyName",
-        "address",
-        "city",
-        "state",
-        "zipCode",
-      ];
-
-      // Validate required fields
-      const missingFields = requiredFields.filter(
-        (field) => !editedDetails[field]?.toString().trim()
-      );
-
-      if (missingFields.length > 0) {
-        const formattedFields = missingFields
-          .map((field) => field.replace(/([A-Z])/g, " $1").toLowerCase())
-          .map((field) => field.charAt(0).toUpperCase() + field.slice(1))
-          .join(", ");
-        setError(`Please fill in required fields: ${formattedFields}`);
-        toast.error("Please fill in all required fields", {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-        return;
-      }
-
-      // Define numeric fields (remove zipCode from this list as it should be a string)
-      const numericFields = [
-        "purchaseCost",
-        "refinanceCost",
-        "equipmentCost",
-        "constructionCost",
-        "largeRepairCost",
-        "renovationCost",
-        "totalRehabCost",
-        "kickStartFunds",
-        "lenderConstructionDrawsReceived",
-        "utilitiesCost",
-        "sewer",
-        "water",
-        "lawn",
-        "garbage",
-        "yearlyPropertyTaxes",
-        "mortgagePaid",
-        "homeownersInsurance",
-        "expectedYearlyRent",
-        "rentalIncomeReceived",
-        "numUnits",
-        "vacancyRate",
-        "avgTenantStay",
-        "otherMonthlyIncome",
-        "vacancyLoss",
-        "managementFees",
-        "maintenanceCosts",
-        "totalEquity",
-        "arvSalePrice",
-        "realtorFees",
-        "propTaxTillEndOfYear",
-        "lenderLoanBalance",
-        "payOffStatement",
-        "attorneyFees",
-        "miscFees",
-        "utilities",
-        "cash2closeFromPurchase",
-        "cash2closeFromRefinance",
-        "totalRehabCosts",
-        "expectedRemainingRentEndToYear",
-        "totalExpenses",
-        "totalConstructionDrawsReceived",
-        "projectNetProfitIfSold",
-        "cashFlow",
-        "cashRoi",
-        "rule2Percent",
-        "rule50Percent",
-        "financeAmount",
-        "purchaseCapRate",
-        "downPaymentPercentage",
-        "loanInterestRate",
-        "pmiPercentage",
-        "mortgageYears",
-        "lenderPointsAmount",
-        "otherFees",
-      ];
-
-      // Define fields that should always be strings, even if they contain numbers
-      const stringFields = [
-        "propertyName",
-        "address",
-        "city",
-        "state",
-        "zipCode",
-        "waterAccountNumber",
-        "electricAccountNumber",
-        "gasOrOilAccountNumber",
-        "sewerAccountNumber",
-        "loanNumber",
-        "phoneNumbers",
-      ];
-
-      // Clean and prepare the data
-      const cleanedDetails = {};
-
-      // Process each field in editedDetails
-      for (const [key, value] of Object.entries(editedDetails)) {
-        // Handle null/undefined/empty values
-        if (value === undefined || value === null || value === "") {
-          cleanedDetails[key] = null;
-          continue;
-        }
-
-        // Convert value to string and trim
-        const trimmedValue = value.toString().trim();
-
-        // Handle empty strings after trimming
-        if (trimmedValue === "") {
-          cleanedDetails[key] = null;
-          continue;
-        }
-
-        if (stringFields.includes(key)) {
-          // Always keep these fields as strings
-          cleanedDetails[key] = trimmedValue;
-        } else if (numericFields.includes(key)) {
-          // Convert to number only for numeric fields
-          const numValue = Number(trimmedValue);
-          cleanedDetails[key] = isNaN(numValue) ? null : numValue;
-        } else {
-          // For all other fields, keep as trimmed string
-          cleanedDetails[key] = trimmedValue;
-        }
-      }
-
-      // Log the cleaned data for debugging
-      console.log("Sending data to server:", cleanedDetails);
-
       const response = await fetch(
         `http://localhost:5000/api/properties/${propertyId}`,
         {
@@ -553,75 +403,73 @@ const PropertyDetails = ({ propertyId }) => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
-          body: JSON.stringify(cleanedDetails),
+          body: JSON.stringify(details),
         }
       );
-
-      // Log the raw response for debugging
-      console.log("Server response status:", response.status);
-
-      let data;
-      const responseText = await response.text();
-      console.log("Server response text:", responseText);
-
-      try {
-        data = JSON.parse(responseText);
-      } catch (e) {
-        console.error("Error parsing response:", e);
-        throw new Error("Invalid response from server");
-      }
-
-      if (!response.ok) {
-        const errorMessage =
-          data.message || data.error || "Error saving property details";
-        throw new Error(errorMessage);
-      }
-
-      // Update both state variables with the new data
-      setPropertyDetails(data);
-      setEditedDetails(data);
-
-      // Toggle edit mode after state updates
-      toggleEditMode();
-
-      toast.success("Property details saved successfully!", {
-        position: "bottom-center",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-
-      // Force a re-fetch of the data to ensure we have the latest state
-      const refreshResponse = await fetch(
-        `http://localhost:5000/api/properties/${propertyId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        }
-      );
-
-      if (refreshResponse.ok) {
-        const refreshedData = await refreshResponse.json();
-        setPropertyDetails(refreshedData);
-        setEditedDetails(refreshedData);
-      }
+      if (!response.ok) throw new Error("Failed to save changes");
     } catch (error) {
-      console.error("Error saving property details:", error);
-      const errorMessage = error.message || "Failed to save property details.";
-      setError(errorMessage);
-
-      toast.error(errorMessage, {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+      console.error("Error saving changes:", error);
     }
+  };
+
+  const debouncedSave = useCallback(
+    debounce((details) => {
+      saveChanges(details);
+    }, 1000),
+    [saveChanges]
+  );
+
+  // Throttled scroll handler
+  /*
+  1. Throttles scroll events to reduce the number of times the handler is called
+  2. Uses throttle to prevent rapid calls to handleScroll
+  3. Properly handles the throttled scroll handler
+  */
+  const handleScroll = useCallback(
+    throttle(() => {
+      const sections = Object.keys(expandedSections);
+      const viewportHeight = window.innerHeight;
+
+      sections.forEach((section) => {
+        const element = document.getElementById(section);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          if (rect.top >= 0 && rect.top <= viewportHeight / 2) {
+            setExpandedSections((prev) => ({
+              ...prev,
+              [section]: true,
+            }));
+          }
+        }
+      });
+    }, 100),
+    [expandedSections]
+  );
+
+  // Use effect for scroll listener
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [handleScroll]);
+
+  // Optimized input handler
+  const handleInputChange = useCallback(
+    (e) => {
+      const { name, value } = e.target;
+      setEditedDetails((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+      debouncedSave({
+        ...editedDetails,
+        [name]: value,
+      });
+    },
+    [editedDetails, debouncedSave]
+  );
+
+  const toggleEditMode = () => {
+    setIsEditing(!isEditing);
   };
 
   const cancelChanges = () => {
@@ -664,7 +512,7 @@ const PropertyDetails = ({ propertyId }) => {
           type={type}
           name={name}
           value={value || ""}
-          onChange={handleEditChange}
+          onChange={handleInputChange}
           required={isRequired}
           className={`
             w-full px-3 py-2 rounded-lg border
@@ -1592,4 +1440,4 @@ const PropertyDetails = ({ propertyId }) => {
   );
 };
 
-export default PropertyDetails;
+export default memo(PropertyDetails);

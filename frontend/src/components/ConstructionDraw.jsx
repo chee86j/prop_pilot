@@ -135,8 +135,7 @@ const ConstructionDraw = ({ propertyId }) => {
     };
 
     fetchReceiptsAndCalculate();
-  }, [draws.length]); // Only re-run when the number of draws changes
-
+  }, [draws]);
   const formatDate = (dateString) => {
     if (!dateString) return "";
     try {
@@ -216,7 +215,7 @@ const ConstructionDraw = ({ propertyId }) => {
       // Format the date to YYYY-MM-DD
       const formattedDate = new Date(newDraw.release_date)
         .toISOString()
-        .split('T')[0];
+        .split("T")[0];
 
       const requestData = {
         ...newDraw,
@@ -224,8 +223,8 @@ const ConstructionDraw = ({ propertyId }) => {
         property_id: parseInt(propertyId, 10),
         amount: parseFloat(newDraw.amount),
       };
-      
-      console.log('Sending construction draw data:', requestData);
+
+      console.log("Sending construction draw data:", requestData);
 
       const response = await fetch(
         "http://localhost:5000/api/construction-draws",
@@ -240,7 +239,7 @@ const ConstructionDraw = ({ propertyId }) => {
       );
 
       const data = await response.json();
-      console.log('Response from server:', data);
+      console.log("Response from server:", data);
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to add construction draw");
@@ -250,7 +249,7 @@ const ConstructionDraw = ({ propertyId }) => {
       setDraws((prevDraws) => {
         const newDraws = [
           ...prevDraws,
-          data.draw // Use data.draw since that's how the backend sends it
+          data.draw, // Use data.draw since that's how the backend sends it
         ].sort((a, b) => new Date(a.release_date) - new Date(b.release_date));
         return newDraws;
       });
@@ -265,9 +264,12 @@ const ConstructionDraw = ({ propertyId }) => {
       setShowAddDrawForm(false);
       toast.success("Construction draw added successfully", toastConfig);
     } catch (error) {
-      console.error('Error adding construction draw:', error);
-      console.error('Error details:', error.message);
-      toast.error(error.message || "Failed to add construction draw", toastConfig);
+      console.error("Error adding construction draw:", error);
+      console.error("Error details:", error.message);
+      toast.error(
+        error.message || "Failed to add construction draw",
+        toastConfig
+      );
       setValidationErrors((prev) => ({ ...prev, draw: error.message }));
     }
   };
@@ -285,17 +287,23 @@ const ConstructionDraw = ({ propertyId }) => {
       );
 
       const data = await response.json();
-      console.log('Delete response:', data);
+      console.log("Delete response:", data);
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to delete construction draw");
       }
 
       setDraws(draws.filter((draw) => draw.id !== drawId));
-      toast.success(data.message || "Construction draw deleted successfully", toastConfig);
+      toast.success(
+        data.message || "Construction draw deleted successfully",
+        toastConfig
+      );
     } catch (error) {
-      console.error('Error deleting draw:', error);
-      toast.error(error.message || "Failed to delete construction draw", toastConfig);
+      console.error("Error deleting draw:", error);
+      toast.error(
+        error.message || "Failed to delete construction draw",
+        toastConfig
+      );
       setValidationErrors((prev) => ({ ...prev, draw: error.message }));
     }
   };
