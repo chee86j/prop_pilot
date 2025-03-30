@@ -22,7 +22,6 @@ const STATIC_ASSETS = [
   "/",
   "/index.html",
   "/manifest.json",
-  "/favicon.ico",
   "/offline.html",
   "/assets/icons/logo.svg",
   "/assets/icons/google.svg",
@@ -86,16 +85,30 @@ const ROUTE_STRATEGIES = [
   },
 ];
 
-// Install event - cache static assets
+// Install event - cache static assets with error handling
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then((cache) => {
+    (async () => {
+      try {
+        const cache = await caches.open(CACHE_NAME);
         console.log("📦 Caching static assets");
-        return cache.addAll(STATIC_ASSETS);
-      })
-      .then(() => self.skipWaiting())
+
+        // Cache assets one by one to handle failures gracefully
+        await Promise.all(
+          STATIC_ASSETS.map(async (url) => {
+            try {
+              await cache.add(url);
+            } catch (error) {
+              console.warn(`⚠️ Failed to cache: ${url}`, error);
+            }
+          })
+        );
+
+        await self.skipWaiting();
+      } catch (error) {
+        console.error("❌ Service worker installation failed:", error);
+      }
+    })()
   );
 });
 
