@@ -112,7 +112,7 @@ export const PHASE_CATEGORIES = {
   },
   inspection: {
     name: "Inspections & Compliance",
-    color: "orange",
+    color: "green",
     description: "Municipal inspections and regulatory compliance",
   },
   sale: {
@@ -128,6 +128,14 @@ export const calculateProgress = (phases) => {
 
   let totalProgress = 0;
   const phaseMap = new Map(PREDEFINED_PHASES.map((p) => [p.name, p]));
+
+  // Check for special completion cases
+  const hasClosingAndRenovations = phases.some(
+    (p) => p.name === "Closing and Renovations" && p.endDate
+  );
+  const hasFinalsAndFinalInspections =
+    phases.some((p) => p.name === "Finals (Operator)" && p.endDate) &&
+    phases.some((p) => p.name === "Final Inspections (Municipal)" && p.endDate);
 
   phases.forEach((phase) => {
     const phaseInfo = phaseMap.get(phase.name);
@@ -153,6 +161,37 @@ export const calculateProgress = (phases) => {
       totalProgress -= phaseInfo.weight * 0.25;
     }
   });
+
+  // Apply special completion rules
+  if (hasClosingAndRenovations) {
+    // Set Property Acquisition category to 100%
+    const acquisitionPhases = phases.filter((p) => {
+      const phaseInfo = phaseMap.get(p.name);
+      return phaseInfo && phaseInfo.category === "acquisition";
+    });
+    acquisitionPhases.forEach((p) => {
+      if (!p.endDate) {
+        totalProgress += phaseMap.get(p.name).weight;
+      }
+    });
+  }
+
+  if (hasFinalsAndFinalInspections) {
+    // Set both Renovation & Construction and Inspections & Compliance categories to 100%
+    const renovationAndInspectionPhases = phases.filter((p) => {
+      const phaseInfo = phaseMap.get(p.name);
+      return (
+        phaseInfo &&
+        (phaseInfo.category === "renovation" ||
+          phaseInfo.category === "inspection")
+      );
+    });
+    renovationAndInspectionPhases.forEach((p) => {
+      if (!p.endDate) {
+        totalProgress += phaseMap.get(p.name).weight;
+      }
+    });
+  }
 
   return Math.min(Math.max(Math.round(totalProgress * 100), 0), 100);
 };

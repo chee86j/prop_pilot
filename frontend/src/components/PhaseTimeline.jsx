@@ -73,6 +73,28 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
 
   // Calculate progress for each category
   const calculateCategoryProgress = (category) => {
+    // Check for special completion cases
+    const hasClosingAndRenovations = phases.some(
+      (p) => p.name === "Closing and Renovations" && p.endDate
+    );
+    const hasFinalsAndFinalInspections =
+      phases.some((p) => p.name === "Finals (Operator)" && p.endDate) &&
+      phases.some(
+        (p) => p.name === "Final Inspections (Municipal)" && p.endDate
+      );
+
+    // Handle special cases first
+    if (category === "acquisition" && hasClosingAndRenovations) {
+      return 100;
+    }
+    if (
+      (category === "renovation" || category === "inspection") &&
+      hasFinalsAndFinalInspections
+    ) {
+      return 100;
+    }
+
+    // Regular progress calculation for other cases
     const categoryPhases = phases.filter((phase) => {
       const predefinedPhase = PREDEFINED_PHASES.find(
         (p) => p.name === phase.name

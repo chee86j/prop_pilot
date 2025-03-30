@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { PREDEFINED_PHASES } from "../constants/phases";
+import { PREDEFINED_PHASES, PHASE_CATEGORIES } from "../constants/phases";
 import { Search, ChevronDown, ChevronUp } from "lucide-react";
 
 const initialFormState = {
@@ -11,12 +11,15 @@ const initialFormState = {
   startDate: "",
   expectedEndDate: "",
   endDate: "",
+  category: "",
+  isCustomPhase: false,
 };
 
 const PhaseForm = ({ onSave, onCancel, initialData }) => {
   const [formData, setFormData] = useState(initialFormState);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showCustomInput, setShowCustomInput] = useState(false);
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -40,17 +43,22 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
   // Update form data when initialData changes
   useEffect(() => {
     if (initialData && Object.keys(initialData).length > 0) {
+      const predefinedPhase = PREDEFINED_PHASES.find(
+        (p) => p.name === initialData.name
+      );
       setFormData({
-        name: initialData.name || "",
-        expectedStartDate: initialData.expectedStartDate || "",
-        startDate: initialData.startDate || "",
-        expectedEndDate: initialData.expectedEndDate || "",
-        endDate: initialData.endDate || "",
+        ...initialData,
+        category:
+          initialData.category ||
+          (predefinedPhase ? predefinedPhase.category : ""),
+        isCustomPhase: !predefinedPhase,
       });
       setSearchTerm(initialData.name || "");
+      setShowCustomInput(!predefinedPhase);
     } else {
       setFormData(initialFormState);
       setSearchTerm("");
+      setShowCustomInput(false);
     }
   }, [initialData]);
 
@@ -62,10 +70,26 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
     }
   };
 
-  const handlePhaseSelect = (phaseName) => {
-    setFormData({ ...formData, name: phaseName });
-    setSearchTerm(phaseName);
+  const handlePhaseSelect = (phase) => {
+    setFormData({
+      ...formData,
+      name: phase.name,
+      category: phase.category,
+      isCustomPhase: false,
+    });
+    setSearchTerm(phase.name);
     setIsDropdownOpen(false);
+    setShowCustomInput(false);
+  };
+
+  const handleCustomPhase = () => {
+    setShowCustomInput(true);
+    setIsDropdownOpen(false);
+    setFormData({
+      ...formData,
+      name: searchTerm,
+      isCustomPhase: true,
+    });
   };
 
   const validateFormData = (data) => {
@@ -79,6 +103,10 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
     }
     if (!data.expectedEndDate) {
       toast.error("Please enter an expected end date");
+      return false;
+    }
+    if (!data.category) {
+      toast.error("Please select a category");
       return false;
     }
     return true;
@@ -101,7 +129,7 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
     >
       <ToastContainer />
 
-      {/* Phase Name Combobox */}
+      {/* Phase Name Input/Selection */}
       <div className="mb-4 relative" ref={dropdownRef}>
         <label
           htmlFor="name"
@@ -124,21 +152,23 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
             className="w-full p-2 pr-10 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Type or select a phase name"
           />
-          <button
-            type="button"
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-          >
-            {isDropdownOpen ? (
-              <ChevronUp size={20} />
-            ) : (
-              <ChevronDown size={20} />
-            )}
-          </button>
+          {!showCustomInput && (
+            <button
+              type="button"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {isDropdownOpen ? (
+                <ChevronUp size={20} />
+              ) : (
+                <ChevronDown size={20} />
+              )}
+            </button>
+          )}
         </div>
 
         {/* Dropdown Menu */}
-        {isDropdownOpen && (
+        {isDropdownOpen && !showCustomInput && (
           <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
             <div className="sticky top-0 bg-white p-2 border-b">
               <div className="relative">
@@ -159,20 +189,51 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
               <button
                 key={index}
                 type="button"
-                onClick={() => handlePhaseSelect(phase.name)}
+                onClick={() => handlePhaseSelect(phase)}
                 className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
               >
-                {phase.name}
+                <span className="block font-medium">{phase.name}</span>
+                <span className="text-sm text-gray-500">
+                  {PHASE_CATEGORIES[phase.category].name}
+                </span>
               </button>
             ))}
-            {filteredPhases.length === 0 && (
-              <div className="px-4 py-2 text-gray-500 text-sm">
-                No matches found. You can use your custom phase name.
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={handleCustomPhase}
+              className="w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50 focus:bg-blue-50 focus:outline-none font-medium"
+            >
+              + Create Custom Phase
+            </button>
           </div>
         )}
       </div>
+
+      {/* Category Selection - Show only for custom phases or when editing */}
+      {(showCustomInput || formData.isCustomPhase) && (
+        <div className="mb-4">
+          <label
+            htmlFor="category"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Category
+            <span className="text-red-500">*</span>
+          </label>
+          <select
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+            className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">Select a category</option>
+            {Object.entries(PHASE_CATEGORIES).map(([key, category]) => (
+              <option key={key} value={key}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Date Fields Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
