@@ -162,7 +162,53 @@ const ConstructionDraw = ({ propertyId }) => {
     return () => {
       isMounted = false;
     };
-  }, [propertyId]); // Only depend on propertyId, not draws
+  }, [draws]); // Update dependency to track changes to draws array
+
+  // Function to calculate financial summary from draws data
+  const calculateFinancialSummary = useCallback((drawsData) => {
+    if (!drawsData || !drawsData.length) {
+      setDrawStats({
+        totalDraws: 0,
+        totalReceipts: 0,
+        completionPercentage: 0,
+        remainingBalance: 0,
+      });
+      return;
+    }
+
+    const totalDrawAmount = drawsData.reduce(
+      (sum, draw) => sum + (Number(draw?.amount) || 0),
+      0
+    );
+
+    let totalReceiptAmount = 0;
+    drawsData.forEach((draw) => {
+      if (draw && Array.isArray(draw.receipts)) {
+        draw.receipts.forEach((receipt) => {
+          const amount = Number(receipt?.amount || 0);
+          if (!isNaN(amount)) {
+            totalReceiptAmount += amount;
+          }
+        });
+      }
+    });
+
+    const completionPercentage =
+      totalDrawAmount > 0 ? (totalReceiptAmount / totalDrawAmount) * 100 : 0;
+    const remainingBalance = totalDrawAmount - totalReceiptAmount;
+
+    setDrawStats({
+      totalDraws: totalDrawAmount,
+      totalReceipts: totalReceiptAmount,
+      completionPercentage: Math.min(completionPercentage, 100),
+      remainingBalance: Math.max(remainingBalance, 0),
+    });
+  }, []);
+
+  // Use the reusable calculation function in the useEffect
+  useEffect(() => {
+    calculateFinancialSummary(draws);
+  }, [draws, calculateFinancialSummary]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -275,6 +321,10 @@ const ConstructionDraw = ({ propertyId }) => {
 
       // Update the state with the complete data
       setDraws(drawsWithReceipts);
+
+      // Recalculate financial summary with updated data
+      calculateFinancialSummary(drawsWithReceipts);
+
       setEditDrawId(null);
       setEditedDraw({});
       toast.success("Draw updated successfully", toastConfig);
@@ -358,6 +408,9 @@ const ConstructionDraw = ({ propertyId }) => {
       // Update the state with the complete sorted list from the server
       setDraws(sortedDraws);
 
+      // Calculate financial summary with the new data
+      calculateFinancialSummary(sortedDraws);
+
       // Reset form
       setNewDraw({
         release_date: "",
@@ -398,7 +451,12 @@ const ConstructionDraw = ({ propertyId }) => {
         throw new Error(data.error || "Failed to delete construction draw");
       }
 
-      setDraws(draws.filter((draw) => draw.id !== drawId));
+      const updatedDraws = draws.filter((draw) => draw.id !== drawId);
+      setDraws(updatedDraws);
+
+      // Recalculate financial summary after deletion
+      calculateFinancialSummary(updatedDraws);
+
       toast.success(
         data.message || "Construction draw deleted successfully",
         toastConfig
@@ -507,6 +565,14 @@ const ConstructionDraw = ({ propertyId }) => {
 
         // Update draws with the complete data
         setDraws(drawsWithReceipts);
+
+        // Log successful update for debugging
+        console.log("Financial summary updated:", {
+          draws: totalDrawAmount,
+          receipts: totalReceiptAmount,
+          completion: completionPercentage.toFixed(1) + "%",
+          remaining: remainingBalance,
+        });
       } catch (error) {
         console.error("Failed to refresh data:", error);
         setError("Failed to refresh data");
@@ -619,6 +685,14 @@ const ConstructionDraw = ({ propertyId }) => {
       <h2 className="text-xl md:text-2xl font-bold text-gray-700 mb-6">
         Construction Draws
       </h2>
+
+      {/* Debug output - comment out in production */}
+      <div className="text-xs text-gray-500 mb-2" style={{ display: "none" }}>
+        Draws: {draws.length} | Draw Stats: Draw Amount:{" "}
+        {formatCurrency(drawStats.totalDraws)} | Receipt Amount:{" "}
+        {formatCurrency(drawStats.totalReceipts)} | Completion:{" "}
+        {drawStats.completionPercentage.toFixed(1)}%
+      </div>
 
       <DrawStatistics stats={drawStats} />
 

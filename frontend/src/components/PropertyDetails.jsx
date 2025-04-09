@@ -26,6 +26,187 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ResearchDropdown from "./ResearchDropdown";
 
+// Property Summary Component
+const PropertySummary = ({ property }) => {
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value || 0);
+  };
+
+  const formatPercent = (value) => {
+    return `${(value || 0).toFixed(2)}%`;
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6">
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-4">
+        <h2 className="text-white text-lg font-semibold">
+          Property Summary Dashboard
+        </h2>
+      </div>
+      <div className="p-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {/* Financial Metrics */}
+          <div className="bg-blue-50 p-3 rounded-lg">
+            <p className="text-sm text-blue-600 font-medium">Purchase Price</p>
+            <p className="text-xl font-bold">
+              {formatCurrency(property.purchaseCost)}
+            </p>
+          </div>
+
+          <div className="bg-green-50 p-3 rounded-lg">
+            <p className="text-sm text-green-600 font-medium">ARV</p>
+            <p className="text-xl font-bold">
+              {formatCurrency(property.arvSalePrice)}
+            </p>
+          </div>
+
+          <div className="bg-purple-50 p-3 rounded-lg">
+            <p className="text-sm text-purple-600 font-medium">Rehab Cost</p>
+            <p className="text-xl font-bold">
+              {formatCurrency(property.totalRehabCost)}
+            </p>
+          </div>
+
+          <div className="bg-amber-50 p-3 rounded-lg">
+            <p className="text-sm text-amber-600 font-medium">Total Equity</p>
+            <p className="text-xl font-bold">
+              {formatCurrency(property.totalEquity)}
+            </p>
+          </div>
+
+          {/* ROI Metrics */}
+          <div className="bg-red-50 p-3 rounded-lg">
+            <p className="text-sm text-red-600 font-medium">Cash ROI</p>
+            <p className="text-xl font-bold">
+              {formatPercent(property.cashRoi)}
+            </p>
+          </div>
+
+          <div className="bg-teal-50 p-3 rounded-lg">
+            <p className="text-sm text-teal-600 font-medium">Cap Rate</p>
+            <p className="text-xl font-bold">
+              {formatPercent(property.purchaseCapRate)}
+            </p>
+          </div>
+
+          <div className="bg-indigo-50 p-3 rounded-lg">
+            <p className="text-sm text-indigo-600 font-medium">
+              Monthly Cashflow
+            </p>
+            <p className="text-xl font-bold">
+              {formatCurrency(property.cashFlow)}
+            </p>
+          </div>
+
+          <div className="bg-orange-50 p-3 rounded-lg">
+            <p className="text-sm text-orange-600 font-medium">
+              Projected Profit
+            </p>
+            <p className="text-xl font-bold">
+              {formatCurrency(property.projectNetProfitIfSold)}
+            </p>
+          </div>
+        </div>
+
+        {/* Property Status */}
+        <div className="mt-4 flex flex-wrap gap-2">
+          <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+            {property.numUnits > 1 ? `${property.numUnits} Units` : "1 Unit"}
+          </span>
+          <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+            {property.bedroomsDescription || "N/A"} Bed
+          </span>
+          <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+            {property.bathroomsDescription || "N/A"} Bath
+          </span>
+          <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+            {property.county || "N/A"}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Quick Jump Navigation Component
+const QuickJump = ({ sections, expandedGroups, setExpandedGroups }) => {
+  const handleClick = (sectionKey) => {
+    // First, expand the section if not already expanded
+    console.log(`QuickJump: Navigating to section "${sectionKey}"`);
+
+    setExpandedGroups((prev) => {
+      const newState = {
+        ...prev,
+        [sectionKey]: true,
+      };
+      console.log(`QuickJump: Updated expandedGroups`, newState);
+      return newState;
+    });
+
+    // Wait for state update to complete, then scroll to the section
+    setTimeout(() => {
+      console.log(
+        `QuickJump: Looking for element with data-field-group="${sectionKey}"`
+      );
+      const element = document.querySelector(
+        `[data-field-group="${sectionKey}"]`
+      );
+
+      if (element) {
+        console.log(`QuickJump: Found element, scrolling to view`);
+        // Scroll to the section with smooth behavior
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+
+        // Provide visual feedback
+        element.classList.add("highlight-section");
+        setTimeout(() => {
+          element.classList.remove("highlight-section");
+        }, 1500);
+      } else {
+        console.warn(
+          `QuickJump: Section with data-field-group="${sectionKey}" not found`
+        );
+        // List all data-field-group attributes for debugging
+        const allGroups = document.querySelectorAll("[data-field-group]");
+        console.log(
+          `QuickJump: Available data-field-group elements:`,
+          Array.from(allGroups).map((el) => el.getAttribute("data-field-group"))
+        );
+      }
+    }, 100);
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow p-4 mb-6">
+      <h3 className="text-lg font-medium text-gray-900 mb-3">
+        Quick Navigation
+      </h3>
+      <div className="flex flex-wrap gap-2">
+        {Object.entries(sections).map(([key, section]) => (
+          <button
+            key={key}
+            onClick={() => handleClick(key)}
+            className={`px-3 py-1.5 text-sm rounded-full transition-colors duration-200
+              ${
+                expandedGroups[key]
+                  ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            aria-label={`Navigate to ${section.title} section`}
+          >
+            {section.icon} {section.title}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 // Memoized Components
 const MemoizedProfitAndLoss = memo(ProfitAndLoss);
 const MemoizedOperatingExpense = memo(OperatingExpense);
@@ -121,24 +302,48 @@ const FloatingActionButton = ({ onClick }) => (
   </div>
 );
 
-// Field Group Component
-const FieldGroup = ({ title, children, isExpanded, onToggle }) => (
-  <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+// Field Group Component - This groups the sections together
+const FieldGroup = ({
+  title,
+  children,
+  isExpanded,
+  onToggle,
+  icon = null,
+  importance = "normal",
+  "data-field-group": dataFieldGroup,
+}) => {
+  // Color themes based on importance
+  const importanceStyles = {
+    high: "border-l-4 border-blue-500",
+    normal: "border-l-4 border-gray-300",
+    low: "border-l-4 border-gray-200",
+  };
+
+  return (
     <div
-      className="flex justify-between items-center cursor-pointer"
-      onClick={onToggle}
+      className={`mb-6 p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 ${importanceStyles[importance]}`}
+      data-field-group={dataFieldGroup}
+      id={`section-${dataFieldGroup}`}
     >
-      <h3 className="text-lg font-semibold">{title}</h3>
-      <ChevronDown
-        size={20}
-        className={`transform transition-transform duration-200 ${
-          isExpanded ? "rotate-180" : ""
-        }`}
-      />
+      <div
+        className="flex justify-between items-center cursor-pointer"
+        onClick={onToggle}
+      >
+        <h3 className="text-lg font-semibold flex items-center gap-2">
+          {icon && <span className="text-xl">{icon}</span>}
+          {title}
+        </h3>
+        <ChevronDown
+          size={20}
+          className={`transform transition-transform duration-200 ${
+            isExpanded ? "rotate-180" : ""
+          }`}
+        />
+      </div>
+      {isExpanded && <div className="space-y-4 mt-4">{children}</div>}
     </div>
-    {isExpanded && <div className="space-y-4 mt-4">{children}</div>}
-  </div>
-);
+  );
+};
 
 // Offline Indicator Component
 const OfflineIndicator = () => {
@@ -419,8 +624,8 @@ const PropertyDetails = ({ propertyId }) => {
     [saveChanges]
   );
 
-  // Throttled scroll handler
   /*
+  Throttled scroll handler
   1. Throttles scroll events to reduce the number of times the handler is called
   2. Uses throttle to prevent rapid calls to handleScroll
   3. Properly handles the throttled scroll handler
@@ -452,7 +657,10 @@ const PropertyDetails = ({ propertyId }) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
-  // Optimized input handler
+  /* Optimized input handler - This is used to handle the input changes whenever
+  the user types in the input fields. It debounces the input to prevent
+  excessive calls to the server and saves the changes to the server.
+  */
   const handleInputChange = useCallback(
     (e) => {
       const { name, value } = e.target;
@@ -739,6 +947,32 @@ const PropertyDetails = ({ propertyId }) => {
         <ResearchDropdown />
       </div>
 
+      {/* Property Summary Dashboard */}
+      {propertyDetails && (
+        <div className="max-w-7xl mx-auto mb-6 px-4 sm:px-6 lg:px-8">
+          <PropertySummary property={propertyDetails} />
+        </div>
+      )}
+
+      {/* Quick Jump Navigation */}
+      <div className="max-w-7xl mx-auto mb-6 px-4 sm:px-6 lg:px-8">
+        <QuickJump
+          sections={{
+            location: { title: "Location", icon: "📍" },
+            foreclosureInfo: { title: "Foreclosure", icon: "🏠" },
+            departments: { title: "Departments", icon: "🏛️" },
+            outlayToDate: { title: "Financials", icon: "💰" },
+            saleProjection: { title: "Sale Projection", icon: "📈" },
+            utilityInformation: { title: "Utilities", icon: "⚡" },
+            lender: { title: "Lending", icon: "🏦" },
+            keyPlayers: { title: "Key Players", icon: "👥" },
+            salesAndMarketing: { title: "Management", icon: "🏢" },
+          }}
+          expandedGroups={expandedGroups}
+          setExpandedGroups={setExpandedGroups}
+        />
+      </div>
+
       {/* Main Content */}
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8 px-4 sm:px-6 lg:px-8">
         {/* Construction Progress Card */}
@@ -794,30 +1028,61 @@ const PropertyDetails = ({ propertyId }) => {
               </span>
               Property Information
             </h2>
+
+            {/* Add search field for property information */}
+            <div className="relative w-full max-w-xs ml-auto">
+              <input
+                type="text"
+                placeholder="Search fields..."
+                className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={(e) => {
+                  // Implementation for filtering visible fields based on search term
+                  const searchTerm = e.target.value.toLowerCase();
+                  const allGroups =
+                    document.querySelectorAll("[data-field-group]");
+
+                  if (!searchTerm) {
+                    allGroups.forEach((group) => {
+                      group.style.display = "block";
+                    });
+                    return;
+                  }
+
+                  allGroups.forEach((group) => {
+                    const fieldLabels = Array.from(
+                      group.querySelectorAll("label")
+                    ).map((label) => label.textContent.toLowerCase());
+                    const visible = fieldLabels.some((label) =>
+                      label.includes(searchTerm)
+                    );
+                    group.style.display = visible ? "block" : "none";
+                  });
+                }}
+              />
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg
+                  className="w-5 h-5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  ></path>
+                </svg>
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <FieldGroup
-              title="Foreclosure Information"
-              isExpanded={expandedGroups.foreclosureInfo}
-              onToggle={() =>
-                setExpandedGroups((prev) => ({
-                  ...prev,
-                  foreclosureInfo: !prev.foreclosureInfo,
-                }))
-              }
-            >
-              {renderInputField("Detail Link", "detail_link")}
-              {renderInputField("Property ID", "property_id")}
-              {renderInputField("Sheriff Number", "sheriff_number")}
-              {renderInputField("Status Date", "status_date", "date")}
-              {renderInputField("Plaintiff", "plaintiff")}
-              {renderInputField("Defendant", "defendant")}
-              {renderInputField("Zillow URL", "zillow_url")}
-            </FieldGroup>
-
-            <FieldGroup
               title="Location"
+              icon="📍"
+              importance="high"
               isExpanded={expandedGroups.location}
               onToggle={() =>
                 setExpandedGroups((prev) => ({
@@ -825,21 +1090,61 @@ const PropertyDetails = ({ propertyId }) => {
                   location: !prev.location,
                 }))
               }
+              data-field-group="location"
             >
-              {renderInputField("Property Name", "propertyName")}
-              {renderInputField("Address", "address")}
-              {renderInputField("City", "city")}
-              {renderInputField("State", "state")}
-              {renderInputField("Zip Code", "zipCode", "number")}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {renderInputField("Property Name", "propertyName")}
+                {renderInputField("Address", "address")}
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                {renderInputField("City", "city")}
+                {renderInputField("State", "state")}
+                {renderInputField("Zip Code", "zipCode", "number")}
+              </div>
               {renderInputField("County", "county")}
-              {renderInputField("Bedrooms", "bedroomsDescription")}
-              {renderInputField("Bathrooms", "bathroomsDescription")}
-              {renderInputField("Kitchen", "kitchenDescription")}
-              {renderInputField("Amenities", "amenitiesDescription")}
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <h4 className="font-medium text-gray-700 mb-2">
+                  Property Features
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {renderInputField("Bedrooms", "bedroomsDescription")}
+                  {renderInputField("Bathrooms", "bathroomsDescription")}
+                </div>
+                {renderInputField("Kitchen", "kitchenDescription")}
+                {renderInputField("Amenities", "amenitiesDescription")}
+              </div>
+            </FieldGroup>
+
+            <FieldGroup
+              title="Foreclosure Information"
+              icon="🏠"
+              isExpanded={expandedGroups.foreclosureInfo}
+              onToggle={() =>
+                setExpandedGroups((prev) => ({
+                  ...prev,
+                  foreclosureInfo: !prev.foreclosureInfo,
+                }))
+              }
+              data-field-group="foreclosureInfo"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                {renderInputField("Detail Link", "detail_link")}
+                {renderInputField("Property ID", "property_id")}
+              </div>
+              {renderInputField("Sheriff Number", "sheriff_number")}
+              {renderInputField("Status Date", "status_date", "date")}
+              <div className="grid grid-cols-1 gap-4 mt-4 pt-4 border-t border-gray-100">
+                {renderInputField("Plaintiff", "plaintiff")}
+                {renderInputField("Defendant", "defendant")}
+              </div>
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                {renderInputField("Zillow URL", "zillow_url")}
+              </div>
             </FieldGroup>
 
             <FieldGroup
               title="Departments"
+              icon="🏛️"
               isExpanded={expandedGroups.departments}
               onToggle={() =>
                 setExpandedGroups((prev) => ({
@@ -847,27 +1152,35 @@ const PropertyDetails = ({ propertyId }) => {
                   departments: !prev.departments,
                 }))
               }
+              data-field-group="departments"
             >
               {renderInputField(
                 "Municipal Building Address",
                 "municipalBuildingAddress"
               )}
-              {renderInputField("Building Dept", "buildingDepartmentContact")}
-              {renderInputField("Electric Dept", "electricDepartmentContact")}
-              {renderInputField("Plumbing Dept", "plumbingDepartmentContact")}
-              {renderInputField("Fire Dept", "fireDepartmentContact")}
-              {renderInputField(
-                "Homeowners Association",
-                "homeownersAssociationContact"
-              )}
-              {renderInputField(
-                "Environmental Dept",
-                "environmentalDepartmentContact"
-              )}
+              <div className="grid grid-cols-1 gap-4 mt-4 pt-4 border-t border-gray-100">
+                <h4 className="font-medium text-gray-700 mb-2">
+                  Department Contacts
+                </h4>
+                {renderInputField("Building Dept", "buildingDepartmentContact")}
+                {renderInputField("Electric Dept", "electricDepartmentContact")}
+                {renderInputField("Plumbing Dept", "plumbingDepartmentContact")}
+                {renderInputField("Fire Dept", "fireDepartmentContact")}
+                {renderInputField(
+                  "Homeowners Association",
+                  "homeownersAssociationContact"
+                )}
+                {renderInputField(
+                  "Environmental Dept",
+                  "environmentalDepartmentContact"
+                )}
+              </div>
             </FieldGroup>
 
             <FieldGroup
               title="Total Outlay To Date"
+              icon="💰"
+              importance="high"
               isExpanded={expandedGroups.outlayToDate}
               onToggle={() =>
                 setExpandedGroups((prev) => ({
@@ -875,140 +1188,231 @@ const PropertyDetails = ({ propertyId }) => {
                   outlayToDate: !prev.outlayToDate,
                 }))
               }
+              data-field-group="outlayToDate"
             >
-              {renderInputField(
-                "Purchase Cost",
-                "purchaseCost",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Refinance Cost",
-                "refinanceCost",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Equipment Cost",
-                "equipmentCost",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Construction Cost",
-                "constructionCost",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Large Repair Cost",
-                "largeRepairCost",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Renovation Cost",
-                "renovationCost",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Total Rehab Cost",
-                "totalRehabCost",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Kick Start Funds",
-                "kickStartFunds",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Lender Construction Draws Received",
-                "lenderConstructionDrawsReceived",
-                "number",
-                true
-              )}
+              <div className="bg-blue-50 p-3 rounded-lg mb-4">
+                <h4 className="font-medium text-blue-700 mb-2">
+                  Purchase & Refinance
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {renderInputField(
+                    "Purchase Cost",
+                    "purchaseCost",
+                    "number",
+                    true
+                  )}
+                  {renderInputField(
+                    "Refinance Cost",
+                    "refinanceCost",
+                    "number",
+                    true
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-green-50 p-3 rounded-lg mb-4">
+                <h4 className="font-medium text-green-700 mb-2">
+                  Construction & Renovation
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {renderInputField(
+                    "Equipment Cost",
+                    "equipmentCost",
+                    "number",
+                    true
+                  )}
+                  {renderInputField(
+                    "Construction Cost",
+                    "constructionCost",
+                    "number",
+                    true
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  {renderInputField(
+                    "Large Repair Cost",
+                    "largeRepairCost",
+                    "number",
+                    true
+                  )}
+                  {renderInputField(
+                    "Renovation Cost",
+                    "renovationCost",
+                    "number",
+                    true
+                  )}
+                </div>
+                <div className="mt-2">
+                  {renderInputField(
+                    "Total Rehab Cost",
+                    "totalRehabCost",
+                    "number",
+                    true
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-purple-50 p-3 rounded-lg mb-4">
+                <h4 className="font-medium text-purple-700 mb-2">Funding</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {renderInputField(
+                    "Kick Start Funds",
+                    "kickStartFunds",
+                    "number",
+                    true
+                  )}
+                  {renderInputField(
+                    "Lender Construction Draws",
+                    "lenderConstructionDrawsReceived",
+                    "number",
+                    true
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-orange-50 p-3 rounded-lg mb-4">
+                <h4 className="font-medium text-orange-700 mb-2">
+                  Operating Costs
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {renderInputField(
+                    "Utilities Cost",
+                    "utilitiesCost",
+                    "number",
+                    true
+                  )}
+                  {renderInputField("Sewer Yearly", "sewer", "number", true)}
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  {renderInputField("Water Yearly", "water", "number", true)}
+                  {renderInputField("Lawn Yearly", "lawn", "number", true)}
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  {renderInputField(
+                    "Garbage Yearly",
+                    "garbage",
+                    "number",
+                    true
+                  )}
+                  {renderInputField(
+                    "Property Taxes Yearly",
+                    "yearlyPropertyTaxes",
+                    "number",
+                    true
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-red-50 p-3 rounded-lg mb-4">
+                <h4 className="font-medium text-red-700 mb-2">Expenses</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {renderInputField(
+                    "Mortgage Paid",
+                    "mortgagePaid",
+                    "number",
+                    true
+                  )}
+                  {renderInputField(
+                    "Homeowners Insurance",
+                    "homeownersInsurance",
+                    "number",
+                    true
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-yellow-50 p-3 rounded-lg mb-4">
+                <h4 className="font-medium text-yellow-700 mb-2">
+                  Rental Income
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {renderInputField(
+                    "Expected Yearly Rent",
+                    "expectedYearlyRent",
+                    "number",
+                    true
+                  )}
+                  {renderInputField(
+                    "Rental Income Received",
+                    "rentalIncomeReceived",
+                    "number",
+                    true
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  {renderInputField(
+                    "Number of Units",
+                    "numUnits",
+                    "number",
+                    true
+                  )}
+                  {renderInputField(
+                    "Vacancy Rate %",
+                    "vacancyRate",
+                    "number",
+                    true
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  {renderInputField(
+                    "Avg Tenant Stay (months)",
+                    "avgTenantStay",
+                    "number",
+                    true
+                  )}
+                  {renderInputField(
+                    "Other Monthly Income",
+                    "otherMonthlyIncome",
+                    "number",
+                    true
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-3 rounded-lg mb-4">
+                <h4 className="font-medium text-gray-700 mb-2">Management</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {renderInputField(
+                    "Vacancy Loss",
+                    "vacancyLoss",
+                    "number",
+                    true
+                  )}
+                  {renderInputField(
+                    "Management Fees",
+                    "managementFees",
+                    "number",
+                    true
+                  )}
+                </div>
+                <div className="mt-2">
+                  {renderInputField(
+                    "Maintenance Costs",
+                    "maintenanceCosts",
+                    "number",
+                    true
+                  )}
+                </div>
+              </div>
+
               <div className="border-t-2 border-black border-solid my-4"></div>
-              {renderInputField(
-                "Utilities Cost",
-                "utilitiesCost",
-                "number",
-                true
-              )}
-              {renderInputField("Sewer Yearly Cost", "sewer", "number", true)}
-              {renderInputField("Water Yearly Cost", "water", "number", true)}
-              {renderInputField("Lawn Yearly Cost", "lawn", "number", true)}
-              {renderInputField(
-                "Garbage Yearly Cost",
-                "garbage",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Yearly Property Taxes",
-                "yearlyPropertyTaxes",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Mortgage Paid",
-                "mortgagePaid",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Homeowners Insurance",
-                "homeownersInsurance",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Expected Yearly Rent",
-                "expectedYearlyRent",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Rental Income Received",
-                "rentalIncomeReceived",
-                "number",
-                true
-              )}
-              {renderInputField("Number of Units", "numUnits", "number", true)}
-              {renderInputField("Vacancy Rate", "vacancyRate", "number", true)}
-              {renderInputField(
-                "Average Tenant Stay",
-                "avgTenantStay",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Other Monthly Income",
-                "otherMonthlyIncome",
-                "number",
-                true
-              )}
-              {renderInputField("Vacancy Loss", "vacancyLoss", "number", true)}
-              {renderInputField(
-                "Management Fees",
-                "managementFees",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Maintenance Costs",
-                "maintenanceCosts",
-                "number",
-                true
-              )}
-              <div className="border-t-2 border-black border-solid my-4"></div>
-              {renderInputField("Total Equity", "totalEquity", "number", true)}
+              <div className="bg-indigo-100 p-3 rounded-lg">
+                <h4 className="font-medium text-indigo-700 mb-2 text-center">
+                  Summary
+                </h4>
+                {renderInputField(
+                  "Total Equity",
+                  "totalEquity",
+                  "number",
+                  true
+                )}
+              </div>
             </FieldGroup>
 
             <FieldGroup
               title="Sale Projection"
+              icon="📈"
+              importance="high"
               isExpanded={expandedGroups.saleProjection}
               onToggle={() =>
                 setExpandedGroups((prev) => ({
@@ -1016,121 +1420,188 @@ const PropertyDetails = ({ propertyId }) => {
                   saleProjection: !prev.saleProjection,
                 }))
               }
+              data-field-group="saleProjection"
             >
-              {renderInputField(
-                "ARV Sale Price",
-                "arvSalePrice",
-                "number",
-                true
-              )}
+              <div className="bg-green-50 p-3 rounded-lg mb-4">
+                <h4 className="font-medium text-green-700 mb-2">Sale Value</h4>
+                {renderInputField(
+                  "ARV Sale Price",
+                  "arvSalePrice",
+                  "number",
+                  true
+                )}
+              </div>
+
+              <div className="bg-red-50 p-3 rounded-lg mb-4">
+                <h4 className="font-medium text-red-700 mb-2">
+                  Transaction Costs
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {renderInputField(
+                    "Realtor Fees",
+                    "realtorFees",
+                    "number",
+                    true
+                  )}
+                  {renderInputField(
+                    "Attorney Fees",
+                    "attorneyFees",
+                    "number",
+                    true
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  {renderInputField(
+                    "Remaining Property Tax",
+                    "propTaxTillEndOfYear",
+                    "number",
+                    true
+                  )}
+                  {renderInputField("Misc Fees", "miscFees", "number", true)}
+                </div>
+                <div className="mt-2">
+                  {renderInputField("Utilities", "utilities", "number", true)}
+                </div>
+              </div>
+
+              <div className="bg-blue-50 p-3 rounded-lg mb-4">
+                <h4 className="font-medium text-blue-700 mb-2">
+                  Loan Information
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {renderInputField(
+                    "Lender Loan Balance",
+                    "lenderLoanBalance",
+                    "number",
+                    true
+                  )}
+                  {renderInputField(
+                    "Pay Off Statement",
+                    "payOffStatement",
+                    "number",
+                    true
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-purple-50 p-3 rounded-lg mb-4">
+                <h4 className="font-medium text-purple-700 mb-2">Cash Flow</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {renderInputField(
+                    "Cash to Close from Purchase",
+                    "cash2closeFromPurchase",
+                    "number",
+                    true
+                  )}
+                  {renderInputField(
+                    "Cash to Close from Refinance",
+                    "cash2closeFromRefinance",
+                    "number",
+                    true
+                  )}
+                </div>
+                <div className="mt-2">
+                  {renderInputField(
+                    "Total Rehab Costs",
+                    "totalRehabCosts",
+                    "number",
+                    true
+                  )}
+                </div>
+                <div className="mt-2">
+                  {renderInputField(
+                    "Expected Remaining Rent End To Year",
+                    "expectedRemainingRentEndToYear",
+                    "number",
+                    true
+                  )}
+                </div>
+                {renderInputField(
+                  "Mortgage Paid",
+                  "mortgagePaid",
+                  "number",
+                  true
+                )}
+              </div>
+
               <div className="border-t-2 border-black border-solid my-4"></div>
-              {renderInputField("Realtor Fees", "realtorFees", "number", true)}
-              {renderInputField(
-                "Remaining Property Tax",
-                "propTaxTillEndOfYear",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Lender Loan Balance",
-                "lenderLoanBalance",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Pay Off Statement",
-                "payOffStatement",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Attorney Fees",
-                "attorneyFees",
-                "number",
-                true
-              )}
-              {renderInputField("Misc Fees", "miscFees", "number", true)}
-              {renderInputField("Utilities", "utilities", "number", true)}
-              {renderInputField(
-                "Cash to Close from Purchase",
-                "cash2closeFromPurchase",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Cash to Close from Refinance",
-                "cash2closeFromRefinance",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Total Rehab Costs",
-                "totalRehabCosts",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Expected Remaining Rent End To Year",
-                "expectedRemainingRentEndToYear",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Mortgage Paid",
-                "mortgagePaid",
-                "number",
-                true
-              )}
+
+              <div className="bg-orange-50 p-3 rounded-lg mb-4">
+                <h4 className="font-medium text-orange-700 mb-2">Summary</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {renderInputField(
+                    "Total Expenses",
+                    "totalExpenses",
+                    "number",
+                    true
+                  )}
+                  {renderInputField(
+                    "Total Expected Draws In",
+                    "totalConstructionDrawsReceived",
+                    "number",
+                    true
+                  )}
+                </div>
+              </div>
+
               <div className="border-t-2 border-black border-solid my-4"></div>
-              {renderInputField(
-                "Total Expenses",
-                "totalExpenses",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Total Expected Draws In",
-                "totalConstructionDrawsReceived",
-                "number",
-                true
-              )}
-              <div className="border-t-2 border-black border-solid my-4"></div>
-              {renderInputField(
-                "Project Net Profit If Sold",
-                "projectNetProfitIfSold",
-                "number",
-                true
-              )}
-              {renderInputField("Cash Flow", "cashFlow", "number", true)}
-              {renderInputField("Cash ROI", "cashRoi", "number", true)}
-              {renderInputField(
-                "Rule 2 Percent",
-                "rule2Percent",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Rule 50 Percent",
-                "rule50Percent",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Finance Amount",
-                "financeAmount",
-                "number",
-                true
-              )}
-              {renderInputField(
-                "Purchase Cap Rate",
-                "purchaseCapRate",
-                "number",
-                true
-              )}
+
+              <div className="bg-indigo-100 p-3 rounded-lg mb-4">
+                <h4 className="font-medium text-indigo-700 mb-2 text-center">
+                  Profitability Analysis
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {renderInputField(
+                    "Project Net Profit If Sold",
+                    "projectNetProfitIfSold",
+                    "number",
+                    true
+                  )}
+                  {renderInputField("Cash Flow", "cashFlow", "number", true)}
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  {renderInputField("Cash ROI", "cashRoi", "number", true)}
+                  {renderInputField(
+                    "Finance Amount",
+                    "financeAmount",
+                    "number",
+                    true
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-teal-100 p-3 rounded-lg">
+                <h4 className="font-medium text-teal-700 mb-2 text-center">
+                  Investment Rules
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {renderInputField(
+                    "Rule 2 Percent",
+                    "rule2Percent",
+                    "number",
+                    true
+                  )}
+                  {renderInputField(
+                    "Rule 50 Percent",
+                    "rule50Percent",
+                    "number",
+                    true
+                  )}
+                </div>
+                <div className="mt-2">
+                  {renderInputField(
+                    "Purchase Cap Rate",
+                    "purchaseCapRate",
+                    "number",
+                    true
+                  )}
+                </div>
+              </div>
             </FieldGroup>
 
             <FieldGroup
               title="Utility Information"
+              icon="⚡"
               isExpanded={expandedGroups.utilityInformation}
               onToggle={() =>
                 setExpandedGroups((prev) => ({
@@ -1138,33 +1609,59 @@ const PropertyDetails = ({ propertyId }) => {
                   utilityInformation: !prev.utilityInformation,
                 }))
               }
+              data-field-group="utilityInformation"
             >
-              {renderInputField(
-                "Type of Heating & Cooling",
-                "typeOfHeatingAndCooling"
-              )}
-              <div className="border-t-2 border-transparent my-2"></div>
-              {renderInputField("Water Company", "waterCompany")}
-              {renderInputField("Water Account Number", "waterAccountNumber")}
-              <div className="border-t-2 border-transparent my-2"></div>
-              {renderInputField("Electric Company", "electricCompany")}
-              {renderInputField(
-                "Electric Account Number",
-                "electricAccountNumber"
-              )}
-              <div className="border-t-2 border-transparent my-2"></div>
-              {renderInputField("Gas or Oil Company", "gasOrOilCompany")}
-              {renderInputField(
-                "Gas or Oil Account Number",
-                "gasOrOilAccountNumber"
-              )}
-              <div className="border-t-2 border-transparent my-2"></div>
-              {renderInputField("Sewer Company", "sewerCompany")}
-              {renderInputField("Sewer Account Number", "sewerAccountNumber")}
+              <div className="bg-yellow-50 p-3 rounded-lg mb-4">
+                <h4 className="font-medium text-yellow-700 mb-2">
+                  Heating & Cooling
+                </h4>
+                {renderInputField(
+                  "Type of Heating & Cooling",
+                  "typeOfHeatingAndCooling"
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <h4 className="font-medium text-blue-700 mb-2 flex items-center gap-2">
+                    <span className="text-xl">💧</span>Water
+                  </h4>
+                  {renderInputField("Water Company", "waterCompany")}
+                  {renderInputField("Account Number", "waterAccountNumber")}
+                </div>
+
+                <div className="bg-amber-50 p-3 rounded-lg">
+                  <h4 className="font-medium text-amber-700 mb-2 flex items-center gap-2">
+                    <span className="text-xl">⚡</span>Electric
+                  </h4>
+                  {renderInputField("Electric Company", "electricCompany")}
+                  {renderInputField("Account Number", "electricAccountNumber")}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div className="bg-orange-50 p-3 rounded-lg">
+                  <h4 className="font-medium text-orange-700 mb-2 flex items-center gap-2">
+                    <span className="text-xl">🔥</span>Gas/Oil
+                  </h4>
+                  {renderInputField("Gas or Oil Company", "gasOrOilCompany")}
+                  {renderInputField("Account Number", "gasOrOilAccountNumber")}
+                </div>
+
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <h4 className="font-medium text-green-700 mb-2 flex items-center gap-2">
+                    <span className="text-xl">🌊</span>Sewer
+                  </h4>
+                  {renderInputField("Sewer Company", "sewerCompany")}
+                  {renderInputField("Account Number", "sewerAccountNumber")}
+                </div>
+              </div>
             </FieldGroup>
 
             <FieldGroup
               title="Lender Information"
+              icon="🏦"
+              importance="high"
               isExpanded={expandedGroups.lender}
               onToggle={() =>
                 setExpandedGroups((prev) => ({
@@ -1172,41 +1669,78 @@ const PropertyDetails = ({ propertyId }) => {
                   lender: !prev.lender,
                 }))
               }
+              data-field-group="lender"
             >
-              {renderInputField("Lender", "lender")}
-              {renderInputField("Lender Phone", "lenderPhone")}
-              <div className="border-t-2 border-transparent my-2"></div>
-              {renderInputField("Refinance Lender", "refinanceLender")}
-              {renderInputField(
-                "Refinance Lender Phone",
-                "refinanceLenderPhone"
-              )}
-              <div className="border-t-2 border-transparent my-2"></div>
-              {renderInputField("Loan Officer", "loanOfficer")}
-              {renderInputField("Loan Officer Phone", "loanOfficerPhone")}
-              {renderInputField("Loan Number", "loanNumber")}
-              {renderInputField(
-                "Down Payment Percentage",
-                "downPaymentPercentage",
-                "number"
-              )}
-              {renderInputField(
-                "Loan Interest Rate",
-                "loanInterestRate",
-                "number"
-              )}
-              {renderInputField("PMI Percentage", "pmiPercentage", "number")}
-              {renderInputField("Mortgage Years", "mortgageYears", "number")}
-              {renderInputField(
-                "Lender Points Amount",
-                "lenderPointsAmount",
-                "number"
-              )}
-              {renderInputField("Other Fees", "otherFees", "number")}
+              <div className="bg-blue-50 p-3 rounded-lg mb-4">
+                <h4 className="font-medium text-blue-700 mb-2">
+                  Primary Lender
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {renderInputField("Lender", "lender")}
+                  {renderInputField("Lender Phone", "lenderPhone")}
+                </div>
+              </div>
+
+              <div className="bg-purple-50 p-3 rounded-lg mb-4">
+                <h4 className="font-medium text-purple-700 mb-2">
+                  Refinance Lender
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {renderInputField("Refinance Lender", "refinanceLender")}
+                  {renderInputField(
+                    "Refinance Lender Phone",
+                    "refinanceLenderPhone"
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-green-50 p-3 rounded-lg mb-4">
+                <h4 className="font-medium text-green-700 mb-2">
+                  Loan Details
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {renderInputField("Loan Officer", "loanOfficer")}
+                  {renderInputField("Loan Officer Phone", "loanOfficerPhone")}
+                </div>
+                {renderInputField("Loan Number", "loanNumber")}
+              </div>
+
+              <div className="bg-amber-50 p-3 rounded-lg">
+                <h4 className="font-medium text-amber-700 mb-2">Loan Terms</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {renderInputField(
+                    "Down Payment %",
+                    "downPaymentPercentage",
+                    "number"
+                  )}
+                  {renderInputField(
+                    "Interest Rate %",
+                    "loanInterestRate",
+                    "number"
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  {renderInputField("PMI %", "pmiPercentage", "number")}
+                  {renderInputField(
+                    "Mortgage Years",
+                    "mortgageYears",
+                    "number"
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  {renderInputField(
+                    "Points Amount",
+                    "lenderPointsAmount",
+                    "number"
+                  )}
+                  {renderInputField("Other Fees", "otherFees", "number")}
+                </div>
+              </div>
             </FieldGroup>
 
             <FieldGroup
               title="Key Players"
+              icon="👥"
               isExpanded={expandedGroups.keyPlayers}
               onToggle={() =>
                 setExpandedGroups((prev) => ({
@@ -1214,6 +1748,7 @@ const PropertyDetails = ({ propertyId }) => {
                   keyPlayers: !prev.keyPlayers,
                 }))
               }
+              data-field-group="keyPlayers"
             >
               {renderInputField("Seller's Agent", "sellersAgent")}
               {renderInputField("Seller's Broker", "sellersBroker")}
@@ -1248,6 +1783,7 @@ const PropertyDetails = ({ propertyId }) => {
 
             <FieldGroup
               title="Sales & Marketing"
+              icon="🏢"
               isExpanded={expandedGroups.salesAndMarketing}
               onToggle={() =>
                 setExpandedGroups((prev) => ({
@@ -1255,6 +1791,7 @@ const PropertyDetails = ({ propertyId }) => {
                   salesAndMarketing: !prev.salesAndMarketing,
                 }))
               }
+              data-field-group="salesAndMarketing"
             >
               {renderInputField("Property Manager", "propertyManager")}
               {renderInputField(
@@ -1426,7 +1963,7 @@ const PropertyDetails = ({ propertyId }) => {
         </div>
       </div>
 
-      {/* Add the sticky action bar */}
+      {/* Sticky Action Bar*/}
       <StickyActionBar
         isEditing={isEditing}
         onSave={saveChanges}
