@@ -80,34 +80,47 @@ const ConstructionDraw = ({ propertyId }) => {
         // Fetch receipts for each draw
         const drawsWithReceipts = await Promise.all(
           draws.map(async (draw) => {
-            const response = await fetch(
-              `http://localhost:5000/api/receipts/${draw.id}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem(
-                    "accessToken"
-                  )}`,
-                },
+            try {
+              if (!draw || !draw.id) {
+                console.warn("Draw is missing or has no ID:", draw);
+                return { ...draw, receipts: [] };
               }
-            );
-            if (!response.ok)
-              throw new Error(`Failed to fetch receipts for draw ${draw.id}`);
-            const receipts = await response.json();
-            return { ...draw, receipts };
+
+              const response = await fetch(
+                `http://localhost:5000/api/receipts/${draw.id}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem(
+                      "accessToken"
+                    )}`,
+                  },
+                }
+              );
+              if (!response.ok)
+                throw new Error(`Failed to fetch receipts for draw ${draw.id}`);
+              const receipts = await response.json();
+              return { ...draw, receipts };
+            } catch (err) {
+              console.error(
+                `Error fetching receipts for draw ${draw?.id}:`,
+                err
+              );
+              return { ...draw, receipts: [] };
+            }
           })
         );
 
         // Calculate totals
         const totalDrawAmount = drawsWithReceipts.reduce(
-          (sum, draw) => sum + Number(draw.amount),
+          (sum, draw) => sum + (Number(draw?.amount) || 0),
           0
         );
 
         let totalReceiptAmount = 0;
         drawsWithReceipts.forEach((draw) => {
-          if (Array.isArray(draw.receipts)) {
+          if (draw && Array.isArray(draw.receipts)) {
             draw.receipts.forEach((receipt) => {
-              const amount = Number(receipt.amount);
+              const amount = Number(receipt?.amount || 0);
               if (!isNaN(amount)) {
                 totalReceiptAmount += amount;
               }
@@ -116,7 +129,9 @@ const ConstructionDraw = ({ propertyId }) => {
         });
 
         const completionPercentage =
-          (totalReceiptAmount / totalDrawAmount) * 100;
+          totalDrawAmount > 0
+            ? (totalReceiptAmount / totalDrawAmount) * 100
+            : 0;
         const remainingBalance = totalDrawAmount - totalReceiptAmount;
 
         setDrawStats({
@@ -126,16 +141,29 @@ const ConstructionDraw = ({ propertyId }) => {
           remainingBalance: Math.max(remainingBalance, 0),
         });
 
-        // Update draws with receipts
-        setDraws(drawsWithReceipts);
+        // Update draws with receipts - but keep the same reference if nothing changed
+        const drawsChanged =
+          JSON.stringify(drawsWithReceipts) !== JSON.stringify(draws);
+        if (drawsChanged) {
+          setDraws(drawsWithReceipts);
+        }
       } catch (error) {
         console.error("Failed to fetch receipts:", error);
         setError("Failed to fetch receipts");
       }
     };
 
-    fetchReceiptsAndCalculate();
-  }, [draws]);
+    // Use a tracked flag to prevent multiple fetch operations
+    let isMounted = true;
+    if (isMounted) {
+      fetchReceiptsAndCalculate();
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [propertyId]); // Only depend on propertyId, not draws
+
   const formatDate = (dateString) => {
     if (!dateString) return "";
     try {
@@ -245,15 +273,30 @@ const ConstructionDraw = ({ propertyId }) => {
         throw new Error(data.error || "Failed to add construction draw");
       }
 
-      // Update the draws state with the new draw data
-      setDraws((prevDraws) => {
-        const newDraws = [
-          ...prevDraws,
-          data.draw, // Use data.draw since that's how the backend sends it
-        ].sort((a, b) => new Date(a.release_date) - new Date(b.release_date));
-        return newDraws;
-      });
+      // Reload all draws to get fresh data rather than updating state directly
+      const drawsResponse = await fetch(
+        `http://localhost:5000/api/construction-draws/${propertyId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      );
 
+      if (!drawsResponse.ok) {
+        throw new Error("Failed to refresh construction draws");
+      }
+
+      const drawsData = await drawsResponse.json();
+      // Sort draws by release date in ascending order
+      const sortedDraws = drawsData.sort(
+        (a, b) => new Date(a.release_date) - new Date(b.release_date)
+      );
+
+      // Update the state with the complete sorted list from the server
+      setDraws(sortedDraws);
+
+      // Reset form
       setNewDraw({
         release_date: "",
         amount: "",
@@ -309,42 +352,76 @@ const ConstructionDraw = ({ propertyId }) => {
   };
 
   const handleReceiptChange = useCallback(() => {
-    // Trigger a refresh of receipts and recalculation of totals
-    const fetchReceiptsAndCalculate = async () => {
-      if (!draws.length) return;
-
+    // Trigger a fresh fetch of all data
+    const fetchAllData = async () => {
       try {
-        // Fetch receipts for each draw
+        // Fetch all draws fresh
+        const drawsResponse = await fetch(
+          `http://localhost:5000/api/construction-draws/${propertyId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        );
+
+        if (!drawsResponse.ok) {
+          throw new Error("Failed to refresh construction draws");
+        }
+
+        const drawsData = await drawsResponse.json();
+
+        // Sort and update draws first
+        const sortedDraws = drawsData.sort(
+          (a, b) => new Date(a.release_date) - new Date(b.release_date)
+        );
+
+        // Now fetch receipts for each draw
         const drawsWithReceipts = await Promise.all(
-          draws.map(async (draw) => {
-            const response = await fetch(
-              `http://localhost:5000/api/receipts/${draw.id}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem(
-                    "accessToken"
-                  )}`,
-                },
+          sortedDraws.map(async (draw) => {
+            try {
+              if (!draw || !draw.id) {
+                return { ...draw, receipts: [] };
               }
-            );
-            if (!response.ok)
-              throw new Error(`Failed to fetch receipts for draw ${draw.id}`);
-            const receipts = await response.json();
-            return { ...draw, receipts };
+
+              const receiptResponse = await fetch(
+                `http://localhost:5000/api/receipts/${draw.id}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem(
+                      "accessToken"
+                    )}`,
+                  },
+                }
+              );
+
+              if (!receiptResponse.ok) {
+                return { ...draw, receipts: [] };
+              }
+
+              const receipts = await receiptResponse.json();
+              return { ...draw, receipts };
+            } catch (err) {
+              console.error(
+                `Error fetching receipts for draw ${draw?.id}:`,
+                err
+              );
+              return { ...draw, receipts: [] };
+            }
           })
         );
 
-        // Calculate totals
+        // Calculate totals using the fetched data
         const totalDrawAmount = drawsWithReceipts.reduce(
-          (sum, draw) => sum + Number(draw.amount),
+          (sum, draw) => sum + (Number(draw?.amount) || 0),
           0
         );
 
         let totalReceiptAmount = 0;
         drawsWithReceipts.forEach((draw) => {
-          if (Array.isArray(draw.receipts)) {
+          if (draw && Array.isArray(draw.receipts)) {
             draw.receipts.forEach((receipt) => {
-              const amount = Number(receipt.amount);
+              const amount = Number(receipt?.amount || 0);
               if (!isNaN(amount)) {
                 totalReceiptAmount += amount;
               }
@@ -353,9 +430,12 @@ const ConstructionDraw = ({ propertyId }) => {
         });
 
         const completionPercentage =
-          (totalReceiptAmount / totalDrawAmount) * 100;
+          totalDrawAmount > 0
+            ? (totalReceiptAmount / totalDrawAmount) * 100
+            : 0;
         const remainingBalance = totalDrawAmount - totalReceiptAmount;
 
+        // Update stats
         setDrawStats({
           totalDraws: totalDrawAmount,
           totalReceipts: totalReceiptAmount,
@@ -363,16 +443,16 @@ const ConstructionDraw = ({ propertyId }) => {
           remainingBalance: Math.max(remainingBalance, 0),
         });
 
-        // Update draws with receipts
+        // Update draws with the complete data
         setDraws(drawsWithReceipts);
       } catch (error) {
-        console.error("Failed to fetch receipts:", error);
-        setError("Failed to fetch receipts");
+        console.error("Failed to refresh data:", error);
+        setError("Failed to refresh data");
       }
     };
 
-    fetchReceiptsAndCalculate();
-  }, [draws]);
+    fetchAllData();
+  }, [propertyId]);
 
   const ValidationError = ({ error }) => {
     if (!error) return null;
@@ -454,7 +534,7 @@ const ConstructionDraw = ({ propertyId }) => {
 
   // Calculate subtotal for Released Draws
   const subtotaldraws =
-    draws?.reduce((acc, draw) => acc + parseFloat(draw.amount || 0), 0) || 0;
+    draws?.reduce((acc, draw) => acc + parseFloat(draw?.amount || 0), 0) || 0;
 
   return (
     <div className="max-w-4xl mx-auto p-3 bg-white shadow-lg rounded-lg text-sm">

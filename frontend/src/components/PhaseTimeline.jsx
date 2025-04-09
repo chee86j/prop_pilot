@@ -16,12 +16,20 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
   const containerRef = useRef(null);
 
   useEffect(() => {
+    // Reset mounted state when phases change
     setMounted(false);
-    const timer = setTimeout(() => {
-      setMounted(true);
-    }, 100);
 
-    return () => clearTimeout(timer);
+    // Add small delay to ensure DOM is ready before mounting Chrono
+    const timer = setTimeout(() => {
+      if (containerRef.current && phases.length > 0) {
+        setMounted(true);
+      }
+    }, 300); // Increased timeout for better reliability
+
+    return () => {
+      clearTimeout(timer);
+      setMounted(false);
+    };
   }, [phases]);
 
   if (!phases || phases.length === 0) {
@@ -273,12 +281,13 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
           className="w-full"
           style={{ minHeight: "400px", height: "400px" }}
         >
-          {mounted && containerRef.current ? (
+          {mounted && containerRef.current && items.length > 0 ? (
             <Chrono
               items={items}
               mode="HORIZONTAL"
               slideItemDuration={4500}
               enableOutline={false}
+              disableClickOnCircle={true}
               theme={{
                 primary: "rgb(59, 130, 246)",
                 secondary: "rgb(239, 246, 255)",
@@ -292,6 +301,7 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
               cardHeight={180}
               scrollable
               useReadMore={false}
+              hideControls={false}
               classNames={{
                 card: "hover:shadow-lg transition-shadow duration-200",
                 cardTitle: "flex items-center justify-between w-full",
