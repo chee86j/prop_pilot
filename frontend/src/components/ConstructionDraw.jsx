@@ -551,7 +551,7 @@ const ConstructionDraw = ({ propertyId }) => {
     };
 
     return (
-      <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 my-4">
+      <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 my-2">
         <div
           className={`h-2.5 rounded-full ${getColorClass(percentage)}`}
           style={{ width: `${Math.min(percentage, 100)}%` }}
@@ -561,31 +561,46 @@ const ConstructionDraw = ({ propertyId }) => {
   };
 
   const DrawStatistics = ({ stats }) => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <div className="bg-white p-4 rounded-lg shadow">
-        <h3 className="text-sm font-medium text-gray-500">Total Draws</h3>
-        <p className="text-2xl font-semibold text-gray-900">
-          {formatCurrency(stats.totalDraws)}
-        </p>
+    <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+      <div className="border-b border-gray-200 p-4">
+        <h3 className="text-lg font-semibold text-gray-800">
+          Financial Summary
+        </h3>
       </div>
-      <div className="bg-white p-4 rounded-lg shadow">
-        <h3 className="text-sm font-medium text-gray-500">Total Receipts</h3>
-        <p className="text-2xl font-semibold text-gray-900">
-          {formatCurrency(stats.totalReceipts)}
-        </p>
-      </div>
-      <div className="bg-white p-4 rounded-lg shadow">
-        <h3 className="text-sm font-medium text-gray-500">Draw % Used</h3>
-        <p className="text-2xl font-semibold text-gray-900">
-          {stats.completionPercentage.toFixed(1)}%
-        </p>
-        <ProgressIndicator percentage={stats.completionPercentage} />
-      </div>
-      <div className="bg-white p-4 rounded-lg shadow">
-        <h3 className="text-sm font-medium text-gray-500">Remaining Balance</h3>
-        <p className="text-2xl font-semibold text-gray-900">
-          {formatCurrency(stats.remainingBalance)}
-        </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 divide-x divide-y md:divide-y-0 divide-gray-100">
+        <div className="p-5">
+          <h4 className="text-sm font-medium text-gray-500 mb-1">
+            Total Draws
+          </h4>
+          <p className="text-2xl font-semibold text-gray-900">
+            {formatCurrency(stats.totalDraws)}
+          </p>
+        </div>
+        <div className="p-5">
+          <h4 className="text-sm font-medium text-gray-500 mb-1">
+            Total Receipts
+          </h4>
+          <p className="text-2xl font-semibold text-gray-900">
+            {formatCurrency(stats.totalReceipts)}
+          </p>
+        </div>
+        <div className="p-5">
+          <h4 className="text-sm font-medium text-gray-500 mb-1">
+            Draw % Used
+          </h4>
+          <p className="text-2xl font-semibold text-gray-900">
+            {stats.completionPercentage.toFixed(1)}%
+          </p>
+          <ProgressIndicator percentage={stats.completionPercentage} />
+        </div>
+        <div className="p-5">
+          <h4 className="text-sm font-medium text-gray-500 mb-1">
+            Remaining Balance
+          </h4>
+          <p className="text-2xl font-semibold text-gray-900">
+            {formatCurrency(stats.remainingBalance)}
+          </p>
+        </div>
       </div>
     </div>
   );

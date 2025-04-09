@@ -3,10 +3,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { formatCurrencyDetailed } from "../utils/formatting";
 import {
-  ChevronsLeft,
-  ChevronsRight,
-  ChevronsUp,
   ChevronsDown,
+  ChevronsUp,
+  CreditCard,
+  Edit,
+  Trash2,
+  Plus,
+  Info,
 } from "lucide-react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -27,8 +30,8 @@ const Receipt = ({ drawId, onReceiptChange }) => {
     ccnumber: "",
   });
   const [showAddForm, setShowAddForm] = useState(false);
-  const [expandedDescriptions, setExpandedDescriptions] = useState(new Set());
   const [expandedReceipts, setReceiptsExpanded] = useState(false);
+  const [selectedReceipt, setSelectedReceipt] = useState(null);
 
   const showToast = useCallback((message, type = "success") => {
     const toastConfig = {
@@ -67,8 +70,9 @@ const Receipt = ({ drawId, onReceiptChange }) => {
       }
 
       const data = await response.json();
+      // Sort by date in descending order (newest first) to match the banking UI
       const sortedReceipts = data.sort(
-        (a, b) => new Date(a.date) - new Date(b.date)
+        (a, b) => new Date(b.date) - new Date(a.date)
       );
       setReceipts(sortedReceipts);
     } catch (err) {
@@ -99,12 +103,25 @@ const Receipt = ({ drawId, onReceiptChange }) => {
   const startEdit = (receipt) => {
     setEditReceiptId(receipt.id);
     setEditedReceipt({ ...receipt });
+    setSelectedReceipt(null);
   };
 
   const saveEdit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      // Format the date properly
+      const formattedDate = new Date(editedReceipt.date)
+        .toISOString()
+        .split("T")[0];
+
+      const requestData = {
+        ...editedReceipt,
+        date: formattedDate,
+        amount: parseFloat(editedReceipt.amount),
+        construction_draw_id: drawId,
+      };
+
       const response = await fetch(
         `http://localhost:5000/api/receipts/${editReceiptId}`,
         {
@@ -113,7 +130,7 @@ const Receipt = ({ drawId, onReceiptChange }) => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
-          body: JSON.stringify(editedReceipt),
+          body: JSON.stringify(requestData),
         }
       );
 
@@ -125,6 +142,10 @@ const Receipt = ({ drawId, onReceiptChange }) => {
       setEditReceiptId(null);
       setEditedReceipt({});
       showToast("Receipt updated successfully");
+      // Notify parent component of the change
+      if (onReceiptChange) {
+        onReceiptChange();
+      }
     } catch (err) {
       setError(err.message);
       showToast("Failed to update receipt", "error");
@@ -193,7 +214,7 @@ const Receipt = ({ drawId, onReceiptChange }) => {
         onReceiptChange();
       }
     } catch (err) {
-      console.error("Error adding receipt:", err); // Debug log
+      console.error("Error adding receipt:", err);
       setError(err.message);
       showToast("Failed to add receipt: " + err.message, "error");
     } finally {
@@ -224,6 +245,7 @@ const Receipt = ({ drawId, onReceiptChange }) => {
       if (onReceiptChange) {
         onReceiptChange();
       }
+      setSelectedReceipt(null);
     } catch (err) {
       setError(err.message);
       showToast("Failed to delete receipt", "error");
@@ -239,23 +261,24 @@ const Receipt = ({ drawId, onReceiptChange }) => {
       .toFixed(2);
   };
 
-  const toggleDescriptionExpansion = (receiptId) => {
-    setExpandedDescriptions((prevExpanded) => {
-      const newExpanded = new Set(prevExpanded);
-      if (newExpanded.has(receiptId)) {
-        newExpanded.delete(receiptId);
-      } else {
-        newExpanded.add(receiptId);
-      }
-      return newExpanded;
-    });
-  };
-
   const toggleReceiptsExpansion = () => {
     setReceiptsExpanded((prevExpanded) => !prevExpanded);
+    setSelectedReceipt(null);
   };
 
-  if (isLoading || isSubmitting) {
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const month = date.toLocaleString("default", { month: "short" });
+    const day = date.getDate();
+    return `${month} ${day}`;
+  };
+
+  const viewReceiptDetails = (receipt) => {
+    setSelectedReceipt(receipt);
+    setEditReceiptId(null);
+  };
+
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center p-4">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -270,319 +293,338 @@ const Receipt = ({ drawId, onReceiptChange }) => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-1 bg-transparent rounded-lg text-sm">
-      <h1 className="text-lg md:text-md font-bold text-gray-700 my-2">
-        Receipts
-      </h1>
-      <button
-        onClick={toggleReceiptsExpansion}
-        className="cursor-pointer mb-2 transition-all bg-blue-500 text-white px-3 py-2 rounded-lg border-blue-600 border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[4px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] flex items-center justify-center"
-      >
-        <span className="flex items-center">
-          {expandedReceipts ? (
-            <ChevronsUp size={24} className="text-white" />
-          ) : (
-            <ChevronsDown size={24} className="text-white" />
+    <div className="mt-4 bg-white rounded-lg shadow-sm overflow-hidden">
+      <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+        <h2 className="text-lg font-semibold text-gray-800 flex items-center">
+          <span className="mr-2">Recent transactions</span>
+          {isSubmitting && (
+            <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
           )}
-          <span className="ml-1 text-white font-semibold">
-            {expandedReceipts ? "Hide" : "Show"}
-          </span>
-        </span>
-      </button>
-
-      <div>
-        {expandedReceipts && receipts.length > 0 ? (
-          <table className="w-full table-auto mb-4">
-            <thead>
-              <tr>
-                <th
-                  scope="col"
-                  className="px-2 py-1 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
-                >
-                  Date
-                </th>
-                <th
-                  scope="col"
-                  className="px-2 py-1 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
-                >
-                  Vendor
-                </th>
-                <th
-                  scope="col"
-                  className="px-2 py-1 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
-                >
-                  Amount
-                </th>
-                <th
-                  scope="col"
-                  className="hidden md:table-cell px-2 py-1 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
-                >
-                  Description
-                </th>
-                <th
-                  scope="col"
-                  className="hidden md:table-cell px-2 py-1 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
-                >
-                  POC
-                </th>
-                <th
-                  scope="col"
-                  className="hidden md:table-cell px-2 py-1 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
-                >
-                  Card Used
-                </th>
-                <th
-                  scope="col"
-                  className="px-2 py-1 text-center border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
-                >
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {receipts.map((receipt) => (
-                <tr
-                  key={receipt.id}
-                  className="text-gray-700 hover:bg-gray-100"
-                >
-                  <td className="border px-2 py-1 text-center">
-                    {new Date(receipt.date).toLocaleDateString(undefined, {
-                      timeZone: "UTC",
-                    })}
-                  </td>
-                  <td className="border px-2 py-1">{receipt.vendor}</td>
-                  <td className="border px-2 py-1 text-center">
-                    {formatCurrencyDetailed(receipt.amount)}
-                  </td>
-                  <td className="hidden md:table-cell border px-2 py-1">
-                    {expandedDescriptions.has(receipt.id) ? (
-                      <span>{receipt.description}</span>
-                    ) : (
-                      <span>
-                        {receipt.description.length > 10
-                          ? receipt.description.substring(0, 10) + "..."
-                          : receipt.description}
-                      </span>
-                    )}
-                    {receipt.description.length > 10 && (
-                      <button
-                        onClick={() => toggleDescriptionExpansion(receipt.id)}
-                        className="text-blue-500 hover:underline focus:outline-none ml-2"
-                      >
-                        {expandedDescriptions.has(receipt.id) ? (
-                          <>
-                            <ChevronsLeft size={20} />
-                          </>
-                        ) : (
-                          <>
-                            <ChevronsRight size={20} />
-                          </>
-                        )}
-                      </button>
-                    )}
-                  </td>
-                  <td className="hidden md:table-cell border px-2 py-1 text-center">
-                    {receipt.pointofcontact}
-                  </td>
-                  <td className="hidden md:table-cell border px-2 py-1 text-center">
-                    x{receipt.ccnumber}
-                  </td>
-
-                  <td className="px-2 py-1 border">
-                    <span className="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
-                      <button
-                        onClick={() => startEdit(receipt)}
-                        className="inline-block border-e p-3 text-blue-600 hover:bg-blue-100 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                        title="Edit Product"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="h-4 w-4"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
-                          />
-                        </svg>
-                      </button>
-
-                      <button
-                        onClick={() => handleDeleteReceipt(receipt.id)}
-                        className="inline-block p-3 text-red-600 hover:bg-red-100 rounded-md focus:outline-none focus:ring focus:border-red-300"
-                        title="Delete Product"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="h-4 w-4"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                          />
-                        </svg>
-                      </button>
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : expandedReceipts && receipts.length < 1 ? (
-          <p className="indent-2 text-lg text-red-500 my-3">
-            No Receipts Added.
-          </p>
-        ) : null}
-
-        {/* Display subtotal */}
-        <div className="mb-4">
-          <p className="indent-2 font-semibold text-gray-700">
-            Subtotal: {formatCurrencyDetailed(calcSubtotal())}
-          </p>
+        </h2>
+        <div className="flex space-x-2">
+          <button
+            onClick={toggleReceiptsExpansion}
+            className="p-1.5 text-gray-600 hover:text-gray-900 rounded-full hover:bg-gray-100"
+            title={expandedReceipts ? "Collapse" : "Expand"}
+          >
+            {expandedReceipts ? (
+              <ChevronsUp size={20} />
+            ) : (
+              <ChevronsDown size={20} />
+            )}
+          </button>
+          <button
+            onClick={() => {
+              setShowAddForm(!showAddForm);
+              setSelectedReceipt(null);
+              setEditReceiptId(null);
+            }}
+            className="p-1.5 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-50"
+            title="Add Receipt"
+          >
+            <Plus size={20} />
+          </button>
         </div>
       </div>
 
-      {/* Button to toggle visibility of add receipt form */}
-      <button
-        onClick={() => setShowAddForm(!showAddForm)}
-        className="rounded-lg relative w-32 h-10 cursor-pointer flex items-center border border-blue-500 bg-blue-500 group hover:bg-blue-500 active:bg-blue-500 active:border-blue-500"
-      >
-        <span className="text-white font-semibold ml-5 transform group-hover:translate-x-10 transition-all duration-300">
-          Receipt
-        </span>
-        <span className="absolute right-0 h-full w-12 rounded-lg bg-blue-500 flex items-center justify-center transform group-hover:translate-x-0 group-hover:w-full transition-all duration-300">
-          <svg
-            className="svg w-8 text-white"
-            fill="none"
-            height="24"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-            width="24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <line x1="12" x2="12" y1="5" y2="19"></line>
-            <line x1="5" x2="19" y1="12" y2="12"></line>
-          </svg>
-        </span>
-      </button>
+      {/* Banking-style receipt list */}
+      {expandedReceipts && (
+        <div className="divide-y divide-gray-100">
+          {receipts.length > 0 ? (
+            receipts.map((receipt) => (
+              <div
+                key={receipt.id}
+                className={`px-4 py-3 hover:bg-gray-50 cursor-pointer ${
+                  selectedReceipt?.id === receipt.id ? "bg-blue-50" : ""
+                }`}
+                onClick={() => viewReceiptDetails(receipt)}
+              >
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center space-x-3">
+                    <div className="text-gray-600 min-w-16 text-center">
+                      {formatDate(receipt.date)}
+                    </div>
+                    <div className="text-gray-800 font-medium">
+                      {receipt.vendor}
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="text-gray-800 font-semibold">
+                      {formatCurrencyDetailed(receipt.amount)}
+                    </div>
+                    <div className="flex space-x-1">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          startEdit(receipt);
+                        }}
+                        className="p-1 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-50"
+                        title="Edit"
+                      >
+                        <Edit size={16} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteReceipt(receipt.id);
+                        }}
+                        className="p-1 text-red-600 hover:text-red-800 rounded-full hover:bg-red-50"
+                        title="Delete"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-1 flex justify-between items-center text-sm">
+                  <div className="text-gray-500 truncate max-w-xs">
+                    {receipt.description || "No description"}
+                  </div>
+                  <div className="flex items-center text-gray-500">
+                    <CreditCard size={14} className="mr-1" />
+                    <span>••{receipt.ccnumber || "XXXX"}</span>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="py-8 text-center text-gray-500">
+              <p>No transactions found</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Receipt details panel - shown when a receipt is selected */}
+      {selectedReceipt && expandedReceipts && (
+        <div className="p-5 bg-gray-50 border-t border-gray-200">
+          <div className="flex justify-between mb-4">
+            <h3 className="text-xl font-bold text-gray-800">
+              {formatCurrencyDetailed(selectedReceipt.amount)}
+            </h3>
+            <button
+              onClick={() => setSelectedReceipt(null)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="mb-4">
+            <h4 className="text-lg font-medium text-gray-700">
+              {selectedReceipt.vendor}
+            </h4>
+            <p className="text-gray-500">
+              {new Date(selectedReceipt.date).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+              {" at "}
+              {new Date(selectedReceipt.date).toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <p className="text-sm text-gray-500">Payment method</p>
+              <p className="font-medium flex items-center">
+                <CreditCard size={16} className="mr-2" />
+                {selectedReceipt.ccnumber
+                  ? `Card ••${selectedReceipt.ccnumber}`
+                  : "Card (no number provided)"}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Point of contact</p>
+              <p className="font-medium">
+                {selectedReceipt.pointofcontact || "None"}
+              </p>
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <p className="text-sm text-gray-500">Description</p>
+            <p className="text-gray-700 whitespace-pre-line">
+              {selectedReceipt.description || "No description provided"}
+            </p>
+          </div>
+
+          <div className="flex space-x-2">
+            <button
+              onClick={() => startEdit(selectedReceipt)}
+              className="px-3 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 flex items-center"
+            >
+              <Edit size={16} className="mr-1" /> Edit
+            </button>
+            <button
+              onClick={() => handleDeleteReceipt(selectedReceipt.id)}
+              className="px-3 py-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200 flex items-center"
+            >
+              <Trash2 size={16} className="mr-1" /> Delete
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Subtotal information - always visible */}
+      <div className="p-4 bg-gray-50 border-t border-gray-100">
+        <div className="font-semibold text-gray-700 flex justify-between">
+          <span>Total Receipts:</span>
+          <span>{formatCurrencyDetailed(calcSubtotal())}</span>
+        </div>
+      </div>
 
       {/* Add receipt form */}
       {showAddForm && (
-        <form onSubmit={handleAddReceipt} className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2">
-                Date
-              </label>
-              <input
-                type="date"
-                name="date"
-                value={newReceipt.date}
-                onChange={(e) =>
-                  setNewReceipt({ ...newReceipt, date: e.target.value })
-                }
-                className="border rounded px-2 py-1 w-full"
-                required
-              />
+        <div className="p-4 bg-white border-t border-gray-200">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-gray-800">Add Receipt</h3>
+            <button
+              onClick={() => setShowAddForm(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
+
+          <form onSubmit={handleAddReceipt}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  name="date"
+                  value={newReceipt.date}
+                  onChange={(e) =>
+                    setNewReceipt({ ...newReceipt, date: e.target.value })
+                  }
+                  className="border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Vendor
+                </label>
+                <input
+                  type="text"
+                  name="vendor"
+                  value={newReceipt.vendor}
+                  onChange={(e) =>
+                    setNewReceipt({ ...newReceipt, vendor: e.target.value })
+                  }
+                  className="border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Amount
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  name="amount"
+                  value={newReceipt.amount}
+                  onChange={(e) =>
+                    setNewReceipt({ ...newReceipt, amount: e.target.value })
+                  }
+                  className="border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
             </div>
-            <div>
+
+            <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2">
-                Vendor
+                Description
               </label>
-              <input
-                type="text"
-                name="vendor"
-                value={newReceipt.vendor}
+              <textarea
+                name="description"
+                value={newReceipt.description}
                 onChange={(e) =>
-                  setNewReceipt({ ...newReceipt, vendor: e.target.value })
+                  setNewReceipt({ ...newReceipt, description: e.target.value })
                 }
-                className="border rounded px-2 py-1 w-full"
-                required
-              />
+                className="border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows="2"
+              ></textarea>
             </div>
-            <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2">
-                Amount
-              </label>
-              <input
-                type="number"
-                name="amount"
-                value={newReceipt.amount}
-                onChange={(e) =>
-                  setNewReceipt({ ...newReceipt, amount: e.target.value })
-                }
-                className="border rounded px-2 py-1 w-full"
-                required
-              />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Point of Contact
+                </label>
+                <input
+                  type="text"
+                  name="pointofcontact"
+                  value={newReceipt.pointofcontact}
+                  onChange={(e) =>
+                    setNewReceipt({
+                      ...newReceipt,
+                      pointofcontact: e.target.value,
+                    })
+                  }
+                  className="border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Card Number (last 4 digits)
+                </label>
+                <input
+                  type="text"
+                  maxLength="4"
+                  name="ccnumber"
+                  value={newReceipt.ccnumber}
+                  onChange={(e) =>
+                    setNewReceipt({ ...newReceipt, ccnumber: e.target.value })
+                  }
+                  className="border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="XXXX"
+                />
+              </div>
             </div>
-          </div>
-          <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Description
-            </label>
-            <textarea
-              name="description"
-              value={newReceipt.description}
-              onChange={(e) =>
-                setNewReceipt({ ...newReceipt, description: e.target.value })
-              }
-              className="border rounded px-2 py-1 w-full"
-            ></textarea>
-          </div>
-          <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Point of Contact
-            </label>
-            <textarea
-              name="pointofcontact"
-              value={newReceipt.pointofcontact}
-              onChange={(e) =>
-                setNewReceipt({ ...newReceipt, pointofcontact: e.target.value })
-              }
-              className="border rounded px-2 py-1 w-full"
-            ></textarea>
-          </div>
-          <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Credit Card Used
-            </label>
-            <textarea
-              name="ccnumber"
-              value={newReceipt.ccnumber}
-              onChange={(e) =>
-                setNewReceipt({ ...newReceipt, ccnumber: e.target.value })
-              }
-              className="border rounded px-2 py-1 w-full"
-            ></textarea>
-          </div>
-          <button
-            type="submit"
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Add Receipt
-          </button>
-        </form>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-200 flex items-center"
+            >
+              {isSubmitting ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white mr-2"></div>
+              ) : (
+                <Plus size={16} className="mr-1" />
+              )}
+              Add Receipt
+            </button>
+          </form>
+        </div>
       )}
 
+      {/* Edit receipt form */}
       {editReceiptId && (
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">
-            Edit Receipt
-          </h3>
-          <form onSubmit={saveEdit} className="mb-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="p-4 bg-white border-t border-gray-200">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-gray-800">
+              Edit Receipt
+            </h3>
+            <button
+              onClick={() => setEditReceiptId(null)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
+
+          <form onSubmit={saveEdit}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>
                 <label className="block text-gray-700 text-sm font-bold mb-2">
                   Date
@@ -592,7 +634,7 @@ const Receipt = ({ drawId, onReceiptChange }) => {
                   name="date"
                   value={editedReceipt.date}
                   onChange={handleEditChange}
-                  className="border rounded px-2 py-1 w-full"
+                  className="border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
@@ -605,7 +647,7 @@ const Receipt = ({ drawId, onReceiptChange }) => {
                   name="vendor"
                   value={editedReceipt.vendor}
                   onChange={handleEditChange}
-                  className="border rounded px-2 py-1 w-full"
+                  className="border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
@@ -615,14 +657,16 @@ const Receipt = ({ drawId, onReceiptChange }) => {
                 </label>
                 <input
                   type="number"
+                  step="0.01"
                   name="amount"
                   value={editedReceipt.amount}
                   onChange={handleEditChange}
-                  className="border rounded px-2 py-1 w-full"
+                  className="border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
             </div>
+
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2">
                 Description
@@ -631,45 +675,57 @@ const Receipt = ({ drawId, onReceiptChange }) => {
                 name="description"
                 value={editedReceipt.description}
                 onChange={handleEditChange}
-                className="border rounded px-2 py-1 w-full"
-                required
+                className="border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows="2"
               ></textarea>
             </div>
-            <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2">
-                Point of Contact
-              </label>
-              <textarea
-                name="pointofcontact"
-                value={editedReceipt.pointofcontact}
-                onChange={handleEditChange}
-                className="border rounded px-2 py-1 w-full"
-                required
-              ></textarea>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Point of Contact
+                </label>
+                <input
+                  type="text"
+                  name="pointofcontact"
+                  value={editedReceipt.pointofcontact}
+                  onChange={handleEditChange}
+                  className="border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Card Number (last 4 digits)
+                </label>
+                <input
+                  type="text"
+                  maxLength="4"
+                  name="ccnumber"
+                  value={editedReceipt.ccnumber}
+                  onChange={handleEditChange}
+                  className="border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="XXXX"
+                />
+              </div>
             </div>
-            <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2">
-                Credit Card Used
-              </label>
-              <textarea
-                name="description"
-                value={editedReceipt.ccnumber}
-                onChange={handleEditChange}
-                className="border rounded px-2 py-1 w-full"
-                required
-              ></textarea>
-            </div>
-            <div>
+
+            <div className="flex space-x-2">
               <button
                 type="submit"
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
+                disabled={isSubmitting}
+                className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition duration-200 flex items-center"
               >
-                Save
+                {isSubmitting ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white mr-2"></div>
+                ) : (
+                  <Edit size={16} className="mr-1" />
+                )}
+                Save Changes
               </button>
               <button
                 type="button"
                 onClick={() => setEditReceiptId(null)}
-                className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-md transition duration-200"
               >
                 Cancel
               </button>
