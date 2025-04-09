@@ -193,6 +193,18 @@ const ConstructionDraw = ({ propertyId }) => {
     e.preventDefault();
 
     try {
+      // Format the date to YYYY-MM-DD
+      const formattedDate = new Date(editedDraw.release_date)
+        .toISOString()
+        .split("T")[0];
+
+      const requestData = {
+        ...editedDraw,
+        release_date: formattedDate,
+        property_id: parseInt(propertyId, 10),
+        amount: parseFloat(editedDraw.amount),
+      };
+
       const response = await fetch(
         `http://localhost:5000/api/construction-draws/${editDrawId}`,
         {
@@ -201,7 +213,7 @@ const ConstructionDraw = ({ propertyId }) => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
-          body: JSON.stringify(editedDraw),
+          body: JSON.stringify(requestData),
         }
       );
 
@@ -209,10 +221,60 @@ const ConstructionDraw = ({ propertyId }) => {
         throw new Error("Failed to update draw");
       }
 
-      const updatedDraw = await response.json();
-      setDraws(
-        draws.map((draw) => (draw.id === editDrawId ? updatedDraw : draw))
+      // Fetch all draws to ensure we have the latest data including receipts
+      const drawsResponse = await fetch(
+        `http://localhost:5000/api/construction-draws/${propertyId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
       );
+
+      if (!drawsResponse.ok) {
+        throw new Error("Failed to refresh construction draws");
+      }
+
+      const drawsData = await drawsResponse.json();
+      // Sort draws by release date in ascending order
+      const sortedDraws = drawsData.sort(
+        (a, b) => new Date(a.release_date) - new Date(b.release_date)
+      );
+
+      // Now fetch receipts for each draw to ensure we have complete data
+      const drawsWithReceipts = await Promise.all(
+        sortedDraws.map(async (draw) => {
+          try {
+            if (!draw || !draw.id) {
+              return { ...draw, receipts: [] };
+            }
+
+            const receiptResponse = await fetch(
+              `http://localhost:5000/api/receipts/${draw.id}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem(
+                    "accessToken"
+                  )}`,
+                },
+              }
+            );
+
+            if (!receiptResponse.ok) {
+              return { ...draw, receipts: [] };
+            }
+
+            const receipts = await receiptResponse.json();
+            return { ...draw, receipts };
+          } catch (err) {
+            console.error(`Error fetching receipts for draw ${draw?.id}:`, err);
+            return { ...draw, receipts: [] };
+          }
+        })
+      );
+
+      // Update the state with the complete data
+      setDraws(drawsWithReceipts);
       setEditDrawId(null);
       setEditedDraw({});
       toast.success("Draw updated successfully", toastConfig);
@@ -752,7 +814,7 @@ const ConstructionDraw = ({ propertyId }) => {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr className="text-gray-700">
+                      <tr key={`draw-row-${draw.id}`} className="text-gray-700">
                         <td className="border px-4 py-2 text-center">
                           {formatDate(draw.release_date)}
                         </td>
