@@ -1,7 +1,14 @@
+/* eslint-disable react-refresh/only-export-components */
 /* eslint-disable react/prop-types */
 import { useState, useEffect, useRef, memo, useCallback } from "react";
 import { useSwipeable } from "react-swipeable";
 import { debounce, throttle } from "../utils/performanceUtils";
+import { formatCurrency, formatPercent } from "../utils/propertyDetailsUtils";
+import {
+  savePropertyChanges,
+  exportToCSV,
+  savePhase,
+} from "../utils/propertyComponentUtils";
 import ConstructionDraw from "./ConstructionDraw";
 import PhaseTimeline from "./PhaseTimeline";
 import PhaseForm from "./PhaseForm";
@@ -28,19 +35,6 @@ import ResearchDropdown from "./ResearchDropdown";
 
 // Property Summary Component
 const PropertySummary = ({ property }) => {
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value || 0);
-  };
-
-  const formatPercent = (value) => {
-    return `${(value || 0).toFixed(2)}%`;
-  };
-
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6">
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-4">
@@ -477,7 +471,12 @@ const PropertyDetails = ({ propertyId }) => {
   const financialsPrintRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [expandedSections, setExpandedSections] = useState({});
+  const [expandedSections, setExpandedSections] = useState({
+    basicInfo: true,
+    financialDetails: false,
+    utilityInfo: false,
+    contactInfo: false,
+  });
   const [isEditing, setIsEditing] = useState(false);
   const [editedDetails, setEditedDetails] = useState({});
   const [propertyDetails, setPropertyDetails] = useState(null);
@@ -529,6 +528,8 @@ const PropertyDetails = ({ propertyId }) => {
 
   // Calculate progress
   const calculateProgress = () => {
+    if (!editedDetails || Object.keys(editedDetails).length === 0) return 0;
+
     const totalFields = Object.keys(editedDetails).length;
     const filledFields = Object.values(editedDetails).filter(
       (value) => value && value.toString().trim() !== ""
@@ -565,6 +566,7 @@ const PropertyDetails = ({ propertyId }) => {
     } catch (error) {
       console.error("Error fetching property details:", error);
       toast.error("Failed to load property details");
+      setError(error);
     } finally {
       setIsLoading(false);
     }
@@ -598,31 +600,48 @@ const PropertyDetails = ({ propertyId }) => {
     fetchPhases();
   }, [propertyId, fetchPropertyDetails]);
 
-  const saveChanges = async (details) => {
+  const handleSaveChanges = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/properties/${propertyId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-          body: JSON.stringify(details),
-        }
+      await savePropertyChanges(
+        editedDetails,
+        propertyId,
+        setIsEditing,
+        setPropertyDetails
       );
-      if (!response.ok) throw new Error("Failed to save changes");
     } catch (error) {
-      console.error("Error saving changes:", error);
+      console.error("Failed to save changes:", error);
+      toast.error("Failed to save changes");
     }
   };
 
-  const debouncedSave = useCallback(
-    debounce((details) => {
-      saveChanges(details);
-    }, 1000),
-    [saveChanges]
-  );
+  // Create a ref to hold the debounced function
+  const debouncedSaveRef = useRef(null);
+
+  // Setup the debounced save function
+  useEffect(() => {
+    debouncedSaveRef.current = debounce(async (details) => {
+      try {
+        await savePropertyChanges(
+          details,
+          propertyId,
+          () => {},
+          () => {}
+        );
+      } catch (error) {
+        console.error("Error auto-saving:", error);
+      }
+    }, 1000);
+
+    // Cleanup function
+    return () => {
+      debouncedSaveRef.current?.cancel?.();
+    };
+  }, [propertyId]);
+
+  // Create a stable callback that uses the ref
+  const debouncedSave = useCallback((details) => {
+    debouncedSaveRef.current?.(details);
+  }, []);
 
   /*
   Throttled scroll handler
@@ -630,13 +649,17 @@ const PropertyDetails = ({ propertyId }) => {
   2. Uses throttle to prevent rapid calls to handleScroll
   3. Properly handles the throttled scroll handler
   */
-  const handleScroll = useCallback(
-    throttle(() => {
+  // Create a ref for the throttled scroll handler
+  const throttledScrollRef = useRef(null);
+
+  // Setup the throttled scroll function
+  useEffect(() => {
+    throttledScrollRef.current = throttle(() => {
       const sections = Object.keys(expandedSections);
       const viewportHeight = window.innerHeight;
 
       sections.forEach((section) => {
-        const element = document.getElementById(section);
+        const element = document.getElementById(`section-${section}`);
         if (element) {
           const rect = element.getBoundingClientRect();
           if (rect.top >= 0 && rect.top <= viewportHeight / 2) {
@@ -647,9 +670,17 @@ const PropertyDetails = ({ propertyId }) => {
           }
         }
       });
-    }, 100),
-    [expandedSections]
-  );
+    }, 100);
+
+    return () => {
+      throttledScrollRef.current?.cancel?.();
+    };
+  }, [expandedSections]);
+
+  // Create a stable callback that uses the ref
+  const handleScroll = useCallback(() => {
+    throttledScrollRef.current?.();
+  }, []);
 
   // Use effect for scroll listener
   useEffect(() => {
@@ -664,26 +695,33 @@ const PropertyDetails = ({ propertyId }) => {
   const handleInputChange = useCallback(
     (e) => {
       const { name, value } = e.target;
-      setEditedDetails((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-      debouncedSave({
-        ...editedDetails,
-        [name]: value,
+      setEditedDetails((prev) => {
+        const updatedDetails = {
+          ...prev,
+          [name]: value,
+        };
+
+        debouncedSave(updatedDetails);
+        return updatedDetails;
       });
     },
-    [editedDetails, debouncedSave]
+    [debouncedSave]
   );
 
   const toggleEditMode = () => {
-    setIsEditing(!isEditing);
+    if (isEditing) {
+      // If we're currently editing, treat this as a save operation
+      handleSaveChanges();
+    } else {
+      // If we're not editing, enter edit mode
+      setIsEditing(true);
+    }
   };
 
   const cancelChanges = () => {
     setEditedDetails(propertyDetails);
     setError("");
-    toggleEditMode();
+    setIsEditing(false);
 
     toast.info("Changes cancelled", {
       position: "bottom-center",
@@ -696,7 +734,7 @@ const PropertyDetails = ({ propertyId }) => {
   };
 
   const renderInputField = (label, name, type = "text", isNumber = false) => {
-    const value = isEditing ? editedDetails[name] : propertyDetails[name];
+    const value = isEditing ? editedDetails[name] : propertyDetails?.[name];
     const isRequired = [
       "propertyName",
       "address",
@@ -721,6 +759,7 @@ const PropertyDetails = ({ propertyId }) => {
           name={name}
           value={value || ""}
           onChange={handleInputChange}
+          disabled={!isEditing}
           required={isRequired}
           className={`
             w-full px-3 py-2 rounded-lg border
@@ -729,6 +768,7 @@ const PropertyDetails = ({ propertyId }) => {
             ${isNumber ? "text-right" : ""}
             ${hasError ? "border-red-500" : "border-gray-300"}
             ${isRequired ? "bg-gray-50" : ""}
+            ${!isEditing ? "bg-gray-50 text-gray-700" : ""}
           `}
         />
         {hasError && (
@@ -748,17 +788,6 @@ const PropertyDetails = ({ propertyId }) => {
     if (financialsPrintRef.current) {
       window.print();
     }
-  };
-
-  const exportToCSV = (data, filename) => {
-    const csvContent = "data:text/csv;charset=utf-8," + data;
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `${filename}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   const handleEditPhase = (phase) => {
@@ -785,59 +814,23 @@ const PropertyDetails = ({ propertyId }) => {
         }
 
         setPhases(phases.filter((phase) => phase.id !== phaseId));
+        toast.success("Phase deleted successfully");
       } catch (error) {
         console.error("Error:", error);
+        toast.error("Failed to delete phase");
       }
     }
   };
 
   const handleSavePhase = async (formData) => {
-    const phaseData = {
-      ...formData,
-      property_id: propertyId,
-    };
-
-    try {
-      const response = await fetch(
-        phaseData.id
-          ? `http://localhost:5000/api/phases/${phaseData.id}`
-          : "http://localhost:5000/api/phases",
-        {
-          method: phaseData.id ? "PUT" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-          body: JSON.stringify(phaseData),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Error saving phase");
-      }
-
-      // Get the updated phase data from the response
-      const savedPhase = await response.json();
-
-      // Update the phases state immediately
-      setPhases((currentPhases) =>
-        phaseData.id
-          ? currentPhases.map((phase) =>
-              phase.id === phaseData.id ? savedPhase : phase
-            )
-          : [...currentPhases, savedPhase]
-      );
-
-      // Reset form state
-      setIsEditing(false);
-      setIsAddingPhase(false);
-      setEditedDetails({});
-      toast.success("Phase saved successfully!");
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error(error.message || "Failed to save phase.");
-    }
+    return savePhase(
+      formData,
+      propertyId,
+      setPhases,
+      setIsEditing,
+      setIsAddingPhase,
+      setEditedDetails
+    );
   };
 
   const handleAddPhase = () => {
@@ -1966,7 +1959,7 @@ const PropertyDetails = ({ propertyId }) => {
       {/* Sticky Action Bar*/}
       <StickyActionBar
         isEditing={isEditing}
-        onSave={saveChanges}
+        onSave={handleSaveChanges}
         onCancel={cancelChanges}
         onEdit={toggleEditMode}
         onPrint={handlePrintDetails}

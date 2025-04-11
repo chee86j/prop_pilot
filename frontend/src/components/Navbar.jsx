@@ -84,14 +84,6 @@ const Navbar = () => {
                 </Link>
               )}
               {isAuthenticated && (
-                <Link
-                  to="/excelstylegrid"
-                  className="my-1 text-sm text-gray-700 leading-5 hover:text-blue-600 md:mx-4 md:my-0"
-                >
-                  Excel Style Grid
-                </Link>
-              )}
-              {isAuthenticated && (
                 <button
                   onClick={() => setIsDSCRModalOpen(true)}
                   className="my-1 text-sm text-gray-700 leading-5 hover:text-blue-600 md:mx-4 md:my-0 flex items-center"

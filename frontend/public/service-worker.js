@@ -139,34 +139,48 @@ async function networkFirstWithTimeout(
 ) {
   try {
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("timeout")), timeout)
+      setTimeout(() => reject(new Error("Network request timed out")), timeout)
     );
 
-    const networkPromise = fetch(request).then(async (response) => {
-      const clone = response.clone();
-      const cache = await caches.open(DYNAMIC_CACHE);
+    const networkPromise = fetch(request)
+      .then(async (response) => {
+        if (!response || !response.ok) {
+          return response;
+        }
 
-      if (cacheDuration) {
-        const headers = new Headers(clone.headers);
-        headers.append("sw-cache-timestamp", Date.now());
-        headers.append("sw-cache-duration", cacheDuration);
+        try {
+          const responseClone = response.clone();
+          const cache = await caches.open(DYNAMIC_CACHE);
 
-        const responseToCache = new Response(await clone.blob(), {
-          status: clone.status,
-          statusText: clone.statusText,
-          headers: headers,
-        });
+          if (cacheDuration) {
+            const headers = new Headers(responseClone.headers);
+            headers.append("sw-cache-timestamp", Date.now());
+            headers.append("sw-cache-duration", cacheDuration);
 
-        await cache.put(request, responseToCache);
-      } else {
-        await cache.put(request, clone);
-      }
+            const responseToCache = new Response(await responseClone.blob(), {
+              status: responseClone.status,
+              statusText: responseClone.statusText,
+              headers: headers,
+            });
 
-      return response;
-    });
+            await cache.put(request, responseToCache);
+          } else {
+            await cache.put(request, responseClone);
+          }
+        } catch (cacheError) {
+          console.error("Error caching response:", cacheError);
+        }
+
+        return response;
+      })
+      .catch((error) => {
+        console.error("Fetch error in networkFirstWithTimeout:", error);
+        throw error;
+      });
 
     return await Promise.race([networkPromise, timeoutPromise]);
   } catch (error) {
+    console.error("networkFirstWithTimeout error:", error);
     const cachedResponse = await caches.match(request);
 
     if (cachedResponse) {
@@ -196,27 +210,39 @@ async function cacheFirst(request) {
   }
   const response = await fetch(request);
   if (response.ok) {
+    const responseClone = response.clone();
     await caches
       .open(DYNAMIC_CACHE)
-      .then((cache) => cache.put(request, response.clone()));
+      .then((cache) => cache.put(request, responseClone));
   }
   return response;
 }
 
 // Stale while revalidate strategy
 async function staleWhileRevalidate(request) {
-  const cachedResponse = await caches.match(request);
+  try {
+    const cachedResponse = await caches.match(request);
 
-  const fetchPromise = fetch(request).then((response) => {
-    if (response.ok) {
-      caches
-        .open(DYNAMIC_CACHE)
-        .then((cache) => cache.put(request, response.clone()));
-    }
-    return response;
-  });
+    const fetchPromise = fetch(request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.ok) {
+          const responseToCache = networkResponse.clone();
+          caches.open(DYNAMIC_CACHE).then((cache) => {
+            cache.put(request, responseToCache);
+          });
+        }
+        return networkResponse;
+      })
+      .catch((error) => {
+        console.error("Fetch failed in staleWhileRevalidate:", error);
+        throw error;
+      });
 
-  return cachedResponse || fetchPromise;
+    return cachedResponse || fetchPromise;
+  } catch (error) {
+    console.error("Error in staleWhileRevalidate:", error);
+    throw error;
+  }
 }
 
 // Enhanced fetch event handler
@@ -257,6 +283,7 @@ self.addEventListener("fetch", (event) => {
               return await fetch(event.request);
           }
         } catch (error) {
+          console.error("Service worker fetch error:", error);
           if (event.request.mode === "navigate") {
             const cache = await caches.open(CACHE_NAME);
             return cache.match("/offline.html");
@@ -265,7 +292,11 @@ self.addEventListener("fetch", (event) => {
         }
       })()
     );
+    return;
   }
+
+  // Default behavior for non-matched routes
+  event.respondWith(fetch(event.request));
 });
 
 // Handle push notifications

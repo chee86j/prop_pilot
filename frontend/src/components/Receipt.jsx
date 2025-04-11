@@ -70,7 +70,7 @@ const Receipt = ({ drawId, onReceiptChange }) => {
       }
 
       const data = await response.json();
-      // Sort by date in descending order (newest first) to match the banking UI
+      // Sort by date in descending order (newest first)
       const sortedReceipts = data.sort(
         (a, b) => new Date(b.date) - new Date(a.date)
       );

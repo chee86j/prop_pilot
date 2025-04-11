@@ -4,7 +4,7 @@ import {
   PREDEFINED_PHASES,
   PHASE_TASKS,
   PHASE_CATEGORIES,
-} from "../constants/phases";
+} from "../utils/phaseData";
 
 const PhaseTrackerFAQ = () => {
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);

@@ -28,7 +28,6 @@ const PropertyList = lazy(() => import("./components/PropertyList"));
 const AddProperty = lazy(() => import("./components/AddProperty"));
 const ConstructionDraw = lazy(() => import("./components/ConstructionDraw"));
 const Receipt = lazy(() => import("./components/Receipt"));
-const ExcelStyleGrid = lazy(() => import("./components/ExcelStyleGrid"));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -120,7 +119,6 @@ function App() {
                 path="/constructiondraw/:propertyId"
                 element={<ConstructionDrawWrapper />}
               />
-              <Route path="/excelstylegrid" element={<ExcelStyleGrid />} />
               <Route path="/receipts/:drawId" element={<ReceiptsWrapper />} />
               <Route path="/testimonials" element={<Testimonials />} />
               <Route path="/about" element={<About />} />

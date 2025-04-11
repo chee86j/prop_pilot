@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { PREDEFINED_PHASES, PHASE_CATEGORIES } from "../constants/phases";
+import { PREDEFINED_PHASES, PHASE_CATEGORIES } from "../utils/phaseData";
 import { Search, ChevronDown, ChevronUp } from "lucide-react";
 
 const initialFormState = {

@@ -135,12 +135,18 @@ const RentalAnalysis = ({ property }) => {
         >
           {Object.values(expandedSections).every((val) => val) ? (
             <>
-              <ChevronsUp size={18} className="transition-transform duration-200" />
+              <ChevronsUp
+                size={18}
+                className="transition-transform duration-200"
+              />
               <span>Collapse All</span>
             </>
           ) : (
             <>
-              <ChevronsDown size={18} className="transition-transform duration-200" />
+              <ChevronsDown
+                size={18}
+                className="transition-transform duration-200"
+              />
               <span>Expand All</span>
             </>
           )}
