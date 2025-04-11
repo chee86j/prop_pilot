@@ -1,9 +1,8 @@
 import { useState } from "react";
-import PhaseTrackerFAQ from "./PhaseTrackerFAQ";
 import { ChevronDown, ChevronUp, Search } from "lucide-react";
 import PropTypes from "prop-types";
-import { generalFaqs } from "../utils/faqData";
-import { filterFaqsByQuery, getFaqsByCategory } from "../utils/faqUtils";
+import { filterFAQs } from "../utils/data";
+import PhaseTrackerFAQ from "./PhaseTrackerFAQ";
 
 // FAQ category component
 const FAQCategory = ({ title, children }) => {
@@ -72,12 +71,20 @@ const FAQ = () => {
   };
 
   // Filter FAQs based on search query
-  const filteredFaqs = filterFaqsByQuery(generalFaqs, searchQuery);
+  const filteredFaqsData = filterFAQs("all", searchQuery);
 
-  // Group FAQs by category
-  const featureFaqs = getFaqsByCategory(filteredFaqs, "features");
-  const financingFaqs = getFaqsByCategory(filteredFaqs, "financing");
-  const usageFaqs = getFaqsByCategory(filteredFaqs, "usage");
+  // Get FAQs by category
+  const getFaqsByCategory = (category) => {
+    const categoryData = filteredFaqsData.find(
+      (cat) => cat.category === category
+    );
+    return categoryData ? categoryData.questions : [];
+  };
+
+  // Extract FAQ categories
+  const featureFaqs = getFaqsByCategory("Features");
+  const financingFaqs = getFaqsByCategory("Financing");
+  const generalFaqs = getFaqsByCategory("General Questions");
 
   return (
     <div className="faq-container mx-auto p-4 md:p-6 lg:p-8 max-w-4xl">
@@ -108,8 +115,8 @@ const FAQ = () => {
         </div>
       </div>
 
-      {/* Phase Tracker FAQs */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+      {/* Phase Tracker FAQ */}
+      <div className="mb-8">
         <PhaseTrackerFAQ />
       </div>
 
@@ -145,22 +152,22 @@ const FAQ = () => {
           </FAQCategory>
         )}
 
-        {usageFaqs.length > 0 && (
-          <FAQCategory title="Usage">
-            {usageFaqs.map((faq, index) => (
+        {generalFaqs.length > 0 && (
+          <FAQCategory title="General Questions">
+            {generalFaqs.map((faq, index) => (
               <FAQItem
-                key={`usage-${index}`}
+                key={`general-${index}`}
                 question={faq.question}
                 answer={faq.answer}
-                isExpanded={expandedIndex === `usage-${index}`}
-                onToggle={() => toggleExpansion(`usage-${index}`)}
-                index={`usage-${index}`}
+                isExpanded={expandedIndex === `general-${index}`}
+                onToggle={() => toggleExpansion(`general-${index}`)}
+                index={`general-${index}`}
               />
             ))}
           </FAQCategory>
         )}
 
-        {filteredFaqs.length === 0 && (
+        {filteredFaqsData.length === 0 && (
           <div className="text-center py-8">
             <p className="text-gray-500">
               No FAQs found matching your search criteria.

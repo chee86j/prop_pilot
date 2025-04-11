@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { useState, useEffect, useCallback } from "react";
-import { formatCurrencyDetailed } from "../utils/formatting";
+import { formatCurrencyDetailed } from "../utils/format";
 import {
   ChevronsDown,
   ChevronsUp,
@@ -10,6 +10,8 @@ import {
   Trash2,
   Plus,
   Info,
+  Printer,
+  X,
 } from "lucide-react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";

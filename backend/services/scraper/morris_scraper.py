@@ -154,7 +154,7 @@ if __name__ == "__main__":
 # ADDITIONAL SITES FOR SCRAPING (Northern Jersey)
 
 # ---General Statistics-----
-# https://www.propertyshark.com/mason/info/Property-Records/NJ/
+# Property Shark: https://www.propertyshark.com/mason/info/Property-Records/NJ/
 # General Northern & Central Jersey County Assessment Records Search: https://taxrecords-nj.com/pub/cgi/prc6.cgi?district=1400&ms_user=ctb00
 # Demographics and Statistics: https://www.city-data.com/
 # Foreclosure Listings: https://salesweb.civilview.com/

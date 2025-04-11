@@ -1,4 +1,4 @@
-/**
+/*
  * Formatting utilities
  * Contains functions for formatting various data types (currency, percentages, etc.)
  */

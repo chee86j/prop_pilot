@@ -2,13 +2,9 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect, useRef, memo, useCallback } from "react";
 import { useSwipeable } from "react-swipeable";
-import { debounce, throttle } from "../utils/performanceUtils";
-import { formatCurrency, formatPercent } from "../utils/propertyDetailsUtils";
-import {
-  savePropertyChanges,
-  exportToCSV,
-  savePhase,
-} from "../utils/propertyComponentUtils";
+import { debounce, throttle } from "../utils/performance";
+import { formatCurrency, formatPercent } from "../utils/format";
+import { savePropertyChanges, savePhase, exportToCSV } from "../utils/property";
 import ConstructionDraw from "./ConstructionDraw";
 import PhaseTimeline from "./PhaseTimeline";
 import PhaseForm from "./PhaseForm";

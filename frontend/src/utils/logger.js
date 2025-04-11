@@ -1,4 +1,4 @@
-/**
+/*
  * Logging utility for frontend application
  * Handles logging based on environment and provides consistent formatting
  */

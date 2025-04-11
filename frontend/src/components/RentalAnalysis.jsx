@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState, useRef } from "react";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
-import { formatFullCurrency } from "../utils/formatting";
+import { formatFullCurrency } from "../utils/format";
 
 const RentalAnalysis = ({ property }) => {
   const printableRef = useRef(null);

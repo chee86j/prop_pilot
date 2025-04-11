@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect, useCallback } from "react";
-import { formatCurrency } from "../utils/formatting";
+import { formatCurrency } from "../utils/format";
 import Receipt from "./Receipt";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";

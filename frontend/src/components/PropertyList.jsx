@@ -1,13 +1,24 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { FaUserCircle, FaSearch, FaFilter } from "react-icons/fa";
+import {
+  Map,
+  Home,
+  Building,
+  Wrench,
+  DollarSign,
+  Calendar,
+} from "lucide-react";
+import TableSkeleton from "./core/TableSkeleton";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 // eslint-disable-next-line no-unused-vars
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { fetchUserProfile } from "../utils/fetchUserProfile";
-import { formatCurrency } from "../utils/formatting";
+import { fetchUserProfile } from "../utils/user";
+import { formatCurrency } from "../utils/format";
+import AuthManager from "../utils/auth";
 import SkyScrapers from "../assets/icons/skyscrapers.png";
 
 const PropertyList = () => {

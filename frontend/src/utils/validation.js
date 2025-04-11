@@ -1,9 +1,9 @@
-/**
+/*
  * Validation utilities
  * Contains functions for validating different types of input
  */
 
-/**
+/*
  * Validates an email address
  * @param {string} email - Email to validate
  * @returns {boolean} - True if email is valid
@@ -13,7 +13,7 @@ export const emailValidator = (email) => {
   return re.test(String(email).toLowerCase());
 };
 
-/**
+/*
  * Validates a password meets security requirements
  * Must include: at least 8 chars, upper & lowercase letters, number, special char
  * @param {string} password - Password to validate
@@ -24,7 +24,7 @@ export const passwordValidator = (password) => {
   return re.test(password);
 };
 
-/**
+/*
  * Validates a phone number
  * @param {string} phone - Phone number to validate
  * @returns {boolean} - True if phone number is valid

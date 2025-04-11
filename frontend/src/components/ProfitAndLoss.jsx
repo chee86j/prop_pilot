@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useRef } from "react";
-import { formatFullCurrency } from "../utils/formatting";
+import { formatFullCurrency } from "../utils/format";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
 
 const keyDisplayMapping = {

@@ -8,7 +8,7 @@ This file helps incorporate web performance optimization by:
 
 import { useState, useEffect, useCallback } from "react";
 import LogoIcon from "../assets/icons/logo.svg";
-import { createOptimizedObserver } from "../utils/performanceUtils";
+import { createOptimizedObserver } from "../utils/performance";
 import imageCompression from "browser-image-compression";
 
 const Property = ({ name, description, image }) => {

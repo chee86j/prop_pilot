@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Testimonials from "./Testimonials";
 import PropertyGallery from "./PropertyGallery";
-import { fetchUserProfile } from "../utils/fetchUserProfile";
+import { fetchUserProfile } from "../utils/user";
 import planeIcon from "../assets/icons/plane.svg";
 import LogoIcon from "../assets/icons/logo.svg";
 
@@ -187,7 +187,7 @@ const Home = () => {
           }
         });
       } catch (error) {
-        console.error("Error fetching user profile:", error);
+        // Silently handle authentication errors
         setShowFallbackAvatar(true);
       }
     };

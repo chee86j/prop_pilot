@@ -1,8 +1,70 @@
-/**
+/*
  * Property-related utilities
  * Contains functions for managing properties, their details and phases
  */
 import { toast } from "react-toastify";
+
+/**
+ * Exports property data to a CSV file
+ * @param {Array} properties - Array of property objects to export
+ * @param {string} filename - Name of the output file (defaults to 'properties.csv')
+ */
+export const exportToCSV = (properties, filename = "properties.csv") => {
+  if (!properties || properties.length === 0) {
+    toast.error("No properties to export");
+    return;
+  }
+
+  try {
+    // Get headers from the first property object
+    const headers = Object.keys(properties[0]);
+
+    // Create CSV header row
+    const csvHeader = headers.join(",");
+
+    // Create CSV content with data rows
+    const csvContent = properties
+      .map((property) => {
+        return headers
+          .map((header) => {
+            const value = property[header];
+            // Handle null/undefined values and comma-containing values
+            if (value == null) return "";
+            if (typeof value === "string" && value.includes(",")) {
+              return `"${value}"`;
+            }
+            return String(value);
+          })
+          .join(",");
+      })
+      .join("\n");
+
+    // Combine header and content
+    const csv = `${csvHeader}\n${csvContent}`;
+
+    // Create a Blob with the CSV content
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+
+    // Create a download link
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+
+    // Set up the download link
+    link.setAttribute("href", url);
+    link.setAttribute("download", filename);
+    link.style.visibility = "hidden";
+
+    // Add to DOM, trigger click to download, then remove
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast.success(`Successfully exported to ${filename}`);
+  } catch (error) {
+    console.error("Error exporting to CSV:", error);
+    toast.error("Failed to export properties to CSV");
+  }
+};
 
 /**
  * Saves property changes to the server

@@ -1,4 +1,4 @@
-/**
+/*
  * Main index file for utility functions
  * Organizes utility functions by category and re-exports them
  */

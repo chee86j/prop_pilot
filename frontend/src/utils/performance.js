@@ -1,4 +1,4 @@
-/**
+/*
  * Performance utilities
  * Contains functions for monitoring and optimizing performance
  */

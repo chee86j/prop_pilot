@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchUserProfile } from "../utils/fetchUserProfile";
+import { fetchUserProfile } from "../utils/user";
 import { emailValidator, passwordValidator } from "../utils/validation";
 import { Eye, EyeOff, UserCircle } from "lucide-react";
 import AvatarUpload from "./AvatarUpload";

@@ -1,9 +1,13 @@
+/* eslint-disable react/prop-types */
 import { useState, useEffect, useCallback, useRef } from "react";
 import PropTypes from "prop-types";
 import { ChevronLeft, ChevronRight, Star, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
-import { testimonials } from "../utils/testimonialsData";
-import { calculateAverageRating, isHomePage } from "../utils/testimonialUtils";
+import {
+  testimonials,
+  calculateAverageRating,
+  isHomePage,
+} from "../utils/data";
 
 // Rating stars component
 const RatingStars = ({ rating }) => {
@@ -151,8 +155,8 @@ const Testimonials = () => {
           {/* Featured testimonial */}
           <div className="mb-8">
             <TestimonialCard
-              text={testimonials[activeIndex].text}
-              author={testimonials[activeIndex].author}
+              text={testimonials[activeIndex].quote}
+              author={testimonials[activeIndex].name}
               role={testimonials[activeIndex].role}
               rating={testimonials[activeIndex].rating}
               image={testimonials[activeIndex].image}
@@ -193,16 +197,14 @@ const Testimonials = () => {
               .map((testimonial, index) => (
                 <TestimonialCard
                   key={index}
-                  text={testimonial.text}
-                  author={testimonial.author}
+                  text={testimonial.quote}
+                  author={testimonial.name}
                   role={testimonial.role}
                   rating={testimonial.rating}
                   image={testimonial.image}
                   onClick={() => {
                     setActiveIndex(
-                      testimonials.findIndex(
-                        (t) => t.author === testimonial.author
-                      )
+                      testimonials.findIndex((t) => t.name === testimonial.name)
                     );
                     setIsAutoPlaying(false);
                   }}
@@ -270,7 +272,7 @@ const Testimonials = () => {
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800 relative">
           <span className="relative">
             What Our Clients Say
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-48 h-1 bg-green-500 mt-2"></div>
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-80 h-1 bg-green-500 mt-2"></div>
           </span>
         </h2>
 
@@ -325,8 +327,8 @@ const Testimonials = () => {
         {/* Featured testimonial */}
         <div className="mb-10 transform transition-all duration-500">
           <TestimonialCard
-            text={testimonials[activeIndex].text}
-            author={testimonials[activeIndex].author}
+            text={testimonials[activeIndex].quote}
+            author={testimonials[activeIndex].name}
             role={testimonials[activeIndex].role}
             rating={testimonials[activeIndex].rating}
             image={testimonials[activeIndex].image}
@@ -373,15 +375,15 @@ const Testimonials = () => {
                     }}
                   >
                     <TestimonialCard
-                      text={testimonial.text}
-                      author={testimonial.author}
+                      text={testimonial.quote}
+                      author={testimonial.name}
                       role={testimonial.role}
                       rating={testimonial.rating}
                       image={testimonial.image}
                       onClick={() => {
                         setActiveIndex(
                           testimonials.findIndex(
-                            (t) => t.author === testimonial.author
+                            (t) => t.name === testimonial.name
                           )
                         );
                         setIsAutoPlaying(false);
