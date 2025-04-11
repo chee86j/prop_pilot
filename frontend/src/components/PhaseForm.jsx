@@ -197,7 +197,9 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
               >
                 <span className="block font-medium">{phase.name}</span>
                 <span className="text-sm text-gray-500">
-                  {PHASE_CATEGORIES[phase.category].name}
+                  {phase.category && PHASE_CATEGORIES[phase.category]
+                    ? PHASE_CATEGORIES[phase.category].name
+                    : "Uncategorized"}
                 </span>
               </button>
             ))}

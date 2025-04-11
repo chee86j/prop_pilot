@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { Chrono } from "react-chrono";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Edit2, Trash2 } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -8,12 +8,35 @@ import {
   PREDEFINED_PHASES,
   PHASE_CATEGORIES,
   calculateProgress,
-} from "../constants/phases";
+} from "../utils/data";
 
 const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
   const [mounted, setMounted] = useState(false);
   const containerRef = useRef(null);
+
+  // Use this ref to track if component is mounted
+  const isMounted = useRef(true);
+  // Store toast IDs to be able to dismiss them on unmount
+  const toastIds = useRef([]);
+
+  // Cleanup function to dismiss all toasts when component unmounts
+  const dismissAllToasts = useCallback(() => {
+    toastIds.current.forEach((id) => {
+      if (id && toast.isActive(id)) {
+        toast.dismiss(id);
+      }
+    });
+    toastIds.current = [];
+  }, []);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+      dismissAllToasts();
+    };
+  }, [dismissAllToasts]);
 
   useEffect(() => {
     // Reset mounted state when phases change
@@ -31,6 +54,46 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
       setMounted(false);
     };
   }, [phases]);
+
+  // Safe toast function that only shows toast if component is still mounted
+  const safeToast = useCallback((message, type = "info") => {
+    if (isMounted.current) {
+      const id = toast[type](message, {
+        autoClose: 2000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        pauseOnFocusLoss: false,
+        closeButton: false,
+      });
+      toastIds.current.push(id);
+      return id;
+    }
+    return null;
+  }, []);
+
+  // Safe delete handler
+  const handleDelete = useCallback(
+    (id) => {
+      if (isMounted.current) {
+        onDelete(id);
+        safeToast("Phase deleted", "success");
+      }
+    },
+    [onDelete, safeToast]
+  );
+
+  // Safe edit handler
+  const handleEdit = useCallback(
+    (phase) => {
+      if (isMounted.current) {
+        onEdit(phase);
+        safeToast("Editing phase...");
+      }
+    },
+    [onEdit, safeToast]
+  );
 
   if (!phases || phases.length === 0) {
     return (
@@ -132,8 +195,7 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                onEdit(phase);
-                toast.info("Editing phase...");
+                handleEdit(phase);
               }}
               className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors duration-200"
               aria-label="Edit phase"
@@ -144,8 +206,7 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                onDelete(phase.id);
-                toast.success("Phase deleted");
+                handleDelete(phase.id);
               }}
               className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors duration-200"
               aria-label="Delete phase"
@@ -211,20 +272,14 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
 
         <div className="flex justify-end gap-2 mt-4">
           <button
-            onClick={() => {
-              onEdit(phase);
-              toast.info("Editing phase...");
-            }}
+            onClick={() => handleEdit(phase)}
             className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors duration-200"
             aria-label="Edit phase"
           >
             <Edit2 size={18} />
           </button>
           <button
-            onClick={() => {
-              onDelete(phase.id);
-              toast.success("Phase deleted");
-            }}
+            onClick={() => handleDelete(phase.id)}
             className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors duration-200"
             aria-label="Delete phase"
           >
@@ -243,7 +298,16 @@ const PhaseTimeline = ({ phases, onEdit, onDelete }) => {
 
   return (
     <div className="w-full">
-      <ToastContainer position="bottom-center" />
+      <ToastContainer
+        position="bottom-center"
+        pauseOnFocusLoss={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        limit={3}
+        autoClose={2000}
+        hideProgressBar
+      />
 
       {/* Mobile View */}
       <div className="block sm:hidden">

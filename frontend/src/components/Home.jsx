@@ -60,7 +60,10 @@ const HeroSection = ({ user, showFallbackAvatar, setShowFallbackAvatar }) => (
     <p className="text-gray-600 text-lg my-5">
       Streamline your property management with our advanced tools and services.
     </p>
-    <Link to="/authform" className="custom-button">
+    <Link
+      to={user && !user.isGuest ? "/propertylist" : "/authform"}
+      className="custom-button"
+    >
       <img
         src={planeIcon}
         alt="Plane"
