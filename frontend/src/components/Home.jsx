@@ -70,7 +70,7 @@ const HeroSection = ({ user, showFallbackAvatar, setShowFallbackAvatar }) => (
         className="mr-2"
         style={{ width: "24px", height: "24px" }}
       />
-      <span>Get Started</span>
+      <span>{user && !user.isGuest ? "Portfolio" : "Get Started"}</span>
     </Link>
   </div>
 );
