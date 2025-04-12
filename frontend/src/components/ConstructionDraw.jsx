@@ -237,6 +237,38 @@ const ConstructionDraw = ({ propertyId }) => {
 
   const saveEdit = async (e) => {
     e.preventDefault();
+    setValidationErrors((prev) => ({ ...prev, draw: null }));
+
+    // Client-side validation so that we don't send empty data to the server
+    if (!editedDraw.release_date) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        draw: "Release date is required",
+      }));
+      toast.error("Release date is required", toastConfig);
+      return;
+    }
+
+    if (!editedDraw.amount || parseFloat(editedDraw.amount) <= 0) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        draw: "Amount must be greater than 0",
+      }));
+      toast.error("Amount must be greater than 0", toastConfig);
+      return;
+    }
+
+    if (
+      !editedDraw.bank_account_number ||
+      editedDraw.bank_account_number.length < 4
+    ) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        draw: "Bank account number must be at least 4 digits",
+      }));
+      toast.error("Bank account number must be at least 4 digits", toastConfig);
+      return;
+    }
 
     try {
       // Format the date to YYYY-MM-DD
@@ -251,6 +283,8 @@ const ConstructionDraw = ({ propertyId }) => {
         amount: parseFloat(editedDraw.amount),
       };
 
+      console.log("Sending update request with data:", requestData);
+
       const response = await fetch(
         `http://localhost:5000/api/construction-draws/${editDrawId}`,
         {
@@ -263,8 +297,11 @@ const ConstructionDraw = ({ propertyId }) => {
         }
       );
 
+      const data = await response.json();
+      console.log("Update response:", data);
+
       if (!response.ok) {
-        throw new Error("Failed to update draw");
+        throw new Error(data.error || "Failed to update draw");
       }
 
       // Fetch all draws to ensure we have the latest data including receipts
@@ -329,8 +366,11 @@ const ConstructionDraw = ({ propertyId }) => {
       setEditedDraw({});
       toast.success("Draw updated successfully", toastConfig);
     } catch (error) {
+      console.error("Error updating draw:", error);
+      console.error("Error details:", error.message);
+      toast.error(error.message || "Failed to update draw", toastConfig);
+      setValidationErrors((prev) => ({ ...prev, draw: error.message }));
       setError(error.message);
-      toast.error("Failed to update draw", toastConfig);
     }
   };
 
@@ -350,6 +390,37 @@ const ConstructionDraw = ({ propertyId }) => {
   const handleAddDraw = async (e) => {
     e.preventDefault();
     setValidationErrors((prev) => ({ ...prev, draw: null }));
+
+    // Client-side validation so that we don't send empty data to the server
+    if (!newDraw.release_date) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        draw: "Release date is required",
+      }));
+      toast.error("Release date is required", toastConfig);
+      return;
+    }
+
+    if (!newDraw.amount || parseFloat(newDraw.amount) <= 0) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        draw: "Amount must be greater than 0",
+      }));
+      toast.error("Amount must be greater than 0", toastConfig);
+      return;
+    }
+
+    if (
+      !newDraw.bank_account_number ||
+      newDraw.bank_account_number.length < 4
+    ) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        draw: "Bank account number must be at least 4 digits",
+      }));
+      toast.error("Bank account number must be at least 4 digits", toastConfig);
+      return;
+    }
 
     try {
       // Format the date to YYYY-MM-DD

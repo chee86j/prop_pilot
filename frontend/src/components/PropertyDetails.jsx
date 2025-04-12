@@ -474,6 +474,7 @@ const PropertyDetails = ({ propertyId }) => {
     contactInfo: false,
   });
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingProperty, setIsEditingProperty] = useState(false);
   const [editedDetails, setEditedDetails] = useState({});
   const [propertyDetails, setPropertyDetails] = useState(null);
   const [phases, setPhases] = useState([]);
@@ -602,11 +603,13 @@ const PropertyDetails = ({ propertyId }) => {
         editedDetails,
         propertyId,
         setIsEditing,
-        setPropertyDetails
+        setPropertyDetails,
+        setIsEditingProperty,
+        true // Show toasts for manual saves
       );
     } catch (error) {
-      console.error("Failed to save changes:", error);
-      toast.error("Failed to save changes");
+      console.error("Error saving property:", error);
+      toast.error("Failed to save property: " + error.message);
     }
   };
 
@@ -620,8 +623,10 @@ const PropertyDetails = ({ propertyId }) => {
         await savePropertyChanges(
           details,
           propertyId,
-          () => {},
-          () => {}
+          () => {}, // Empty function for setIsEditing
+          () => {}, // Empty function for setPropertyDetails
+          () => {}, // Empty function for setIsEditingProperty
+          false // Don't show toasts for auto-saves during typing
         );
       } catch (error) {
         console.error("Error auto-saving:", error);
@@ -691,6 +696,41 @@ const PropertyDetails = ({ propertyId }) => {
   const handleInputChange = useCallback(
     (e) => {
       const { name, value } = e.target;
+
+      // Check if this is a numeric field
+      const isNumericField =
+        name.includes("Cost") ||
+        name.includes("Price") ||
+        name.includes("Rate") ||
+        name.includes("Percentage") ||
+        name.includes("Fee") ||
+        name.includes("Amount") ||
+        name.includes("Balance") ||
+        name.includes("Flow") ||
+        name.includes("Equity") ||
+        name.includes("Rent") ||
+        name.includes("income") ||
+        name.includes("numUnits") ||
+        name.includes("Years") ||
+        name === "purchase_price" ||
+        name === "sewer" ||
+        name === "water" ||
+        name === "lawn" ||
+        name === "garbage";
+
+      // Handle numeric field parsing
+      if (isNumericField && value !== "") {
+        // Only process if not empty (empty is valid for optional fields)
+        if (!/^-?\d*\.?\d*$/.test(value)) {
+          // If not a valid number format, show error but don't update
+          toast.error(`${name} must be a valid number`, {
+            position: "top-right",
+            autoClose: 2000,
+          });
+          return; // Don't update with invalid value
+        }
+      }
+
       setEditedDetails((prev) => {
         const updatedDetails = {
           ...prev,
@@ -705,19 +745,29 @@ const PropertyDetails = ({ propertyId }) => {
   );
 
   const toggleEditMode = () => {
-    if (isEditing) {
-      // If we're currently editing, treat this as a save operation
+    if (isEditingProperty) {
+      // If we're currently editing property details, treat this as a save operation
       handleSaveChanges();
     } else {
-      // If we're not editing, enter edit mode
+      // If we're not editing property details, enter property edit mode
+      setIsEditingProperty(true);
       setIsEditing(true);
+      setIsAddingPhase(false); // Ensure we're not in phase adding mode
     }
+  };
+
+  const handleCancelPhase = () => {
+    setEditedDetails({});
+    setIsAddingPhase(false);
+    setIsEditing(false);
+    setIsEditingProperty(false);
   };
 
   const cancelChanges = () => {
     setEditedDetails(propertyDetails);
     setError("");
     setIsEditing(false);
+    setIsEditingProperty(false); // Reset property edit mode too
 
     toast.info("Changes cancelled", {
       position: "bottom-center",
@@ -789,6 +839,7 @@ const PropertyDetails = ({ propertyId }) => {
   const handleEditPhase = (phase) => {
     setEditedDetails(phase);
     setIsEditing(true);
+    setIsEditingProperty(false); // Ensure we're not in property edit mode
     setIsAddingPhase(false); // Make sure we're not in adding mode
   };
 
@@ -825,7 +876,8 @@ const PropertyDetails = ({ propertyId }) => {
       setPhases,
       setIsEditing,
       setIsAddingPhase,
-      setEditedDetails
+      setEditedDetails,
+      setIsEditingProperty
     );
   };
 
@@ -833,12 +885,7 @@ const PropertyDetails = ({ propertyId }) => {
     setEditedDetails({}); // Reset current phase to empty
     setIsAddingPhase(true);
     setIsEditing(false);
-  };
-
-  const handleCancelPhase = () => {
-    setEditedDetails({});
-    setIsAddingPhase(false);
-    setIsEditing(false);
+    setIsEditingProperty(false); // Ensure we're not in property edit mode
   };
 
   const toggleAllGroups = () => {
@@ -997,7 +1044,7 @@ const PropertyDetails = ({ propertyId }) => {
             onEdit={handleEditPhase}
             onDelete={handleDeletePhase}
           />
-          {(isEditing || isAddingPhase) && (
+          {(isAddingPhase || (isEditing && !isEditingProperty)) && (
             <div className="mt-6">
               <PhaseForm
                 initialData={editedDetails}

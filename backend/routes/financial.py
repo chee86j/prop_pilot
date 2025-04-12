@@ -99,16 +99,65 @@ def add_construction_draw():
 @financial_routes.route('/construction-draws/<int:draw_id>', methods=['PUT'])
 @jwt_required()
 def update_construction_draw(draw_id):
-    draw = ConstructionDraw.query.get_or_404(draw_id)
-    data = request.get_json()
     try:
-        for key, value in data.items():
-            if hasattr(draw, key):
-                setattr(draw, key, value)
+        draw = ConstructionDraw.query.get_or_404(draw_id)
+        data = request.get_json()
+        
+        print(f"Updating draw {draw_id} with data: {data}")  # Debug log
+        
+        # Handle date field specifically - convert from string to date object
+        if 'release_date' in data:
+            try:
+                # Split at 'T' and take just the date part to handle ISO format
+                date_str = data['release_date'].split('T')[0]
+                release_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                # Update directly on the model instance
+                draw.release_date = release_date
+            except (ValueError, AttributeError) as e:
+                return jsonify({"error": f"Invalid date format: {str(e)}"}), 400
+        
+        # Handle amount field - convert to float
+        if 'amount' in data:
+            try:
+                amount = float(data['amount'])
+                if amount <= 0:
+                    return jsonify({"error": "Amount must be greater than 0"}), 400
+                # Update directly on the model instance
+                draw.amount = amount
+            except (ValueError, TypeError):
+                return jsonify({"error": "Invalid amount format"}), 400
+        
+        # Handle property_id field - convert to int
+        if 'property_id' in data:
+            try:
+                property_id = int(data['property_id'])
+                if property_id <= 0:
+                    return jsonify({"error": "Property ID must be a positive integer"}), 400
+                # Update directly on the model instance
+                draw.property_id = property_id
+            except (ValueError, TypeError):
+                return jsonify({"error": "property_id must be a positive integer"}), 400
+        
+        # Handle bank_account_number field
+        if 'bank_account_number' in data:
+            if not data['bank_account_number'] or len(str(data['bank_account_number'])) < 4:
+                return jsonify({"error": "Bank account number must be at least 4 digits"}), 400
+            # Update directly on the model instance
+            draw.bank_account_number = str(data['bank_account_number'])
+        
+        # Handle is_approved field
+        if 'is_approved' in data:
+            draw.is_approved = bool(data['is_approved'])
+        
+        # This will trigger the validation through the event listener
         db.session.commit()
         return jsonify({"message": "Construction draw updated successfully"}), 200
+    except ValidationError as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
         db.session.rollback()
+        print(f"Error updating construction draw: {str(e)}")  # Debug log
         return jsonify({"error": str(e)}), 500
 
 @financial_routes.route('/construction-draws/<int:draw_id>', methods=['DELETE'])

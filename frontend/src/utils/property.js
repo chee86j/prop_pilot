@@ -72,15 +72,151 @@ export const exportToCSV = (properties, filename = "properties.csv") => {
  * @param {string} propertyId - ID of the property being edited
  * @param {Function} setIsEditing - Function to update editing state
  * @param {Function} setPropertyDetails - Function to update property details
+ * @param {Function} setIsEditingProperty - Function to update property editing state
+ * @param {boolean} showToast - Whether to show success toast notifications
  * @returns {Promise<boolean>} - Success status
  */
 export const savePropertyChanges = async (
   details,
   propertyId,
   setIsEditing,
-  setPropertyDetails
+  setPropertyDetails,
+  setIsEditingProperty = () => {}, // Default no-op function if not provided
+  showToast = true // Default to showing toasts
 ) => {
   try {
+    // Create a copy of the details to process
+    const processedDetails = { ...details };
+
+    // Define numeric fields that should be converted to numbers
+    const numericFields = [
+      "purchaseCost",
+      "totalRehabCost",
+      "arvSalePrice",
+      "equipmentCost",
+      "constructionCost",
+      "largeRepairsCost",
+      "renovationCost",
+      "refinanceCosts",
+      "kickStartFunds",
+      "lenderConstructionDrawsReceived",
+      "utilitiesCost",
+      "sewer",
+      "water",
+      "lawn",
+      "garbage",
+      "yearlyPropertyTaxes",
+      "mortgagePaid",
+      "homeownersInsurance",
+      "expectedYearlyRent",
+      "rentalIncomeReceived",
+      "vacancyRate",
+      "avgTenantStay",
+      "otherMonthlyIncome",
+      "vacancyLoss",
+      "managementFees",
+      "maintenanceCosts",
+      "totalEquity",
+      "realtorFees",
+      "propTaxtillEndOfYear",
+      "lenderLoanBalance",
+      "payOffStatement",
+      "attorneyFees",
+      "miscFees",
+      "utilities",
+      "cash2closeFromPurchase",
+      "cash2closeFromRefinance",
+      "totalRehabCosts",
+      "expectedRemainingRentEndToYear",
+      "totalExpenses",
+      "totalConstructionDrawsReceived",
+      "projectNetProfitIfSold",
+      "cashFlow",
+      "cashRoi",
+      "rule2Percent",
+      "rule50Percent",
+      "financeAmount",
+      "purchaseCapRate",
+      "downPaymentPercentage",
+      "loanInterestRate",
+      "pmiPercentage",
+      "lenderPointsAmount",
+      "otherFees",
+      "purchase_price",
+    ];
+
+    // Convert numeric fields to numbers
+    numericFields.forEach((field) => {
+      if (
+        field in processedDetails &&
+        processedDetails[field] !== null &&
+        processedDetails[field] !== ""
+      ) {
+        // Convert to float if it's a string
+        if (typeof processedDetails[field] === "string") {
+          processedDetails[field] = parseFloat(processedDetails[field]);
+        }
+
+        // Validate the converted number
+        if (isNaN(processedDetails[field])) {
+          console.warn(
+            `Invalid numeric value for ${field}: ${processedDetails[field]}`
+          );
+          processedDetails[field] = null; // Set to null instead of sending invalid data
+        }
+      }
+    });
+
+    // Define integer fields that should be converted to integers
+    const integerFields = ["numUnits", "mortgageYears"];
+
+    // Convert integer fields to integers
+    integerFields.forEach((field) => {
+      if (
+        field in processedDetails &&
+        processedDetails[field] !== null &&
+        processedDetails[field] !== ""
+      ) {
+        // Convert to integer if it's a string or float
+        if (
+          typeof processedDetails[field] === "string" ||
+          typeof processedDetails[field] === "number"
+        ) {
+          processedDetails[field] = parseInt(processedDetails[field], 10);
+        }
+
+        // Validate the converted integer
+        if (isNaN(processedDetails[field])) {
+          console.warn(
+            `Invalid integer value for ${field}: ${processedDetails[field]}`
+          );
+          processedDetails[field] = null; // Set to null instead of sending invalid data
+        }
+      }
+    });
+
+    // Parse date fields if they are strings
+    if (
+      processedDetails.status_date &&
+      typeof processedDetails.status_date === "string"
+    ) {
+      // Ensure date is in YYYY-MM-DD format
+      const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+      if (!datePattern.test(processedDetails.status_date)) {
+        const date = new Date(processedDetails.status_date);
+        if (!isNaN(date.getTime())) {
+          processedDetails.status_date = date.toISOString().split("T")[0];
+        } else {
+          console.warn(
+            `Invalid date format for status_date: ${processedDetails.status_date}`
+          );
+          processedDetails.status_date = null;
+        }
+      }
+    }
+
+    // No logging for normal operation - reduces console noise
+
     const response = await fetch(
       `http://localhost:5000/api/properties/${propertyId}`,
       {
@@ -89,7 +225,7 @@ export const savePropertyChanges = async (
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
-        body: JSON.stringify(details),
+        body: JSON.stringify(processedDetails),
       }
     );
 
@@ -99,18 +235,27 @@ export const savePropertyChanges = async (
     }
 
     // Update the UI with the saved details
-    setPropertyDetails(details);
+    setPropertyDetails(processedDetails);
     setIsEditing(false);
+    setIsEditingProperty(false); // Also reset property editing mode
 
-    toast.success("Changes saved successfully!", {
-      position: "bottom-center",
-      autoClose: 3000,
-    });
+    // Only show success toast if showToast is true
+    if (showToast) {
+      toast.success("Changes saved successfully!", {
+        position: "bottom-center",
+        autoClose: 3000,
+      });
+    }
 
     return true;
   } catch (error) {
     console.error("Error saving changes:", error);
-    toast.error(error.message || "Failed to save changes");
+
+    // Only show error toast for critical errors
+    if (showToast || error.message !== "Failed to save changes") {
+      toast.error(error.message || "Failed to save changes");
+    }
+
     return false;
   }
 };
@@ -123,6 +268,7 @@ export const savePropertyChanges = async (
  * @param {Function} setIsEditing - Function to update editing state
  * @param {Function} setIsAddingPhase - Function to update adding phase state
  * @param {Function} setEditedDetails - Function to update edited details
+ * @param {Function} setIsEditingProperty - Function to update property editing state
  * @returns {Promise<boolean>} - Success status
  */
 export const savePhase = async (
@@ -131,7 +277,8 @@ export const savePhase = async (
   setPhases,
   setIsEditing,
   setIsAddingPhase,
-  setEditedDetails
+  setEditedDetails,
+  setIsEditingProperty = () => {} // Default no-op function if not provided
 ) => {
   const phaseData = {
     ...formData,
@@ -174,6 +321,7 @@ export const savePhase = async (
     setIsEditing(false);
     setIsAddingPhase(false);
     setEditedDetails({});
+    setIsEditingProperty(false); // Also reset property editing mode
     toast.success("Phase saved successfully!");
     return true;
   } catch (error) {

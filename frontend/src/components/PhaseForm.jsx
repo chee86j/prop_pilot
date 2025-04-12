@@ -50,7 +50,14 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
         (p) => p.name === initialData.name
       );
       setFormData({
+        ...initialFormState, // Start with initial state to ensure all fields have default values
         ...initialData,
+        // Ensure values are never undefined
+        name: initialData.name || "",
+        expectedStartDate: initialData.expectedStartDate || "",
+        startDate: initialData.startDate || "",
+        expectedEndDate: initialData.expectedEndDate || "",
+        endDate: initialData.endDate || "",
         category:
           initialData.category ||
           (predefinedPhase ? predefinedPhase.category : ""),
@@ -67,9 +74,9 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData({ ...formData, [name]: value || "" });
     if (name === "name") {
-      setSearchTerm(value);
+      setSearchTerm(value || "");
     }
   };
 
@@ -146,7 +153,7 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
             ref={inputRef}
             type="text"
             name="name"
-            value={searchTerm}
+            value={searchTerm || ""}
             onChange={(e) => {
               handleChange(e);
               setIsDropdownOpen(true);
@@ -226,7 +233,7 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
           </label>
           <select
             name="category"
-            value={formData.category}
+            value={formData.category || ""}
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
@@ -252,10 +259,11 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
           </label>
           <input
             type="date"
+            id="expectedStartDate"
             name="expectedStartDate"
-            value={formData.expectedStartDate}
+            value={formData.expectedStartDate || ""}
             onChange={handleChange}
-            className="mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
@@ -268,10 +276,11 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
           </label>
           <input
             type="date"
+            id="startDate"
             name="startDate"
-            value={formData.startDate}
+            value={formData.startDate || ""}
             onChange={handleChange}
-            className="mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
@@ -285,10 +294,11 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
           </label>
           <input
             type="date"
+            id="expectedEndDate"
             name="expectedEndDate"
-            value={formData.expectedEndDate}
+            value={formData.expectedEndDate || ""}
             onChange={handleChange}
-            className="mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
@@ -301,10 +311,11 @@ const PhaseForm = ({ onSave, onCancel, initialData }) => {
           </label>
           <input
             type="date"
+            id="endDate"
             name="endDate"
-            value={formData.endDate}
+            value={formData.endDate || ""}
             onChange={handleChange}
-            className="mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
       </div>

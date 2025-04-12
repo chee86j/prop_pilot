@@ -290,15 +290,64 @@ def update_property(property_id):
     if user:
         property = db.session.query(Property).filter_by(id=property_id, owner_id=user.id).first()
         if property:
-            data = request.get_json()
             try:
+                data = request.get_json()
+                
+                # Handle date conversion
+                status_date = data.get('status_date')
+                if status_date:
+                    if isinstance(status_date, str):
+                        try:
+                            status_date = datetime.strptime(status_date, '%Y-%m-%d').date()
+                            data['status_date'] = status_date
+                        except ValueError:
+                            return jsonify({"error": "Invalid date format for status_date. Expected YYYY-MM-DD"}), 400
+                
+                # Convert numeric fields
+                numeric_fields = [
+                    'purchaseCost', 'totalRehabCost', 'arvSalePrice', 'equipmentCost', 
+                    'constructionCost', 'largeRepairsCost', 'renovationCost', 'refinanceCosts',
+                    'kickStartFunds', 'lenderConstructionDrawsReceived', 'utilitiesCost',
+                    'sewer', 'water', 'lawn', 'garbage', 'yearlyPropertyTaxes',
+                    'mortgagePaid', 'homeownersInsurance', 'expectedYearlyRent',
+                    'rentalIncomeReceived', 'vacancyRate', 'avgTenantStay', 'otherMonthlyIncome',
+                    'vacancyLoss', 'managementFees', 'maintenanceCosts', 'totalEquity',
+                    'realtorFees', 'propTaxtillEndOfYear', 'lenderLoanBalance', 'payOffStatement',
+                    'attorneyFees', 'miscFees', 'utilities', 'cash2closeFromPurchase',
+                    'cash2closeFromRefinance', 'totalRehabCosts', 'expectedRemainingRentEndToYear',
+                    'totalExpenses', 'totalConstructionDrawsReceived', 'projectNetProfitIfSold',
+                    'cashFlow', 'cashRoi', 'rule2Percent', 'rule50Percent', 'financeAmount',
+                    'purchaseCapRate', 'downPaymentPercentage', 'loanInterestRate',
+                    'pmiPercentage', 'lenderPointsAmount', 'otherFees', 'numUnits', 'mortgageYears',
+                    'purchase_price'
+                ]
+                
+                for field in numeric_fields:
+                    if field in data and data[field] is not None and data[field] != '':
+                        try:
+                            data[field] = float(data[field])
+                        except (ValueError, TypeError):
+                            return jsonify({"error": f"Invalid value for {field}. Must be a number"}), 400
+                
+                # Handle integer fields specifically
+                integer_fields = ['numUnits', 'mortgageYears']
+                for field in integer_fields:
+                    if field in data and data[field] is not None and data[field] != '':
+                        try:
+                            data[field] = int(float(data[field]))
+                        except (ValueError, TypeError):
+                            return jsonify({"error": f"Invalid value for {field}. Must be an integer"}), 400
+                
+                # Now update the property with the converted data
                 for key, value in data.items():
                     if hasattr(property, key):
                         setattr(property, key, value)
+                        
                 db.session.commit()
                 return jsonify({"message": "Property updated successfully"}), 200
             except Exception as e:
                 db.session.rollback()
+                print(f"Error updating property: {str(e)}")
                 return jsonify({"error": str(e)}), 500
         return jsonify({"message": "Property not found"}), 404
     return jsonify({"message": "User not found"}), 404
