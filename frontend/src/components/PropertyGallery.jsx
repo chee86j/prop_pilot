@@ -16,6 +16,7 @@ const Property = ({ name, description, image }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [optimizedImage, setOptimizedImage] = useState(image);
   const [imageRef, setImageRef] = useState(null);
+  const [blobUrl, setBlobUrl] = useState(null);
 
   /* handleImageOptimization: Optimizes image size and quality
   1. Compressing images to max 1MB
@@ -24,6 +25,12 @@ const Property = ({ name, description, image }) => {
   4. Including error handling with fallback to original image
 */
   const handleImageOptimization = useCallback(async (imageUrl) => {
+    // Clean up previous blob URL if it exists
+    if (blobUrl) {
+      URL.revokeObjectURL(blobUrl);
+      setBlobUrl(null);
+    }
+
     try {
       const response = await fetch(imageUrl);
       const blob = await response.blob();
@@ -36,12 +43,13 @@ const Property = ({ name, description, image }) => {
 
       const compressedBlob = await imageCompression(blob, options);
       const optimizedUrl = URL.createObjectURL(compressedBlob);
+      setBlobUrl(optimizedUrl);
       setOptimizedImage(optimizedUrl);
     } catch (error) {
       console.error("Image optimization failed:", error);
       setOptimizedImage(imageUrl); // Fallback to original image
     }
-  }, []);
+  }, [blobUrl]);
 
   /* useEffect: 
   1.Only loads images when they enter the viewport
@@ -73,6 +81,15 @@ const Property = ({ name, description, image }) => {
       }
     };
   }, [imageRef]);
+
+  // Clean up blob URL when component unmounts
+  useEffect(() => {
+    return () => {
+      if (blobUrl) {
+        URL.revokeObjectURL(blobUrl);
+      }
+    };
+  }, [blobUrl]);
 
   return (
     <div className="property bg-white border border-gray-200 p-6 rounded-lg shadow-md flex flex-col items-center">

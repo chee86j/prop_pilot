@@ -1,79 +1,106 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Testimonials from "./Testimonials";
 import PropertyGallery from "./PropertyGallery";
-import { fetchUserProfile } from "../utils/user";
+import { fetchUserProfile, persistAvatarData } from "../utils/user";
 import planeIcon from "../assets/icons/plane.svg";
 import LogoIcon from "../assets/icons/logo.svg";
 
 // Extracting Hero section into a separate component
-const HeroSection = ({ user, showFallbackAvatar, setShowFallbackAvatar }) => (
-  <div className="hero-section bg-white shadow-lg rounded-lg text-center p-6 md:p-10 mb-6 md:mb-10">
-    <div className="inline-block">
-      {!showFallbackAvatar && user?.avatar ? (
-        <img
-          src={user.avatar}
-          alt={`${user?.first_name || "User"}'s profile picture`}
-          className="inline-block rounded-full align-middle object-cover"
-          style={{
-            width: "clamp(60px, 12vw, 80px)",
-            height: "clamp(60px, 12vw, 80px)",
-            marginRight: "12px",
-          }}
-          onError={() => setShowFallbackAvatar(true)}
-        />
-      ) : (
-        <svg
-          className="inline-block w-16 h-16 text-gray-400 align-middle"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          style={{ marginRight: "12px" }}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-          />
-        </svg>
-      )}
-    </div>
+const HeroSection = ({ user, showFallbackAvatar, setShowFallbackAvatar }) => {
+  const [processedAvatarUrl, setProcessedAvatarUrl] = useState(null);
 
-    <h1 className="text-4xl md:text-5xl font-bold text-gray-700 mb-0">
-      Welcome{" "}
-      <span className="italic text-green-500">
-        {user ? `${user.first_name} ${user.last_name}` : "Guest"}
-      </span>{" "}
-      to Prop Pilot
-      <img
-        src={LogoIcon}
-        alt="Logo"
-        className="inline-block align-middle mr-2"
-        style={{ width: "68px", height: "68px" }}
-      />
-      <br />
-      REI Property Management System
-    </h1>
-    <p className="text-gray-600 text-lg my-5">
-      Streamline your property management with our advanced tools and services.
-    </p>
-    <Link
-      to={user && !user.isGuest ? "/propertylist" : "/authform"}
-      className="custom-button"
-    >
-      <img
-        src={planeIcon}
-        alt="Plane"
-        className="mr-2"
-        style={{ width: "24px", height: "24px" }}
-      />
-      <span>{user && !user.isGuest ? "Portfolio" : "Get Started"}</span>
-    </Link>
-  </div>
-);
+  // Process the avatar URL when user data changes
+  useEffect(() => {
+    const processAvatar = async () => {
+      if (user?.avatar) {
+        try {
+          // Convert any avatar URL to base64 for consistent display
+          const persistedUrl = await persistAvatarData(user.avatar);
+          setProcessedAvatarUrl(persistedUrl);
+          setShowFallbackAvatar(false);
+        } catch (error) {
+          console.error("Failed to process avatar:", error);
+          setProcessedAvatarUrl(null);
+          setShowFallbackAvatar(true);
+        }
+      } else {
+        setProcessedAvatarUrl(null);
+        setShowFallbackAvatar(true);
+      }
+    };
+
+    processAvatar();
+  }, [user?.avatar, setShowFallbackAvatar]);
+
+  return (
+    <div className="hero-section bg-white shadow-lg rounded-lg text-center p-6 md:p-10 mb-6 md:mb-10">
+      <div className="inline-block">
+        {!showFallbackAvatar && processedAvatarUrl ? (
+          <img
+            src={processedAvatarUrl}
+            alt={`${user?.first_name || "User"}'s profile picture`}
+            className="inline-block rounded-full align-middle object-cover"
+            style={{
+              width: "clamp(60px, 12vw, 80px)",
+              height: "clamp(60px, 12vw, 80px)",
+              marginRight: "12px",
+            }}
+            onError={() => setShowFallbackAvatar(true)}
+          />
+        ) : (
+          <svg
+            className="inline-block w-16 h-16 text-gray-400 align-middle"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            style={{ marginRight: "12px" }}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            />
+          </svg>
+        )}
+      </div>
+
+      <h1 className="text-4xl md:text-5xl font-bold text-gray-700 mb-0">
+        Welcome{" "}
+        <span className="italic text-green-500">
+          {user ? `${user.first_name} ${user.last_name}` : "Guest"}
+        </span>{" "}
+        to Prop Pilot
+        <img
+          src={LogoIcon}
+          alt="Logo"
+          className="inline-block align-middle mr-2"
+          style={{ width: "68px", height: "68px" }}
+        />
+        <br />
+        REI Property Management System
+      </h1>
+      <p className="text-gray-600 text-lg my-5">
+        Streamline your property management with our advanced tools and services.
+      </p>
+      <Link
+        to={user && !user.isGuest ? "/propertylist" : "/authform"}
+        className="custom-button"
+      >
+        <img
+          src={planeIcon}
+          alt="Plane"
+          className="mr-2"
+          style={{ width: "24px", height: "24px" }}
+        />
+        <span>{user && !user.isGuest ? "Portfolio" : "Get Started"}</span>
+      </Link>
+    </div>
+  );
+};
 
 // Features component with hover effect and consistent styling
 const FeatureCard = ({ title, description }) => (
@@ -176,6 +203,7 @@ const CallToAction = ({
 const Home = () => {
   const [user, setUser] = useState(null);
   const [showFallbackAvatar, setShowFallbackAvatar] = useState(true);
+  const [processedAvatarUrl, setProcessedAvatarUrl] = useState(null);
 
   useEffect(() => {
     const loadUserData = async () => {

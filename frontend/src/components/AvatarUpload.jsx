@@ -17,7 +17,16 @@ const AvatarUpload = ({ currentAvatar, onAvatarChange }) => {
     };
     try {
       const compressedFile = await imageCompression(file, options);
-      return URL.createObjectURL(compressedFile);
+      
+      // Convert to base64 instead of blob URL
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(compressedFile);
+        reader.onloadend = () => {
+          resolve(reader.result);
+        };
+        reader.onerror = reject;
+      });
     } catch (error) {
       console.error("Error during image compression:", error);
       throw new Error("Failed to compress image");

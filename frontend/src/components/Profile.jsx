@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { fetchUserProfile } from "../utils/user";
+import { fetchUserProfile, persistAvatarData } from "../utils/user";
 import { emailValidator, passwordValidator } from "../utils/validation";
 import {
   Eye,
@@ -67,17 +67,27 @@ const Profile = () => {
 
     try {
       setIsLoading(true);
+      
+      // Ensure avatar data is in a persistent format before saving
+      let profileToSave = { ...userDetails };
+      if (profileToSave.avatar) {
+        // Make sure the avatar is in a persistent format (base64)
+        profileToSave.avatar = await persistAvatarData(profileToSave.avatar);
+      }
+
       const response = await fetch("http://localhost:5000/api/profile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
-        body: JSON.stringify(userDetails),
+        body: JSON.stringify(profileToSave),
       });
       const data = await response.json();
 
       if (response.ok) {
+        // Update the user details with the persisted avatar
+        setUserDetails(profileToSave);
         setEditing(false);
         toast.success("Profile updated successfully");
       } else {
@@ -162,8 +172,15 @@ const Profile = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleAvatarChange = (avatarData) => {
-    setUserDetails({ ...userDetails, avatar: avatarData });
+  const handleAvatarChange = async (avatarData) => {
+    try {
+      // Convert blob URL to base64 if needed to ensure persistence
+      const persistedAvatarData = await persistAvatarData(avatarData);
+      setUserDetails({ ...userDetails, avatar: persistedAvatarData });
+    } catch (error) {
+      console.error("Error handling avatar change:", error);
+      toast.error("Failed to process avatar image");
+    }
   };
 
   // Loading skeleton for profile
@@ -501,10 +518,11 @@ const Profile = () => {
                           userDetails.first_name || "User"
                         }'s profile picture`}
                         className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.src = "";
-                          e.target.parentElement.innerHTML =
-                            '<svg class="w-20 h-20 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>';
+                        onError={() => {
+                          setUserDetails(prev => ({
+                            ...prev,
+                            avatar: null
+                          }));
                         }}
                       />
                     ) : (

@@ -20,13 +20,14 @@ const OptimizedImage = ({
     let isMounted = true;
 
     const optimizeImage = async () => {
+      let createdBlobUrl = null;
       try {
         setIsLoading(true);
 
         // Skip optimization for SVGs and data URLs
         if (src.startsWith("data:") || src.endsWith(".svg")) {
           setImageSrc(src);
-          return;
+          return null;
         }
 
         // Create a blob from the image URL
@@ -43,14 +44,14 @@ const OptimizedImage = ({
 
         const compressedBlob = await imageCompression(blob, options);
         const optimizedUrl = URL.createObjectURL(compressedBlob);
+        createdBlobUrl = optimizedUrl;
 
         if (isMounted) {
           setImageSrc(optimizedUrl);
           setIsLoading(false);
         }
-
-        // Clean up the object URL when the component unmounts
-        return () => URL.revokeObjectURL(optimizedUrl);
+        
+        return optimizedUrl;
       } catch (err) {
         console.error("Image optimization failed:", err);
         if (isMounted) {
@@ -58,13 +59,22 @@ const OptimizedImage = ({
           setImageSrc(src); // Fallback to original source
           setIsLoading(false);
         }
+        return null;
       }
     };
 
-    optimizeImage();
+    let blobUrl;
+    
+    optimizeImage().then(url => {
+      blobUrl = url;
+    });
 
     return () => {
       isMounted = false;
+      // Properly revoke any blob URLs created
+      if (blobUrl) {
+        URL.revokeObjectURL(blobUrl);
+      }
     };
   }, [src, width, height, quality]);
 

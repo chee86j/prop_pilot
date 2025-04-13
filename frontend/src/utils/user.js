@@ -146,3 +146,64 @@ export const getCurrentUserId = () => {
     return null;
   }
 };
+
+/**
+ * Persists avatar data properly (converts URLs to base64 data URIs for consistent storage)
+ * @param {string} avatarUrl - The avatar URL to persist
+ * @returns {Promise<string>} - The persisted avatar URL (base64 or original URL)
+ */
+export const persistAvatarData = async (avatarUrl) => {
+  try {
+    if (!avatarUrl) return null;
+
+    // If it's already a data URL, no need to convert
+    if (avatarUrl.startsWith('data:')) {
+      return avatarUrl;
+    }
+
+    // Check for invalid blob URLs that might cause errors
+    if (avatarUrl.startsWith('blob:') && !sessionStorage.getItem('avatar_validated')) {
+      logger.warn("🚧 Potentially invalid blob URL detected, will convert");
+    }
+
+    // For both blob URLs and http(s) URLs (including Google profile pictures),
+    // fetch and convert to base64 for consistent storage
+    try {
+      const response = await fetch(avatarUrl);
+      if (!response.ok) {
+        logger.error(`❌ Failed to fetch avatar: ${response.status}`);
+        throw new Error(`Failed to fetch avatar: ${response.status}`);
+      }
+      
+      const blob = await response.blob();
+      const contentType = response.headers.get('content-type') || blob.type || 'image/jpeg';
+      
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = () => {
+          // Ensure we have a proper data URL with content type
+          const result = reader.result;
+          if (!result.startsWith('data:')) {
+            // If somehow the result doesn't have the right format, fix it
+            const base64 = result.replace(/^data:.*?;base64,/, '');
+            resolve(`data:${contentType};base64,${base64}`);
+          } else {
+            resolve(result);
+          }
+        };
+        reader.onerror = (error) => {
+          logger.error("❌ Error converting to base64", error);
+          reject(error);
+        };
+      });
+    } catch (error) {
+      // If fetch fails, log and return the original URL as fallback
+      logger.error(`❌ Error fetching avatar: ${error.message}`);
+      return avatarUrl; // Fallback to original URL
+    }
+  } catch (error) {
+    logger.error("❌ Error persisting avatar data", error);
+    return null;
+  }
+};
