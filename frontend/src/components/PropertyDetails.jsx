@@ -996,12 +996,18 @@ const PropertyDetails = ({ propertyId }) => {
         <div className="max-w-7xl mx-auto mb-6 px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-xl shadow-md overflow-hidden">
             <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-4 flex justify-between items-center">
-              <h2 className="text-white text-lg font-semibold">Property Location</h2>
+              <h2 className="text-white text-lg font-semibold">
+                Property Location
+              </h2>
               {propertyDetails.address && (
                 <div className="flex space-x-2">
-                  <a 
+                  <a
                     href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-                      `${propertyDetails.address || ""}, ${propertyDetails.city || ""}, ${propertyDetails.state || ""} ${propertyDetails.zipCode || ""}`
+                      `${propertyDetails.address || ""}, ${
+                        propertyDetails.city || ""
+                      }, ${propertyDetails.state || ""} ${
+                        propertyDetails.zipCode || ""
+                      }`
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -1014,30 +1020,37 @@ const PropertyDetails = ({ propertyId }) => {
               )}
             </div>
             {propertyDetails.address ? (
-              <div id="property-map-container" className="aspect-w-16 aspect-h-9">
+              <div className="mt-4 border rounded-lg overflow-hidden">
                 <iframe
-                  src={`https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8"}&q=${encodeURIComponent(
-                    `${propertyDetails.address || ""}, ${propertyDetails.city || ""}, ${propertyDetails.state || ""} ${propertyDetails.zipCode || ""}`
-                  )}&maptype=roadmap`}
+                  src={`https://maps.google.com/maps?q=${encodeURIComponent(
+                    `${propertyDetails.address || ""}, ${
+                      propertyDetails.city || ""
+                    }, ${propertyDetails.state || ""} ${
+                      propertyDetails.zipCode || ""
+                    }`
+                  )}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
                   width="100%"
-                  height="450"
+                  height="300"
                   style={{ border: 0 }}
                   allowFullScreen=""
                   loading="lazy"
-                  title="Property Location"
-                  className="w-full h-80 md:h-96"
+                  referrerPolicy="no-referrer-when-downgrade"
                   onError={(e) => {
-                    console.error("Google Maps iframe failed to load", e);
+                    console.error("Map failed to load", e);
                     e.target.style.display = "none";
-                    e.target.parentNode.innerHTML += `<div class="flex items-center justify-center h-80 md:h-96 bg-gray-100">
-                      <p class="text-gray-500">Map could not be loaded. Please check the property address.</p>
-                    </div>`;
+                    e.target.parentNode.innerHTML += `
+                      <div class="flex items-center justify-center h-80 bg-gray-100">
+                        <p class="text-gray-500">Map could not be loaded. Please check the property address.</p>
+                      </div>
+                    `;
                   }}
                 ></iframe>
               </div>
             ) : (
               <div className="flex items-center justify-center h-80 md:h-96 bg-gray-100">
-                <p className="text-gray-500">Please add a property address to display the map.</p>
+                <p className="text-gray-500">
+                  Please add a property address to display the map.
+                </p>
               </div>
             )}
           </div>

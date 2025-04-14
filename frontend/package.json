@@ -13,6 +13,7 @@
     "@react-oauth/google": "^0.12.1",
     "ag-grid-community": "^31.3.4",
     "ag-grid-react": "^31.3.4",
+    "atropos": "^2.0.2",
     "axios": "^1.6.7",
     "browser-image-compression": "^2.0.2",
     "lucide-react": "^0.341.0",

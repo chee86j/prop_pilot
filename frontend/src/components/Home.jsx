@@ -1,11 +1,24 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Testimonials from "./Testimonials";
 import PropertyGallery from "./PropertyGallery";
 import { fetchUserProfile, persistAvatarData } from "../utils/user";
 import planeIcon from "../assets/icons/plane.svg";
 import LogoIcon from "../assets/icons/logo.svg";
+import Atropos from "atropos/react";
+import "atropos/css";
+import {
+  FaHome,
+  FaChartLine,
+  FaUsers,
+  FaTools,
+  FaClipboardCheck,
+  FaFileContract,
+  FaSearchDollar,
+  FaDatabase,
+  FaMobileAlt,
+} from "react-icons/fa";
 
 // Extracting Hero section into a separate component
 const HeroSection = ({ user, showFallbackAvatar, setShowFallbackAvatar }) => {
@@ -84,7 +97,8 @@ const HeroSection = ({ user, showFallbackAvatar, setShowFallbackAvatar }) => {
         REI Property Management System
       </h1>
       <p className="text-gray-600 text-lg my-5">
-        Streamline your property management with our advanced tools and services.
+        Streamline your property management with our advanced tools and
+        services.
       </p>
       <Link
         to={user && !user.isGuest ? "/propertylist" : "/authform"}
@@ -103,12 +117,75 @@ const HeroSection = ({ user, showFallbackAvatar, setShowFallbackAvatar }) => {
 };
 
 // Features component with hover effect and consistent styling
-const FeatureCard = ({ title, description }) => (
-  <div className="feature bg-gray-50 p-6 rounded-lg shadow-md hover:scale-105 transition-transform duration-200">
-    <h3 className="text-xl font-semibold mb-3">{title}</h3>
-    <p>{description}</p>
-  </div>
-);
+const FeatureCard = ({ title, description, index }) => {
+  // Array of icons for each feature
+  const icons = [
+    FaHome,
+    FaChartLine,
+    FaUsers,
+    FaTools,
+    FaClipboardCheck,
+    FaFileContract,
+    FaSearchDollar,
+    FaDatabase,
+    FaMobileAlt,
+  ];
+
+  // Get the icon component based on index
+  const IconComponent = icons[index % icons.length];
+
+  return (
+    <Atropos
+      className="atropos-feature"
+      shadow={true}
+      shadowScale={1.05}
+      rotateXMax={6}
+      rotateYMax={6}
+      duration={300}
+    >
+      {/* Moving background layer that creates the 3D effect */}
+      <div
+        className="absolute inset-0 bg-gray-50 rounded-lg shadow-sm"
+        data-atropos-offset="0"
+      ></div>
+
+      {/* Shadow gradients - these move with the 3D effect */}
+      <div
+        className="absolute top-0 right-0 w-24 h-24 opacity-5 rounded-tr-lg"
+        data-atropos-offset="-2"
+        style={{
+          background: `radial-gradient(circle, rgba(59, 130, 246, 0.5) 0%, rgba(255,255,255,0) 70%)`,
+          transform: `translate(30%, -30%)`,
+          pointerEvents: "none",
+        }}
+      ></div>
+
+      <div
+        className="absolute bottom-0 left-0 w-16 h-16 opacity-10 rounded-bl-lg"
+        data-atropos-offset="-1"
+        style={{
+          background: `radial-gradient(circle, rgba(59, 130, 246, 0.8) 0%, rgba(255,255,255,0) 70%)`,
+          transform: `translate(-30%, 30%)`,
+          pointerEvents: "none",
+        }}
+      ></div>
+
+      {/* Stable content layer - won't move with 3D effect */}
+      <div className="feature p-6 rounded-lg atropos-inner feature-content relative">
+        {/* Icon */}
+        <div className="text-blue-500 mb-4">
+          <IconComponent size={28} />
+        </div>
+
+        {/* Title */}
+        <h3 className="text-xl font-semibold mb-3">{title}</h3>
+
+        {/* Description */}
+        <p>{description}</p>
+      </div>
+    </Atropos>
+  );
+};
 
 // Features section component
 const FeaturesSection = () => {
@@ -165,10 +242,11 @@ const FeaturesSection = () => {
       <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-700 mb-4 md:mb-6">
         Our Features
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {features.map((feature, index) => (
           <FeatureCard
             key={index}
+            index={index}
             title={feature.title}
             description={feature.description}
           />
@@ -203,7 +281,6 @@ const CallToAction = ({
 const Home = () => {
   const [user, setUser] = useState(null);
   const [showFallbackAvatar, setShowFallbackAvatar] = useState(true);
-  const [processedAvatarUrl, setProcessedAvatarUrl] = useState(null);
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -259,10 +336,14 @@ const Home = () => {
       />
 
       {/* Property Gallery Section */}
-      <div className="property-gallery bg-white p-6 md:p-10 rounded-lg shadow-md mb-6 md:mb-10">
+      <div className="property-gallery bg-gradient-to-br from-gray-50 to-white p-6 md:p-10 rounded-lg shadow-md mb-6 md:mb-10">
         <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-700 mb-4 md:mb-6">
           Our Property Portfolio
         </h2>
+        <p className="text-gray-600 text-center mb-8 max-w-3xl mx-auto">
+          Explore our diverse portfolio of properties, each meticulously managed
+          with our cutting-edge tools and professional expertise.
+        </p>
         <PropertyGallery />
       </div>
 
