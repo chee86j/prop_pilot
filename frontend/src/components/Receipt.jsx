@@ -32,7 +32,7 @@ const Receipt = ({ drawId, onReceiptChange }) => {
     ccnumber: "",
   });
   const [showAddForm, setShowAddForm] = useState(false);
-  const [expandedReceipts, setReceiptsExpanded] = useState(false);
+  const [expandedReceipts, setExpandedReceipts] = useState(false);
   const [selectedReceipt, setSelectedReceipt] = useState(null);
 
   const showToast = useCallback((message, type = "success") => {
@@ -264,7 +264,7 @@ const Receipt = ({ drawId, onReceiptChange }) => {
   };
 
   const toggleReceiptsExpansion = () => {
-    setReceiptsExpanded((prevExpanded) => !prevExpanded);
+    setExpandedReceipts(!expandedReceipts);
     setSelectedReceipt(null);
   };
 
@@ -297,9 +297,22 @@ const Receipt = ({ drawId, onReceiptChange }) => {
   return (
     <div className="py-3">
       <div className="flex flex-wrap items-center justify-between mb-3">
-        <h3 className="text-base font-bold text-gray-700 mb-2 sm:mb-0">
-          Receipts & Documentation
-        </h3>
+        <div className="flex items-center">
+          <h3 className="text-base font-bold text-gray-700 mb-2 sm:mb-0">
+            Receipts & Documentation
+          </h3>
+          <button
+            onClick={toggleReceiptsExpansion}
+            className="ml-2 p-1.5 rounded-full hover:bg-gray-100 border border-gray-200 shadow-sm transition-colors"
+            aria-label={expandedReceipts ? "Collapse receipts" : "Expand receipts"}
+          >
+            {expandedReceipts ? (
+              <ChevronsUp size={18} className="text-blue-600" />
+            ) : (
+              <ChevronsDown size={18} className="text-blue-600" />
+            )}
+          </button>
+        </div>
         <div className="flex space-x-2 w-full sm:w-auto">
           <button
             onClick={() => setShowAddForm(!showAddForm)}
@@ -309,30 +322,11 @@ const Receipt = ({ drawId, onReceiptChange }) => {
             <Plus size={16} />
             <span>Add Receipt</span>
           </button>
-          <button
-            onClick={toggleReceiptsExpansion}
-            className="flex items-center justify-center gap-1 px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md text-sm"
-            aria-label={
-              expandedReceipts ? "Collapse receipts" : "Expand receipts"
-            }
-          >
-            {expandedReceipts ? (
-              <>
-                <ChevronsUp size={16} />{" "}
-                <span className="hidden sm:inline">Collapse</span>
-              </>
-            ) : (
-              <>
-                <ChevronsDown size={16} />{" "}
-                <span className="hidden sm:inline">Expand</span>
-              </>
-            )}
-          </button>
         </div>
       </div>
 
       {/* Show add form */}
-      {showAddForm && (
+      {expandedReceipts && showAddForm && (
         <form
           onSubmit={handleAddReceipt}
           className="my-4 p-4 bg-gray-50 rounded-lg shadow-sm"
@@ -489,76 +483,8 @@ const Receipt = ({ drawId, onReceiptChange }) => {
         </form>
       )}
 
-      {/* Receipt selection and details */}
-      {selectedReceipt && (
-        <div className="my-4 bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-          <div className="flex justify-between items-start mb-3">
-            <h3 className="font-bold text-gray-800">Receipt Details</h3>
-            <button
-              onClick={() => setSelectedReceipt(null)}
-              className="text-gray-400 hover:text-gray-600"
-              aria-label="Close details"
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-            <div>
-              <p className="text-gray-500">Date</p>
-              <p className="font-medium">{formatDate(selectedReceipt.date)}</p>
-            </div>
-            <div>
-              <p className="text-gray-500">Vendor</p>
-              <p className="font-medium">{selectedReceipt.vendor}</p>
-            </div>
-            <div>
-              <p className="text-gray-500">Amount</p>
-              <p className="font-medium">
-                {formatCurrencyDetailed(selectedReceipt.amount)}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500">Description</p>
-              <p className="font-medium">
-                {selectedReceipt.description || "N/A"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500">Point of Contact</p>
-              <p className="font-medium">
-                {selectedReceipt.pointofcontact || "N/A"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500">CC Number</p>
-              <p className="font-medium">
-                {selectedReceipt.ccnumber
-                  ? `xxxx-xxxx-xxxx-${selectedReceipt.ccnumber}`
-                  : "N/A"}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-4 flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={() => startEdit(selectedReceipt)}
-              className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg"
-            >
-              <Edit size={16} /> Edit
-            </button>
-            <button
-              onClick={() => handleDeleteReceipt(selectedReceipt.id)}
-              className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg"
-            >
-              <Trash2 size={16} /> Delete
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Edit form */}
-      {editReceiptId && (
+      {expandedReceipts && editReceiptId && (
         <form
           onSubmit={saveEdit}
           className="my-4 p-4 bg-gray-50 rounded-lg shadow-sm"
@@ -568,12 +494,12 @@ const Receipt = ({ drawId, onReceiptChange }) => {
             <div className="mb-2 sm:mb-0">
               <label
                 className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="edit-date"
+                htmlFor="receipt-date"
               >
                 Date
               </label>
               <input
-                id="edit-date"
+                id="receipt-date"
                 type="date"
                 name="date"
                 value={editedReceipt.date}
@@ -586,12 +512,12 @@ const Receipt = ({ drawId, onReceiptChange }) => {
             <div className="mb-2 sm:mb-0">
               <label
                 className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="edit-vendor"
+                htmlFor="receipt-vendor"
               >
                 Vendor
               </label>
               <input
-                id="edit-vendor"
+                id="receipt-vendor"
                 type="text"
                 name="vendor"
                 value={editedReceipt.vendor}
@@ -604,12 +530,12 @@ const Receipt = ({ drawId, onReceiptChange }) => {
             <div className="mb-2 sm:mb-0">
               <label
                 className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="edit-amount"
+                htmlFor="receipt-amount"
               >
                 Amount
               </label>
               <input
-                id="edit-amount"
+                id="receipt-amount"
                 type="number"
                 name="amount"
                 value={editedReceipt.amount}
@@ -622,12 +548,12 @@ const Receipt = ({ drawId, onReceiptChange }) => {
             <div className="mb-2 sm:mb-0">
               <label
                 className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="edit-description"
+                htmlFor="receipt-description"
               >
                 Description
               </label>
               <input
-                id="edit-description"
+                id="receipt-description"
                 type="text"
                 name="description"
                 value={editedReceipt.description}
@@ -639,12 +565,12 @@ const Receipt = ({ drawId, onReceiptChange }) => {
             <div className="mb-2 sm:mb-0">
               <label
                 className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="edit-contact"
+                htmlFor="receipt-contact"
               >
                 Point of Contact
               </label>
               <input
-                id="edit-contact"
+                id="receipt-contact"
                 type="text"
                 name="pointofcontact"
                 value={editedReceipt.pointofcontact}
@@ -656,12 +582,12 @@ const Receipt = ({ drawId, onReceiptChange }) => {
             <div className="mb-2 sm:mb-0">
               <label
                 className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="edit-ccnumber"
+                htmlFor="receipt-ccnumber"
               >
                 CC Number (Last 4)
               </label>
               <input
-                id="edit-ccnumber"
+                id="receipt-ccnumber"
                 type="text"
                 name="ccnumber"
                 value={editedReceipt.ccnumber}
@@ -677,17 +603,14 @@ const Receipt = ({ drawId, onReceiptChange }) => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2"
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2"
             >
-              {isSubmitting ? "Saving..." : "Save Changes"}
+              {isSubmitting ? "Saving..." : "Update Receipt"}
             </button>
             <button
               type="button"
-              onClick={() => {
-                setEditReceiptId(null);
-                setEditedReceipt({});
-              }}
-              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg"
+              onClick={() => setEditReceiptId(null)}
+              className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg"
             >
               Cancel
             </button>
@@ -696,12 +619,8 @@ const Receipt = ({ drawId, onReceiptChange }) => {
       )}
 
       {/* Receipt list */}
-      {!isLoading && receipts.length > 0 ? (
-        <div
-          className={`mt-3 ${
-            expandedReceipts ? "block" : "max-h-60 overflow-hidden"
-          }`}
-        >
+      {expandedReceipts && !isLoading && receipts.length > 0 && (
+        <div className="mt-3">
           {/* Mobile view */}
           <div className="block sm:hidden space-y-3">
             {receipts.map((receipt) => (
@@ -731,15 +650,6 @@ const Receipt = ({ drawId, onReceiptChange }) => {
                 </div>
               </div>
             ))}
-
-            {!expandedReceipts && receipts.length > 2 && (
-              <button
-                onClick={toggleReceiptsExpansion}
-                className="w-full py-2 text-center text-sm text-blue-600 hover:text-blue-800"
-              >
-                Show all {receipts.length} receipts
-              </button>
-            )}
           </div>
 
           {/* Desktop view */}
@@ -811,15 +721,112 @@ const Receipt = ({ drawId, onReceiptChange }) => {
             </span>
           </div>
         </div>
-      ) : (
+      )}
+
+      {/* Receipt selection and details */}
+      {expandedReceipts && selectedReceipt && (
+        <div className="my-4 bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+          <div className="flex justify-between items-start mb-3">
+            <h3 className="font-bold text-gray-800">Receipt Details</h3>
+            <button
+              onClick={() => setSelectedReceipt(null)}
+              className="text-gray-400 hover:text-gray-600"
+              aria-label="Close details"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <div>
+              <p className="text-gray-500">Date</p>
+              <p className="font-medium">{formatDate(selectedReceipt.date)}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Vendor</p>
+              <p className="font-medium">{selectedReceipt.vendor}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Amount</p>
+              <p className="font-medium">
+                {formatCurrencyDetailed(selectedReceipt.amount)}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500">Description</p>
+              <p className="font-medium">
+                {selectedReceipt.description || "N/A"}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500">Point of Contact</p>
+              <p className="font-medium">
+                {selectedReceipt.pointofcontact || "N/A"}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500">CC Number</p>
+              <p className="font-medium">
+                {selectedReceipt.ccnumber
+                  ? `xxxx-xxxx-xxxx-${selectedReceipt.ccnumber}`
+                  : "N/A"}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => startEdit(selectedReceipt)}
+              className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg"
+            >
+              <Edit size={16} /> Edit
+            </button>
+            <button
+              onClick={() => handleDeleteReceipt(selectedReceipt.id)}
+              className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg"
+            >
+              <Trash2 size={16} /> Delete
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Collapsed view summary */}
+      {!expandedReceipts && receipts.length > 0 && (
+        <div className="p-3 border border-gray-200 bg-gray-50 rounded-lg flex justify-between items-center hover:bg-gray-100 cursor-pointer" onClick={toggleReceiptsExpansion}>
+          <div className="flex items-center">
+            <ChevronsDown size={16} className="text-blue-600 mr-2" />
+            <span className="text-gray-600">{receipts.length} receipt(s) available - Click to expand</span>
+          </div>
+          <span className="font-medium text-blue-600">
+            Total: {formatCurrencyDetailed(calcSubtotal())}
+          </span>
+        </div>
+      )}
+
+      {/* Empty state with collapsed view */}
+      {!expandedReceipts && receipts.length === 0 && (
+        <div className="p-3 border border-gray-200 bg-gray-50 rounded-lg flex justify-between items-center hover:bg-gray-100 cursor-pointer" onClick={toggleReceiptsExpansion}>
+          <div className="flex items-center">
+            <ChevronsDown size={16} className="text-blue-600 mr-2" />
+            <span className="text-gray-600">No receipts yet - Click to add receipts</span>
+          </div>
+        </div>
+      )}
+
+      {/* Empty state when expanded */}
+      {expandedReceipts && !isLoading && receipts.length === 0 && (
         <div className="text-center p-6 bg-gray-50 rounded-lg my-3">
-          {isLoading ? (
-            <p className="text-gray-500">Loading receipts...</p>
-          ) : (
-            <p className="text-gray-500">
-              No receipts found. Add one to get started.
-            </p>
-          )}
+          <p className="text-gray-500">
+            No receipts found. Add one to get started.
+          </p>
+        </div>
+      )}
+
+      {/* Loading state */}
+      {expandedReceipts && isLoading && (
+        <div className="text-center p-6 bg-gray-50 rounded-lg my-3">
+          <p className="text-gray-500">Loading receipts...</p>
         </div>
       )}
     </div>
