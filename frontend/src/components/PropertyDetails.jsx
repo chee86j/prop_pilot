@@ -24,6 +24,7 @@ import {
   Save,
   X,
   ChevronDown,
+  Home,
 } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -987,6 +988,59 @@ const PropertyDetails = ({ propertyId }) => {
       {propertyDetails && (
         <div className="max-w-7xl mx-auto mb-6 px-4 sm:px-6 lg:px-8">
           <PropertySummary property={propertyDetails} />
+        </div>
+      )}
+
+      {/* Property Location Map */}
+      {propertyDetails && (
+        <div className="max-w-7xl mx-auto mb-6 px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-xl shadow-md overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-4 flex justify-between items-center">
+              <h2 className="text-white text-lg font-semibold">Property Location</h2>
+              {propertyDetails.address && (
+                <div className="flex space-x-2">
+                  <a 
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+                      `${propertyDetails.address || ""}, ${propertyDetails.city || ""}, ${propertyDetails.state || ""} ${propertyDetails.zipCode || ""}`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center px-3 py-1 bg-white text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200"
+                  >
+                    <Home className="h-4 w-4 mr-1" />
+                    <span className="text-sm">Directions</span>
+                  </a>
+                </div>
+              )}
+            </div>
+            {propertyDetails.address ? (
+              <div id="property-map-container" className="aspect-w-16 aspect-h-9">
+                <iframe
+                  src={`https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8"}&q=${encodeURIComponent(
+                    `${propertyDetails.address || ""}, ${propertyDetails.city || ""}, ${propertyDetails.state || ""} ${propertyDetails.zipCode || ""}`
+                  )}&maptype=roadmap`}
+                  width="100%"
+                  height="450"
+                  style={{ border: 0 }}
+                  allowFullScreen=""
+                  loading="lazy"
+                  title="Property Location"
+                  className="w-full h-80 md:h-96"
+                  onError={(e) => {
+                    console.error("Google Maps iframe failed to load", e);
+                    e.target.style.display = "none";
+                    e.target.parentNode.innerHTML += `<div class="flex items-center justify-center h-80 md:h-96 bg-gray-100">
+                      <p class="text-gray-500">Map could not be loaded. Please check the property address.</p>
+                    </div>`;
+                  }}
+                ></iframe>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-80 md:h-96 bg-gray-100">
+                <p className="text-gray-500">Please add a property address to display the map.</p>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
