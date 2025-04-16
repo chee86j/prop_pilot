@@ -3,9 +3,9 @@ import "atropos/css";
 import PropTypes from "prop-types";
 
 // These paths will need to be updated to point to your actual SVG assets
-import layer01 from "../assets/layers/layer01.svg";
-import layer02 from "../assets/layers/layer02.svg";
-import layer03 from "../assets/layers/layer03.svg";
+import layer01 from "../assets/layers/layer01.png";
+import layer02 from "../assets/layers/layer02.png";
+import layer03 from "../assets/layers/layer03.png";
 
 const ParallaxBackground = ({ children, className = "" }) => {
   return (
