@@ -17,7 +17,7 @@ const AboutSection = ({ title, content, additionalContent = null }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <section className="mb-6 bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+    <section className="mb-6 bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 cursor-pointer">
       <SectionHeader title={title} />
       <p className="text-sm md:text-md text-gray-600 mb-4">{content}</p>
       {additionalContent && (

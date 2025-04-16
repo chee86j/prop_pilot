@@ -6,6 +6,7 @@ import {
   useParams,
 } from "react-router-dom";
 import { useState, useEffect, Suspense, lazy } from "react";
+import PropTypes from "prop-types";
 import Navbar from "./components/Navbar";
 import { fetchUserProfile } from "./utils/user";
 import "ag-grid-community/styles/ag-grid.css";
@@ -15,6 +16,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import ErrorBoundary from "./components/core/ErrorBoundary";
 import PropertyListFallback from "./components/core/PropertyListFallback";
+import ParallaxBackground from "./components/ParallaxBackground";
 
 // Only try to import PropertyList dynamically if it exists, otherwise use the fallback
 let PropertyList = PropertyListFallback; // Default to fallback
@@ -76,18 +78,39 @@ function App() {
 
   const [propertyListLoaded, setPropertyListLoaded] = useState(false);
 
+  // State to control when to show the parallax background
+  const [showParallax, setShowParallax] = useState(true);
+
   const PropertyDetailsWrapper = () => {
     const { propertyId } = useParams();
+    // Disable parallax background on specific routes
+    useEffect(() => {
+      setShowParallax(false);
+      return () => setShowParallax(true);
+    }, []);
+
     return <PropertyDetails propertyId={propertyId} auth={auth} />;
   };
 
   const ConstructionDrawWrapper = () => {
     const { propertyId } = useParams();
+    // Disable parallax background on specific routes
+    useEffect(() => {
+      setShowParallax(false);
+      return () => setShowParallax(true);
+    }, []);
+
     return <ConstructionDraw propertyId={propertyId} auth={auth} />;
   };
 
   const ReceiptsWrapper = () => {
     const { drawId } = useParams();
+    // Disable parallax background on specific routes
+    useEffect(() => {
+      setShowParallax(false);
+      return () => setShowParallax(true);
+    }, []);
+
     return <Receipt drawId={drawId} auth={auth} />;
   };
 
@@ -136,10 +159,25 @@ function App() {
     return null;
   }
 
+  // Wraps content with the parallax background when enabled
+  const ContentWrapper = ({ children }) => {
+    return showParallax ? (
+      <ParallaxBackground>
+        <div className="p-4 sm:p-6 lg:p-8">{children}</div>
+      </ParallaxBackground>
+    ) : (
+      <div className="p-4 sm:p-6 lg:p-8">{children}</div>
+    );
+  };
+
+  ContentWrapper.propTypes = {
+    children: PropTypes.node.isRequired,
+  };
+
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
       <Router>
-        <div>
+        <div className="min-h-screen">
           <Navbar auth={auth} />
           <ToastContainer
             position="top-right"
@@ -155,65 +193,67 @@ function App() {
             theme="light"
             containerId="root-toast"
           />
-          <ErrorBoundary>
-            <Suspense fallback={<LoadingFallback />}>
-              <Routes>
-                <Route path="/" element={<Navigate to="/home" />} />
-                <Route path="/home" element={<Home />} />
-                <Route path="/profile" element={<Profile auth={auth} />} />
-                <Route
-                  path="/propertylist"
-                  element={
-                    <ErrorBoundary>
-                      {propertyListLoaded ? (
-                        <PropertyList auth={auth} />
-                      ) : (
-                        <LoadingFallback />
-                      )}
-                    </ErrorBoundary>
-                  }
-                />
-                <Route
-                  path="/addproperty"
-                  element={
-                    <ErrorBoundary>
-                      <AddProperty auth={auth} />
-                    </ErrorBoundary>
-                  }
-                />
-                <Route
-                  path="/property/:propertyId"
-                  element={
-                    <ErrorBoundary>
-                      <PropertyDetailsWrapper auth={auth} />
-                    </ErrorBoundary>
-                  }
-                />
-                <Route
-                  path="/constructiondraw/:propertyId"
-                  element={
-                    <ErrorBoundary>
-                      <ConstructionDrawWrapper />
-                    </ErrorBoundary>
-                  }
-                />
-                <Route
-                  path="/receipts/:drawId"
-                  element={
-                    <ErrorBoundary>
-                      <ReceiptsWrapper />
-                    </ErrorBoundary>
-                  }
-                />
-                <Route path="/testimonials" element={<Testimonials />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/authform" element={<AuthForm />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/faq" element={<Faq />} />
-                <Route path="/lender" element={<Lender />} />
-              </Routes>
-            </Suspense>
-          </ErrorBoundary>
+          <ContentWrapper>
+            <ErrorBoundary>
+              <Suspense fallback={<LoadingFallback />}>
+                <Routes>
+                  <Route path="/" element={<Navigate to="/home" />} />
+                  <Route path="/home" element={<Home />} />
+                  <Route path="/profile" element={<Profile auth={auth} />} />
+                  <Route
+                    path="/propertylist"
+                    element={
+                      <ErrorBoundary>
+                        {propertyListLoaded ? (
+                          <PropertyList auth={auth} />
+                        ) : (
+                          <LoadingFallback />
+                        )}
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/addproperty"
+                    element={
+                      <ErrorBoundary>
+                        <AddProperty auth={auth} />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/property/:propertyId"
+                    element={
+                      <ErrorBoundary>
+                        <PropertyDetailsWrapper auth={auth} />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/constructiondraw/:propertyId"
+                    element={
+                      <ErrorBoundary>
+                        <ConstructionDrawWrapper />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/receipts/:drawId"
+                    element={
+                      <ErrorBoundary>
+                        <ReceiptsWrapper />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route path="/testimonials" element={<Testimonials />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/authform" element={<AuthForm />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/faq" element={<Faq />} />
+                  <Route path="/lender" element={<Lender />} />
+                </Routes>
+              </Suspense>
+            </ErrorBoundary>
+          </ContentWrapper>
         </div>
       </Router>
     </GoogleOAuthProvider>

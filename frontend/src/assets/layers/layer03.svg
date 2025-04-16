@@ -1,0 +1,173 @@
+<svg width="1200" height="400" viewBox="0 0 1200 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background city skyline - Layer 03 -->
+  <!-- Base gradient for the sky -->
+  <defs>
+    <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f0f9ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#d6eaf8;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="buildingGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#a3d5e9;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#a3d5e9;stop-opacity:0.7" />
+    </linearGradient>
+  </defs>
+
+  <!-- Sky background -->
+  <rect x="0" y="0" width="1200" height="400" fill="url(#skyGradient)" />
+  
+  <!-- Far distant horizon mist -->
+  <rect x="0" y="150" width="1200" height="100" fill="#e8f4fa" opacity="0.4" />
+  
+  <g fill="url(#buildingGradient)" opacity="0.7">
+    <!-- Left side buildings -->
+    <rect x="10" y="260" width="25" height="140" />
+    <rect x="45" y="280" width="30" height="120" />
+    <rect x="85" y="240" width="40" height="160" />
+    <rect x="135" y="220" width="25" height="180" />
+    <rect x="170" y="250" width="35" height="150" />
+    <rect x="215" y="230" width="20" height="170" />
+    <rect x="245" y="210" width="30" height="190" />
+    <path d="M290,400 L290,170 L310,150 L330,170 L330,400 Z" />
+    
+    <!-- Central buildings -->
+    <rect x="350" y="120" width="50" height="280" />
+    <path d="M350,120 L375,90 L400,120 Z" /> <!-- Building top -->
+    <rect x="410" y="170" width="40" height="230" />
+    <rect x="460" y="150" width="35" height="250" />
+    <rect x="505" y="100" width="45" height="300" />
+    <path d="M505,100 L527,70 L550,100 Z" /> <!-- Building top -->
+    <path d="M560,400 L560,80 L600,40 L640,80 L640,400 Z" />
+    <rect x="650" y="130" width="60" height="270" />
+    <rect x="660" y="110" width="40" height="20" /> <!-- Building upper section -->
+    
+    <!-- Tallest central building -->
+    <rect x="720" y="30" width="70" height="370" />
+    <path d="M720,30 L755,0 L790,30 Z" />
+    <rect x="735" y="30" width="40" height="60" opacity="0.8" /> <!-- Windows section -->
+    
+    <!-- Right side buildings -->
+    <rect x="800" y="150" width="50" height="250" />
+    <rect x="810" y="130" width="30" height="20" /> <!-- Building upper section -->
+    <rect x="860" y="180" width="35" height="220" />
+    <rect x="905" y="140" width="40" height="260" />
+    <rect x="955" y="170" width="35" height="230" />
+    <rect x="1000" y="110" width="45" height="290" />
+    <path d="M1000,110 L1022,80 L1045,110 Z" /> <!-- Building top -->
+    <rect x="1055" y="190" width="30" height="210" />
+    <rect x="1095" y="160" width="40" height="240" />
+    <rect x="1145" y="220" width="50" height="180" />
+  </g>
+  
+  <!-- Distant hills and smaller buildings with layered effect -->
+  <g opacity="0.6">
+    <path d="M0,400 C100,380 200,390 300,370 C400,360 500,380 600,385 C700,390 800,375 900,380 C1000,385 1100,370 1200,390 L1200,400 L0,400 Z" fill="#83b8d4" />
+    <path d="M0,400 C150,375 300,385 450,365 C600,355 750,375 900,380 C1050,385 1200,365 1200,385 L1200,400 L0,400 Z" fill="#a3d5e9" opacity="0.5" />
+    <path d="M0,400 C200,370 400,380 600,360 C800,350 1000,370 1200,380 L1200,400 L0,400 Z" fill="#c2e5f5" opacity="0.4" />
+  </g>
+  
+  <!-- Windows (small dots on buildings) - Enhanced with more windows -->
+  <g fill="#f7fcfd" opacity="0.5">
+    <!-- Left buildings windows -->
+    <rect x="95" y="250" width="10" height="10" />
+    <rect x="95" y="270" width="10" height="10" />
+    <rect x="95" y="290" width="10" height="10" />
+    <rect x="95" y="310" width="10" height="10" />
+    <rect x="105" y="270" width="10" height="10" />
+    <rect x="105" y="310" width="10" height="10" />
+    
+    <rect x="175" y="260" width="8" height="8" />
+    <rect x="175" y="280" width="8" height="8" />
+    <rect x="175" y="300" width="8" height="8" />
+    <rect x="190" y="280" width="8" height="8" />
+    <rect x="190" y="320" width="8" height="8" />
+
+    <rect x="255" y="220" width="8" height="8" />
+    <rect x="255" y="250" width="8" height="8" />
+    <rect x="255" y="280" width="8" height="8" />
+    <rect x="255" y="310" width="8" height="8" />
+    
+    <!-- Central buildings windows -->
+    <rect x="365" y="130" width="8" height="8" />
+    <rect x="365" y="150" width="8" height="8" />
+    <rect x="365" y="170" width="8" height="8" />
+    <rect x="365" y="190" width="8" height="8" />
+    <rect x="365" y="210" width="8" height="8" />
+    <rect x="380" y="130" width="8" height="8" />
+    <rect x="380" y="150" width="8" height="8" />
+    <rect x="380" y="170" width="8" height="8" />
+    <rect x="380" y="190" width="8" height="8" />
+    <rect x="380" y="210" width="8" height="8" />
+    
+    <rect x="520" y="120" width="8" height="8" />
+    <rect x="520" y="140" width="8" height="8" />
+    <rect x="520" y="160" width="8" height="8" />
+    <rect x="520" y="180" width="8" height="8" />
+    <rect x="520" y="200" width="8" height="8" />
+    <rect x="535" y="120" width="8" height="8" />
+    <rect x="535" y="140" width="8" height="8" />
+    <rect x="535" y="160" width="8" height="8" />
+    <rect x="535" y="180" width="8" height="8" />
+    <rect x="535" y="200" width="8" height="8" />
+    
+    <rect x="580" y="100" width="8" height="8" />
+    <rect x="580" y="120" width="8" height="8" />
+    <rect x="580" y="140" width="8" height="8" />
+    <rect x="580" y="160" width="8" height="8" />
+    <rect x="580" y="180" width="8" height="8" />
+    <rect x="600" y="100" width="8" height="8" />
+    <rect x="600" y="120" width="8" height="8" />
+    <rect x="600" y="140" width="8" height="8" />
+    <rect x="600" y="160" width="8" height="8" />
+    <rect x="600" y="180" width="8" height="8" />
+    
+    <!-- Tallest building windows -->
+    <rect x="735" y="40" width="10" height="10" />
+    <rect x="735" y="60" width="10" height="10" />
+    <rect x="735" y="80" width="10" height="10" />
+    <rect x="735" y="100" width="10" height="10" />
+    <rect x="735" y="120" width="10" height="10" />
+    <rect x="735" y="140" width="10" height="10" />
+    <rect x="735" y="160" width="10" height="10" />
+    <rect x="735" y="180" width="10" height="10" />
+    
+    <rect x="755" y="40" width="10" height="10" />
+    <rect x="755" y="60" width="10" height="10" />
+    <rect x="755" y="80" width="10" height="10" />
+    <rect x="755" y="100" width="10" height="10" />
+    <rect x="755" y="120" width="10" height="10" />
+    <rect x="755" y="140" width="10" height="10" />
+    <rect x="755" y="160" width="10" height="10" />
+    <rect x="755" y="180" width="10" height="10" />
+    
+    <rect x="775" y="40" width="10" height="10" />
+    <rect x="775" y="60" width="10" height="10" />
+    <rect x="775" y="80" width="10" height="10" />
+    <rect x="775" y="100" width="10" height="10" />
+    <rect x="775" y="120" width="10" height="10" />
+    <rect x="775" y="140" width="10" height="10" />
+    <rect x="775" y="160" width="10" height="10" />
+    <rect x="775" y="180" width="10" height="10" />
+    
+    <!-- Right buildings windows -->
+    <rect x="925" y="160" width="8" height="8" />
+    <rect x="925" y="180" width="8" height="8" />
+    <rect x="925" y="200" width="8" height="8" />
+    <rect x="925" y="220" width="8" height="8" />
+    
+    <rect x="1015" y="130" width="8" height="8" />
+    <rect x="1015" y="150" width="8" height="8" />
+    <rect x="1015" y="170" width="8" height="8" />
+    <rect x="1015" y="190" width="8" height="8" />
+    <rect x="1030" y="130" width="8" height="8" />
+    <rect x="1030" y="150" width="8" height="8" />
+    <rect x="1030" y="170" width="8" height="8" />
+    <rect x="1030" y="190" width="8" height="8" />
+  </g>
+  
+  <!-- Morning/evening glow effect -->
+  <rect x="0" y="150" width="1200" height="100" fill="#f8fbfe" opacity="0.1" />
+  
+  <!-- Subtle cloud/mist elements -->
+  <path d="M100,200 C150,190 200,210 250,200 C300,190 350,200 400,195 C450,190 500,200 550,195 S650,190 700,200 S800,190 850,185 S950,200 1000,190 S1100,200 1150,190 L1200,200 L1200,230 L0,230 L0,210 Z" fill="white" opacity="0.1" />
+  <path d="M0,180 C50,170 100,190 150,180 C200,170 250,180 300,175 C350,170 400,180 450,175 S550,170 600,180 S700,170 750,165 S850,180 900,170 S1000,180 1050,170 S1150,180 1200,170 L1200,200 L0,200 L0,190 Z" fill="white" opacity="0.1" />
+</svg> 
