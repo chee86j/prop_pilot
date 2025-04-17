@@ -49,109 +49,87 @@ const HeroSection = ({ user, showFallbackAvatar, setShowFallbackAvatar }) => {
 
   return (
     <div className="hero-content z-20 relative mt-12 pt-16 pb-8 text-center">
-      <Atropos
-        className="atropos-card mx-auto"
-        highlight={true}
-        shadow={true}
-        shadowScale={1.05}
-        rotateXMax={8}
-        rotateYMax={8}
-        stretchX={10}
-        stretchY={10}
-        duration={400}
-      >
-        <div
-          className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-xl max-w-3xl mx-auto"
-          data-atropos-offset="0"
-        >
-          <div className="welcome-content" data-atropos-offset="5">
-            <div className="avatar-container mb-4 inline-block">
-              {!showFallbackAvatar && processedAvatarUrl ? (
-                <img
-                  src={processedAvatarUrl}
-                  alt={`${user?.first_name || "User"}'s profile picture`}
-                  className="inline-block rounded-full align-middle object-cover border-4 border-blue-100"
+      <div className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-xl max-w-3xl mx-auto">
+        <div className="welcome-content">
+          <div className="avatar-container mb-4 inline-block">
+            {!showFallbackAvatar && processedAvatarUrl ? (
+              <img
+                src={processedAvatarUrl}
+                alt={`${user?.first_name || "User"}'s profile picture`}
+                className="inline-block rounded-full align-middle object-cover border-4 border-blue-100"
+                style={{
+                  width: "clamp(80px, 15vw, 100px)",
+                  height: "clamp(80px, 15vw, 100px)",
+                }}
+                onError={() => setShowFallbackAvatar(true)}
+              />
+            ) : (
+              <div className="bg-blue-100 rounded-full p-4 inline-block">
+                <svg
+                  className="inline-block text-blue-500 align-middle"
                   style={{
-                    width: "clamp(80px, 15vw, 100px)",
-                    height: "clamp(80px, 15vw, 100px)",
+                    width: "clamp(60px, 12vw, 80px)",
+                    height: "clamp(60px, 12vw, 80px)",
                   }}
-                  onError={() => setShowFallbackAvatar(true)}
-                />
-              ) : (
-                <div className="bg-blue-100 rounded-full p-4 inline-block">
-                  <svg
-                    className="inline-block text-blue-500 align-middle"
-                    style={{
-                      width: "clamp(60px, 12vw, 80px)",
-                      height: "clamp(60px, 12vw, 80px)",
-                    }}
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
-                </div>
-              )}
-            </div>
-
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 mb-4">
-              Welcome{" "}
-              <span className="text-blue-600">
-                {user ? `${user.first_name} ${user.last_name}` : "Guest"}
-              </span>
-            </h1>
-
-            <div className="logo-container mb-4">
-              <img
-                src={LogoIcon}
-                alt="Logo"
-                className="inline-block align-middle mx-auto"
-                style={{ width: "88px", height: "88px" }}
-                data-atropos-offset="8"
-              />
-            </div>
-
-            <h2 className="text-3xl md:text-4xl font-semibold text-gray-700 mb-6">
-              REI Property Management System
-            </h2>
-
-            <p className="text-gray-600 text-xl mb-8">
-              Streamline your property management with our advanced tools and
-              services.
-            </p>
-
-            <Link
-              to={user && !user.isGuest ? "/propertylist" : "/authform"}
-              className="custom-button scale-110 transform transition-transform hover:scale-125"
-              data-atropos-offset="10"
-            >
-              <img
-                src={planeIcon}
-                alt="Plane"
-                className="mr-2"
-                style={{ width: "24px", height: "24px" }}
-              />
-              <span>
-                {user && !user.isGuest ? "View Portfolio" : "Get Started"}
-              </span>
-            </Link>
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+              </div>
+            )}
           </div>
+
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 mb-4">
+            Welcome{" "}
+            <span className="text-blue-600">
+              {user ? `${user.first_name} ${user.last_name}` : "Guest"}
+            </span>
+          </h1>
+
+          <div className="logo-container mb-4">
+            <img
+              src={LogoIcon}
+              alt="Logo"
+              className="inline-block align-middle mx-auto"
+              style={{ width: "88px", height: "88px" }}
+            />
+          </div>
+
+          <h2 className="text-3xl md:text-4xl font-semibold text-gray-700 mb-6">
+            REI Property Management System
+          </h2>
+
+          <p className="text-gray-600 text-xl mb-8">
+            Streamline your property management with our advanced tools and
+            services.
+          </p>
+
+          <Link
+            to={user && !user.isGuest ? "/propertylist" : "/authform"}
+            className="custom-button transform transition-transform hover:scale-110"
+          >
+            <img
+              src={planeIcon}
+              alt="Plane"
+              className="mr-2"
+              style={{ width: "24px", height: "24px" }}
+            />
+            <span>
+              {user && !user.isGuest ? "View Portfolio" : "Get Started"}
+            </span>
+          </Link>
         </div>
-      </Atropos>
+      </div>
 
       <style>{`
-        .atropos-card {
-          width: 100%;
-          max-width: 800px;
-        }
-        
         .custom-button {
           display: inline-flex;
           align-items: center;
