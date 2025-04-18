@@ -5,6 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Select from "react-select";
 import ResearchDropdown from "./ResearchDropdown";
+import { getCoordinatesFromAddress } from "../utils/property";
 
 const AddProperty = () => {
   const [property, setProperty] = useState({
@@ -651,7 +652,7 @@ const AddProperty = () => {
     setProperty({ ...property, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Check if propertyName is empty, if not, proceed with saving the property
@@ -661,33 +662,44 @@ const AddProperty = () => {
       return;
     }
 
-    // API call to save the new property
-    fetch("http://localhost:5000/api/properties", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      },
-      body: JSON.stringify(property),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Property save failed");
-        }
-        return response.json();
-      })
-      .then(() => {
-        // Handle successful property save
-        console.log("Property added successfully");
-        toast.success("Property added successfully!");
-        setTimeout(() => {
-          navigate("/propertylist");
-        }, 2000);
-      })
-      .catch((error) => {
-        setErrorMessage("Failed to save property: " + error.message);
-        toast.error(`Failed to save property: ${error.message}`);
+    try {
+      // Get coordinates from address
+      const coordinates = await getCoordinatesFromAddress(
+        property.address,
+        property.city,
+        property.state,
+        property.zipCode
+      );
+
+      // Add coordinates to property data if available
+      const propertyData = {
+        ...property,
+        ...(coordinates && {
+          latitude: coordinates.latitude,
+          longitude: coordinates.longitude
+        })
+      };
+
+      const response = await fetch("http://localhost:5000/api/properties", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        body: JSON.stringify(propertyData),
       });
+
+      if (!response.ok) {
+        throw new Error("Failed to save property");
+      }
+
+      const savedProperty = await response.json();
+      toast.success("Property saved successfully!");
+      navigate(`/property/${savedProperty.id}`);
+    } catch (error) {
+      console.error("Error saving property:", error);
+      toast.error("Failed to save property: " + error.message);
+    }
   };
 
   // Helper function to capitalize first letter of each word

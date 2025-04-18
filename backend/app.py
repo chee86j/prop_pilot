@@ -15,9 +15,17 @@ from datetime import timedelta
 from models import db, User, Property, Phase, ConstructionDraw, Receipt, Tenant, Lease, PropertyMaintenanceRequest
 from routes import api
 from routes.auth import auth_routes
+from routes.school_routes import school_bp
 
 # Load environment variables from .env file
 load_dotenv()
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 def create_app():
     """Create and configure the Flask application"""
@@ -75,6 +83,7 @@ def create_app():
     # Register blueprints
     app.register_blueprint(api, url_prefix='/api')
     app.register_blueprint(auth_routes, url_prefix='/api')
+    app.register_blueprint(school_bp, url_prefix='/api')
     
     # Create database tables
     with app.app_context():
@@ -109,4 +118,13 @@ def create_app():
 app = create_app()
 
 if __name__ == '__main__':
+    # Check for required environment variables
+    required_vars = ['SCHOOL_DATA_API_KEY']
+    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    
+    if missing_vars:
+        logger.error(f'❌ Missing required environment variables: {", ".join(missing_vars)}')
+        raise EnvironmentError(f'Missing required environment variables: {", ".join(missing_vars)}')
+    
+    logger.info('🚀 Starting Property Pilot API server...')
     app.run(debug=True)

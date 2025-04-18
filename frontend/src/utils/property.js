@@ -399,3 +399,49 @@ export const getPropertyData = async (propertyId) => {
     throw error;
   }
 };
+
+/**
+ * Gets coordinates (latitude, longitude) from an address using MapDevelopers Geocoding API
+ * @param {string} address - Full address string
+ * @param {string} city - City name
+ * @param {string} state - State name
+ * @param {string} zipCode - Zip code
+ * @returns {Promise<{latitude: number, longitude: number}>} - Coordinates
+ */
+export const getCoordinatesFromAddress = async (address, city, state, zipCode) => {
+  try {
+    const fullAddress = `${address}, ${city}, ${state} ${zipCode}`;
+    const encodedAddress = encodeURIComponent(fullAddress);
+    const response = await fetch(`https://www.mapdevelopers.com/data.php?operation=geocode&address=${encodedAddress}&region=USA`);
+    
+    if (!response.ok) {
+      throw new Error('Failed to geocode address');
+    }
+    
+    const data = await response.json();
+    if (data && data.status === 'OK') {
+      return {
+        latitude: data.results[0].geometry.location.lat,
+        longitude: data.results[0].geometry.location.lng
+      };
+    } else {
+      throw new Error('Geocoding failed');
+    }
+  } catch (error) {
+    console.error('Error geocoding address:', error);
+    // Fallback to using Google Maps Geocoding API
+    try {
+      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=YOUR_GOOGLE_MAPS_API_KEY`);
+      const data = await response.json();
+      if (data.status === 'OK') {
+        return {
+          latitude: data.results[0].geometry.location.lat,
+          longitude: data.results[0].geometry.location.lng
+        };
+      }
+    } catch (fallbackError) {
+      console.error('Fallback geocoding failed:', fallbackError);
+    }
+    return null;
+  }
+};

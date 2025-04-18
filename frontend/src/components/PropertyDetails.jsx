@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, memo, useCallback } from "react";
 import { useSwipeable } from "react-swipeable";
 import { debounce, throttle } from "../utils/performance";
 import { formatCurrency, formatPercent } from "../utils/format";
-import { savePropertyChanges, savePhase, exportToCSV } from "../utils/property";
+import { savePropertyChanges, savePhase, exportToCSV, getCoordinatesFromAddress } from "../utils/property";
 import ConstructionDraw from "./ConstructionDraw";
 import PhaseTimeline from "./PhaseTimeline";
 import PhaseForm from "./PhaseForm";
@@ -13,6 +13,7 @@ import OperatingExpense from "./OperatingExpense";
 import RentalIncome from "./RentalIncome";
 import CapitalExpenditure from "./CapitalExpenditure";
 import RentalAnalysis from "./RentalAnalysis";
+import SchoolDistrictInfo from './SchoolDistrictInfo';
 // import CsvDisplay from "./CsvDisplay";
 // import CsvReader from "./CsvReader";
 import {
@@ -695,7 +696,7 @@ const PropertyDetails = ({ propertyId }) => {
   excessive calls to the server and saves the changes to the server.
   */
   const handleInputChange = useCallback(
-    (e) => {
+    async (e) => {
       const { name, value } = e.target;
 
       // Check if this is a numeric field
@@ -738,7 +739,40 @@ const PropertyDetails = ({ propertyId }) => {
           [name]: value,
         };
 
-        debouncedSave(updatedDetails);
+        // If address fields change, update coordinates
+        if (["address", "city", "state", "zipCode"].includes(name)) {
+          // Use setTimeout to avoid too many API calls while typing
+          setTimeout(async () => {
+            try {
+              const coordinates = await getCoordinatesFromAddress(
+                name === "address" ? value : updatedDetails.address,
+                name === "city" ? value : updatedDetails.city,
+                name === "state" ? value : updatedDetails.state,
+                name === "zipCode" ? value : updatedDetails.zipCode
+              );
+
+              if (coordinates) {
+                setEditedDetails(current => ({
+                  ...current,
+                  latitude: coordinates.latitude,
+                  longitude: coordinates.longitude
+                }));
+                
+                // Save the updated coordinates
+                debouncedSave({
+                  ...updatedDetails,
+                  latitude: coordinates.latitude,
+                  longitude: coordinates.longitude
+                });
+              }
+            } catch (error) {
+              console.error("Error updating coordinates:", error);
+            }
+          }, 1000); // Wait 1 second after typing stops
+        } else {
+          debouncedSave(updatedDetails);
+        }
+
         return updatedDetails;
       });
     },
@@ -1053,6 +1087,11 @@ const PropertyDetails = ({ propertyId }) => {
                 </p>
               </div>
             )}
+            
+            {/* School District Information */}
+            <div className="p-6 border-t border-gray-200">
+              <SchoolDistrictInfo property={propertyDetails} />
+            </div>
           </div>
         </div>
       )}

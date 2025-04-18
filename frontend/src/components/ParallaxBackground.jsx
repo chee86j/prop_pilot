@@ -84,10 +84,10 @@ const ParallaxBackground = ({ children, className = "" }) => {
               data-atropos-offset="12"
               style={{ zIndex: 10 }}
             >
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg mb-4">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg mb-4 [text-shadow:_-1px_-1px_0_#000,_1px_-1px_0_#000,_-1px_1px_0_#000,_1px_1px_0_#000]">
                 Property Investment Platform
               </h1>
-              <p className="text-xl md:text-2xl text-white drop-shadow-md max-w-3xl">
+              <p className="text-xl md:text-2xl text-white drop-shadow-md max-w-3xl [text-shadow:_-1px_-1px_0_#000,_1px_-1px_0_#000,_-1px_1px_0_#000,_1px_1px_0_#000]">
                 Analyze, manage, and optimize your real estate investments with
                 our powerful tools
               </p>
