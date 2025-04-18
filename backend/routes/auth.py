@@ -147,7 +147,7 @@ def login():
         logger.error(f"❌ Login error: {str(e)}")
         return jsonify({"message": "An error occurred"}), HTTPStatus.INTERNAL_SERVER_ERROR
 
-@auth_routes.route('/auth/google', methods=['POST'])
+@auth_routes.route('/google', methods=['POST'])
 def google_auth():
     try:
         data = request.json

@@ -85,7 +85,7 @@ const AuthForm = () => {
 
         // Send to backend
         const backendResponse = await fetch(
-          `${import.meta.env.VITE_API_URL}/auth/google`,
+          `${import.meta.env.VITE_API_URL}/google`,
           {
             method: "POST",
             headers: {

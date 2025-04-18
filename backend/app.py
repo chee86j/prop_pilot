@@ -15,7 +15,11 @@ from datetime import timedelta
 from models import db, User, Property, Phase, ConstructionDraw, Receipt, Tenant, Lease, PropertyMaintenanceRequest
 from routes import api
 from routes.auth import auth_routes
-from routes.school_routes import school_bp
+from routes.property import property_routes
+from routes.financial import financial_routes
+from routes.tenant import tenant_routes
+from routes.maintenance import maintenance_routes
+from routes.user import user_routes
 
 # Load environment variables from .env file
 load_dotenv()
@@ -83,7 +87,11 @@ def create_app():
     # Register blueprints
     app.register_blueprint(api, url_prefix='/api')
     app.register_blueprint(auth_routes, url_prefix='/api')
-    app.register_blueprint(school_bp, url_prefix='/api')
+    app.register_blueprint(property_routes, url_prefix='/api')
+    app.register_blueprint(financial_routes, url_prefix='/api') 
+    app.register_blueprint(tenant_routes, url_prefix='/api')
+    app.register_blueprint(maintenance_routes, url_prefix='/api')
+    app.register_blueprint(user_routes, url_prefix='/api')
     
     # Create database tables
     with app.app_context():
@@ -119,7 +127,7 @@ app = create_app()
 
 if __name__ == '__main__':
     # Check for required environment variables
-    required_vars = ['SCHOOL_DATA_API_KEY']
+    required_vars = ['JWT_SECRET_KEY', 'FLASK_SECRET_KEY']
     missing_vars = [var for var in required_vars if not os.getenv(var)]
     
     if missing_vars:

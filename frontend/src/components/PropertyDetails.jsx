@@ -13,9 +13,6 @@ import OperatingExpense from "./OperatingExpense";
 import RentalIncome from "./RentalIncome";
 import CapitalExpenditure from "./CapitalExpenditure";
 import RentalAnalysis from "./RentalAnalysis";
-import SchoolDistrictInfo from './SchoolDistrictInfo';
-// import CsvDisplay from "./CsvDisplay";
-// import CsvReader from "./CsvReader";
 import {
   ChevronsUp,
   ChevronsDown,
@@ -30,6 +27,7 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ResearchDropdown from "./ResearchDropdown";
+import { useParams, useNavigate } from "react-router-dom";
 
 // Property Summary Component
 const PropertySummary = ({ property }) => {
@@ -1087,11 +1085,6 @@ const PropertyDetails = ({ propertyId }) => {
                 </p>
               </div>
             )}
-            
-            {/* School District Information */}
-            <div className="p-6 border-t border-gray-200">
-              <SchoolDistrictInfo property={propertyDetails} />
-            </div>
           </div>
         </div>
       )}
