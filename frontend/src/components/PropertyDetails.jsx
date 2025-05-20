@@ -3,8 +3,7 @@
 import { useState, useEffect, useRef, memo, useCallback } from "react";
 import { useSwipeable } from "react-swipeable";
 import { debounce, throttle } from "../utils/performance";
-import { formatCurrency, formatPercent } from "../utils/format";
-import { savePropertyChanges, savePhase, exportToCSV, getCoordinatesFromAddress } from "../utils/property";
+import { savePropertyChanges, savePhase, getCoordinatesFromAddress } from "../utils/property";
 import ConstructionDraw from "./ConstructionDraw";
 import PhaseTimeline from "./PhaseTimeline";
 import PhaseForm from "./PhaseForm";
@@ -13,21 +12,35 @@ import OperatingExpense from "./OperatingExpense";
 import RentalIncome from "./RentalIncome";
 import CapitalExpenditure from "./CapitalExpenditure";
 import RentalAnalysis from "./RentalAnalysis";
-import {
-  ChevronsUp,
-  ChevronsDown,
-  Download,
-  Printer,
-  Edit2,
-  Save,
-  X,
-  ChevronDown,
-  Home,
-} from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ResearchDropdown from "./ResearchDropdown";
 import { useParams, useNavigate } from "react-router-dom";
+
+// Import our modular components
+import PropertySummary from "./property/PropertySummary";
+import QuickJump from "./property/QuickJump";
+import FieldGroup from "./property/FieldGroup";
+import PropertyMap from "./property/PropertyMap";
+import FinancialAnalysis from "./property/FinancialAnalysis";
+import PropertyFormFields from "./property/PropertyFormFields";
+import { 
+  LoadingSkeleton, 
+  ErrorFallback, 
+  FloatingActionButton, 
+  OfflineIndicator, 
+  StickyActionBar,
+  buttonStyles,
+  cardStyles,
+  printStyles
+} from "./property/UIComponents";
+
+// Memoized Components
+const MemoizedProfitAndLoss = memo(ProfitAndLoss);
+const MemoizedOperatingExpense = memo(OperatingExpense);
+const MemoizedRentalIncome = memo(RentalIncome);
+const MemoizedCapitalExpenditure = memo(CapitalExpenditure);
+const MemoizedRentalAnalysis = memo(RentalAnalysis);
 
 // Property Summary Component
 const PropertySummary = ({ property }) => {
@@ -196,13 +209,6 @@ const QuickJump = ({ sections, expandedGroups, setExpandedGroups }) => {
     </div>
   );
 };
-
-// Memoized Components
-const MemoizedProfitAndLoss = memo(ProfitAndLoss);
-const MemoizedOperatingExpense = memo(OperatingExpense);
-const MemoizedRentalIncome = memo(RentalIncome);
-const MemoizedCapitalExpenditure = memo(CapitalExpenditure);
-const MemoizedRentalAnalysis = memo(RentalAnalysis);
 
 // Button Styles
 const buttonStyles = {
@@ -813,47 +819,18 @@ const PropertyDetails = ({ propertyId }) => {
   };
 
   const renderInputField = (label, name, type = "text", isNumber = false) => {
-    const value = isEditing ? editedDetails[name] : propertyDetails?.[name];
-    const isRequired = [
-      "propertyName",
-      "address",
-      "city",
-      "state",
-      "zipCode",
-    ].includes(name);
-    const hasError = error && isRequired && !value && type !== "number";
-
     return (
-      <div className="form-group mb-4">
-        <label
-          className="block text-sm font-medium text-gray-700 mb-1"
-          htmlFor={name}
-        >
-          {label}
-          {isRequired && <span className="text-red-500 ml-1">*</span>}
-        </label>
-        <input
-          id={name}
-          type={type}
-          name={name}
-          value={value || ""}
-          onChange={handleInputChange}
-          disabled={!isEditing}
-          required={isRequired}
-          className={`
-            w-full px-3 py-2 rounded-lg border
-            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-            transition duration-150 ease-in-out
-            ${isNumber ? "text-right" : ""}
-            ${hasError ? "border-red-500" : "border-gray-300"}
-            ${isRequired ? "bg-gray-50" : ""}
-            ${!isEditing ? "bg-gray-50 text-gray-700" : ""}
-          `}
-        />
-        {hasError && (
-          <p className="mt-1 text-sm text-red-500">{`${label} is required`}</p>
-        )}
-      </div>
+      <PropertyFormFields
+        label={label}
+        name={name}
+        type={type}
+        isNumber={isNumber}
+        isEditing={isEditing}
+        editedDetails={editedDetails}
+        propertyDetails={propertyDetails}
+        handleInputChange={handleInputChange}
+        error={error}
+      />
     );
   };
 
@@ -1026,66 +1003,7 @@ const PropertyDetails = ({ propertyId }) => {
       {/* Property Location Map */}
       {propertyDetails && (
         <div className="max-w-7xl mx-auto mb-6 px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-xl shadow-md overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-4 flex justify-between items-center">
-              <h2 className="text-white text-lg font-semibold">
-                Property Location
-              </h2>
-              {propertyDetails.address && (
-                <div className="flex space-x-2">
-                  <a
-                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-                      `${propertyDetails.address || ""}, ${
-                        propertyDetails.city || ""
-                      }, ${propertyDetails.state || ""} ${
-                        propertyDetails.zipCode || ""
-                      }`
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center px-3 py-1 bg-white text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200"
-                  >
-                    <Home className="h-4 w-4 mr-1" />
-                    <span className="text-sm">Directions</span>
-                  </a>
-                </div>
-              )}
-            </div>
-            {propertyDetails.address ? (
-              <div className="mt-4 border rounded-lg overflow-hidden">
-                <iframe
-                  src={`https://maps.google.com/maps?q=${encodeURIComponent(
-                    `${propertyDetails.address || ""}, ${
-                      propertyDetails.city || ""
-                    }, ${propertyDetails.state || ""} ${
-                      propertyDetails.zipCode || ""
-                    }`
-                  )}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
-                  width="100%"
-                  height="300"
-                  style={{ border: 0 }}
-                  allowFullScreen=""
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  onError={(e) => {
-                    console.error("Map failed to load", e);
-                    e.target.style.display = "none";
-                    e.target.parentNode.innerHTML += `
-                      <div class="flex items-center justify-center h-80 bg-gray-100">
-                        <p class="text-gray-500">Map could not be loaded. Please check the property address.</p>
-                      </div>
-                    `;
-                  }}
-                ></iframe>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center h-80 md:h-96 bg-gray-100">
-                <p className="text-gray-500">
-                  Please add a property address to display the map.
-                </p>
-              </div>
-            )}
-          </div>
+          <PropertyMap propertyDetails={propertyDetails} />
         </div>
       )}
 
@@ -1966,123 +1884,10 @@ const PropertyDetails = ({ propertyId }) => {
           className={`${cardStyles} print-full-width`}
           ref={financialsPrintRef}
         >
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4 sm:gap-0">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-              Financial Analysis
-            </h2>
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-              <button
-                onClick={handlePrintFinancials}
-                className={buttonStyles.primary}
-                aria-label="Print financial analysis"
-              >
-                <Printer size={16} className="sm:mr-2" />
-                <span className="hidden sm:inline">
-                  Print Financial Analysis
-                </span>
-                <span className="sm:hidden">Print</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-8">
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold text-gray-700">
-                  Profit & Loss Statement
-                </h3>
-                <button
-                  onClick={() =>
-                    exportToCSV(propertyDetails.profitLossData, "profit-loss")
-                  }
-                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
-                >
-                  <Download size={16} /> Export CSV
-                </button>
-              </div>
-              <MemoizedProfitAndLoss property={propertyDetails} />
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold text-gray-700">
-                  Operating Expenses
-                </h3>
-                <button
-                  onClick={() =>
-                    exportToCSV(
-                      propertyDetails.operatingExpenseData,
-                      "operating-expenses"
-                    )
-                  }
-                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
-                >
-                  <Download size={16} /> Export CSV
-                </button>
-              </div>
-              <MemoizedOperatingExpense property={propertyDetails} />
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold text-gray-700">
-                  Rental Income
-                </h3>
-                <button
-                  onClick={() =>
-                    exportToCSV(
-                      propertyDetails.rentalIncomeData,
-                      "rental-income"
-                    )
-                  }
-                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
-                >
-                  <Download size={16} /> Export CSV
-                </button>
-              </div>
-              <MemoizedRentalIncome property={propertyDetails} />
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold text-gray-700">
-                  Capital Expenditure
-                </h3>
-                <button
-                  onClick={() =>
-                    exportToCSV(
-                      propertyDetails.capExData,
-                      "capital-expenditure"
-                    )
-                  }
-                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
-                >
-                  <Download size={16} /> Export CSV
-                </button>
-              </div>
-              <MemoizedCapitalExpenditure property={propertyDetails} />
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold text-gray-700">
-                  Rental Analysis
-                </h3>
-                <button
-                  onClick={() =>
-                    exportToCSV(
-                      propertyDetails.rentalAnalysisData,
-                      "rental-analysis"
-                    )
-                  }
-                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
-                >
-                  <Download size={16} /> Export CSV
-                </button>
-              </div>
-              <MemoizedRentalAnalysis property={propertyDetails} />
-            </div>
-          </div>
+          <FinancialAnalysis 
+            propertyDetails={propertyDetails} 
+            onPrint={handlePrintFinancials} 
+          />
         </section>
 
         <div className="mb-8">
