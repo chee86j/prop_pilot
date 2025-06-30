@@ -1,0 +1,19 @@
+{
+  "name": "property-scraper",
+  "version": "1.0.0",
+  "description": "Property scraper service for PropPilot",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "start": "node main.js",
+    "scrape": "node main.js --county Morris"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "puppeteer": "^21.5.0",
+    "winston": "^3.11.0",
+    "yargs": "^17.7.2",
+    "csv-parse": "^5.5.2",
+    "csv-stringify": "^6.4.4"
+  }
+}
