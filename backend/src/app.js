@@ -10,12 +10,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 // Import routes
-import authRoutes from './routes/auth.js';
-import propertyRoutes from './routes/property.js';
-import financialRoutes from './routes/financial.js';
-import tenantRoutes from './routes/tenant.js';
-import maintenanceRoutes from './routes/maintenance.js';
-import userRoutes from './routes/user.js';
+import routes from './routes/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -75,7 +70,7 @@ async function testDbConnection() {
 // Configure CORS
 const corsOptions = {
     origin: 'http://localhost:5173',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     exposedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -114,13 +109,8 @@ app.use((req, res, next) => {
     next();
 });
 
-// Routes
-app.use('/api', authRoutes);
-app.use('/api', propertyRoutes);
-app.use('/api', financialRoutes);
-app.use('/api', tenantRoutes);
-app.use('/api', maintenanceRoutes);
-app.use('/api', userRoutes);
+// Mount all routes
+app.use('/api', routes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -139,7 +129,7 @@ const PORT = process.env.PORT || 5000;
 async function startServer() {
     try {
         // Check required environment variables
-        const requiredVars = ['JWT_SECRET_KEY'];
+        const requiredVars = ['JWT_SECRET_KEY', 'DB_NAME', 'DB_USERNAME', 'DB_PASSWORD'];
         const missingVars = requiredVars.filter(varName => !process.env[varName]);
         
         if (missingVars.length > 0) {

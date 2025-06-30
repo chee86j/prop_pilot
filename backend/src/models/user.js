@@ -1,10 +1,9 @@
-import { DataTypes } from "sequelize";
+import { Model, DataTypes } from 'sequelize';
 import bcrypt from "bcrypt";
-import BaseModel from "./base.js";
-import sequelize from "../config/database.js";
+import sequelize from '../config/database.js';
 import logger from "../utils/logger.js";
 
-class User extends BaseModel {
+class User extends Model {
   static async hashPassword(password) {
     return bcrypt.hash(password, 10);
   }
@@ -25,56 +24,77 @@ class User extends BaseModel {
   }
 }
 
-User.init(
-  {
+User.init({
     id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    first_name: {
-      type: DataTypes.STRING(512),
-      allowNull: false,
-      validate: {
-        notEmpty: true,
-      },
-    },
-    last_name: {
-      type: DataTypes.STRING(512),
-      allowNull: false,
-      validate: {
-        notEmpty: true,
-      },
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
     },
     email: {
-      type: DataTypes.STRING(512),
-      allowNull: false,
-      unique: true,
-      validate: {
-        isEmail: true,
-      },
-    },
-    password_hash: {
-      type: DataTypes.STRING(512),
-      allowNull: false,
-    },
-    avatar: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-  },
-  {
-    sequelize,
-    modelName: "User",
-    tableName: "users",
-    hooks: {
-      beforeSave: async (user) => {
-        if (user.changed("password_hash")) {
-          logger.info("Hashing new password for user");
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+        validate: {
+            isEmail: true
         }
-      },
     },
-  }
-);
+    password: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    firstName: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    lastName: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    profileImage: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    isVerified: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    verificationToken: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    resetPasswordToken: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    resetPasswordExpires: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
+    lastLogin: {
+        type: DataTypes.DATE,
+        allowNull: true
+    }
+}, {
+    sequelize,
+    modelName: 'User',
+    tableName: 'users',
+    timestamps: true,
+    indexes: [
+        {
+            unique: true,
+            fields: ['email']
+        }
+    ]
+});
+
+// Instance methods
+User.prototype.toJSON = function() {
+    const values = { ...this.get() };
+    delete values.password;
+    delete values.verificationToken;
+    delete values.resetPasswordToken;
+    delete values.resetPasswordExpires;
+    return values;
+};
 
 export default User;

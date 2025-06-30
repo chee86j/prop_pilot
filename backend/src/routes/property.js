@@ -1,26 +1,29 @@
-import { Router } from "express";
-import { User, Property, Phase } from "../models/index.js";
-import { authenticateToken } from "../middleware/auth.js";
+import express from "express";
 import {
-  convertToFloat,
-  serializeProperty,
-  serializePropertySummary,
-} from "../utils/property.js";
-import logger from "../utils/logger.js";
+  Property,
+  Phase,
+  Tenant,
+  MaintenanceRequest,
+} from "../models/index.js";
+import { authenticateToken } from "../middleware/auth.js";
+import { validatePropertyData } from "../utils/validation.js";
 
-const router = Router();
+const router = express.Router();
 
-// Get all properties for the current user
+// Get all properties for authenticated user
 router.get("/", authenticateToken, async (req, res) => {
   try {
     const properties = await Property.findAll({
-      where: { owner_id: req.user.id },
+      where: { ownerId: req.user.id },
+      include: [
+        { model: Phase, as: "phases" },
+        { model: Tenant, as: "tenants" },
+        { model: MaintenanceRequest, as: "maintenanceRequests" },
+      ],
     });
-
-    res.json(properties.map(serializePropertySummary));
+    res.json(properties);
   } catch (error) {
-    logger.error("Error fetching properties:", error);
-    res.status(500).json({ message: "Error fetching properties" });
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -30,183 +33,67 @@ router.get("/:id", authenticateToken, async (req, res) => {
     const property = await Property.findOne({
       where: {
         id: req.params.id,
-        owner_id: req.user.id,
+        ownerId: req.user.id,
       },
+      include: [
+        { model: Phase, as: "phases" },
+        { model: Tenant, as: "tenants" },
+        { model: MaintenanceRequest, as: "maintenanceRequests" },
+      ],
     });
 
     if (!property) {
-      return res.status(404).json({ message: "Property not found" });
+      return res.status(404).json({ error: "Property not found" });
     }
 
-    res.json(serializeProperty(property));
+    res.json(property);
   } catch (error) {
-    logger.error("Error fetching property:", error);
-    res.status(500).json({ message: "Error fetching property" });
+    res.status(500).json({ error: error.message });
   }
 });
 
 // Create a new property
 router.post("/", authenticateToken, async (req, res) => {
   try {
-    const data = req.body;
-    if (!data) {
-      return res.status(400).json({ message: "No data provided" });
+    const validationError = validatePropertyData(req.body);
+    if (validationError) {
+      return res.status(400).json({ error: validationError });
     }
 
-    // Convert numeric fields
-    const numericFields = [
-      "purchaseCost",
-      "refinanceCosts",
-      "totalRehabCost",
-      "equipmentCost",
-      "constructionCost",
-      "largeRepairsCost",
-      "renovationCost",
-      "kickStartFunds",
-      "lenderConstructionDrawsReceived",
-      "utilitiesCost",
-      "sewer",
-      "water",
-      "lawn",
-      "garbage",
-      "yearlyPropertyTaxes",
-      "mortgagePaid",
-      "homeownersInsurance",
-      "expectedYearlyRent",
-      "rentalIncomeReceived",
-      "vacancyRate",
-      "avgTenantStay",
-      "otherMonthlyIncome",
-      "vacancyLoss",
-      "managementFees",
-      "maintenanceCosts",
-      "totalEquity",
-      "arvSalePrice",
-      "realtorFees",
-      "propTaxtillEndOfYear",
-      "lenderLoanBalance",
-      "payOffStatement",
-      "attorneyFees",
-      "miscFees",
-      "utilities",
-      "cash2closeFromPurchase",
-      "cash2closeFromRefinance",
-      "totalRehabCosts",
-      "expectedRemainingRentEndToYear",
-      "totalExpenses",
-      "totalConstructionDrawsReceived",
-      "projectNetProfitIfSold",
-      "cashFlow",
-      "cashRoi",
-      "rule2Percent",
-      "rule50Percent",
-      "financeAmount",
-      "purchaseCapRate",
-      "downPaymentPercentage",
-      "loanInterestRate",
-      "pmiPercentage",
-      "lenderPointsAmount",
-    ];
-
-    numericFields.forEach((field) => {
-      data[field] = convertToFloat(data[field]);
+    const property = await Property.create({
+      ...req.body,
+      ownerId: req.user.id,
     });
 
-    // Set owner
-    data.owner_id = req.user.id;
-
-    const property = await Property.create(data);
-
-    res.status(201).json(serializeProperty(property));
+    res.status(201).json(property);
   } catch (error) {
-    logger.error("Error creating property:", error);
-    res.status(500).json({ message: "Error creating property" });
+    res.status(500).json({ error: error.message });
   }
 });
 
 // Update a property
 router.put("/:id", authenticateToken, async (req, res) => {
   try {
+    const validationError = validatePropertyData(req.body);
+    if (validationError) {
+      return res.status(400).json({ error: validationError });
+    }
+
     const property = await Property.findOne({
       where: {
         id: req.params.id,
-        owner_id: req.user.id,
+        ownerId: req.user.id,
       },
     });
 
     if (!property) {
-      return res.status(404).json({ message: "Property not found" });
+      return res.status(404).json({ error: "Property not found" });
     }
 
-    const data = req.body;
-
-    // Convert numeric fields
-    const numericFields = [
-      "purchaseCost",
-      "refinanceCosts",
-      "totalRehabCost",
-      "equipmentCost",
-      "constructionCost",
-      "largeRepairsCost",
-      "renovationCost",
-      "kickStartFunds",
-      "lenderConstructionDrawsReceived",
-      "utilitiesCost",
-      "sewer",
-      "water",
-      "lawn",
-      "garbage",
-      "yearlyPropertyTaxes",
-      "mortgagePaid",
-      "homeownersInsurance",
-      "expectedYearlyRent",
-      "rentalIncomeReceived",
-      "vacancyRate",
-      "avgTenantStay",
-      "otherMonthlyIncome",
-      "vacancyLoss",
-      "managementFees",
-      "maintenanceCosts",
-      "totalEquity",
-      "arvSalePrice",
-      "realtorFees",
-      "propTaxtillEndOfYear",
-      "lenderLoanBalance",
-      "payOffStatement",
-      "attorneyFees",
-      "miscFees",
-      "utilities",
-      "cash2closeFromPurchase",
-      "cash2closeFromRefinance",
-      "totalRehabCosts",
-      "expectedRemainingRentEndToYear",
-      "totalExpenses",
-      "totalConstructionDrawsReceived",
-      "projectNetProfitIfSold",
-      "cashFlow",
-      "cashRoi",
-      "rule2Percent",
-      "rule50Percent",
-      "financeAmount",
-      "purchaseCapRate",
-      "downPaymentPercentage",
-      "loanInterestRate",
-      "pmiPercentage",
-      "lenderPointsAmount",
-    ];
-
-    numericFields.forEach((field) => {
-      if (field in data) {
-        data[field] = convertToFloat(data[field]);
-      }
-    });
-
-    await property.update(data);
-
-    res.json(serializeProperty(property));
+    await property.update(req.body);
+    res.json(property);
   } catch (error) {
-    logger.error("Error updating property:", error);
-    res.status(500).json({ message: "Error updating property" });
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -216,124 +103,90 @@ router.delete("/:id", authenticateToken, async (req, res) => {
     const property = await Property.findOne({
       where: {
         id: req.params.id,
-        owner_id: req.user.id,
+        ownerId: req.user.id,
       },
     });
 
     if (!property) {
-      return res.status(404).json({ message: "Property not found" });
+      return res.status(404).json({ error: "Property not found" });
     }
 
     await property.destroy();
-    res.json({ message: "Property deleted successfully" });
+    res.status(204).send();
   } catch (error) {
-    logger.error("Error deleting property:", error);
-    res.status(500).json({ message: "Error deleting property" });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Get phases for a property
-router.get("/:id/phases", authenticateToken, async (req, res) => {
+// Get property financial summary
+router.get("/:id/financial-summary", authenticateToken, async (req, res) => {
   try {
     const property = await Property.findOne({
       where: {
         id: req.params.id,
-        owner_id: req.user.id,
+        ownerId: req.user.id,
       },
-      include: [
-        {
-          model: Phase,
-          as: "phases",
-        },
-      ],
     });
 
     if (!property) {
-      return res.status(404).json({ message: "Property not found" });
+      return res.status(404).json({ error: "Property not found" });
     }
 
-    res.json(property.phases);
+    const summary = {
+      totalInvestment: property.purchaseCost + property.totalRehabCost,
+      monthlyIncome: property.expectedYearlyRent / 12,
+      monthlyExpenses:
+        property.yearlyPropertyTaxes / 12 +
+        property.homeownersInsurance / 12 +
+        property.managementFees +
+        property.maintenanceCosts,
+      cashFlow:
+        property.expectedYearlyRent / 12 -
+        (property.yearlyPropertyTaxes / 12 +
+          property.homeownersInsurance / 12 +
+          property.managementFees +
+          property.maintenanceCosts),
+      capRate: property.purchaseCapRate,
+      roi:
+        ((property.expectedYearlyRent -
+          property.yearlyPropertyTaxes -
+          property.homeownersInsurance -
+          property.managementFees * 12 -
+          property.maintenanceCosts * 12) /
+          (property.purchaseCost + property.totalRehabCost)) *
+        100,
+    };
+
+    res.json(summary);
   } catch (error) {
-    logger.error("Error fetching phases:", error);
-    res.status(500).json({ message: "Error fetching phases" });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Create a new phase
-router.post("/:id/phases", authenticateToken, async (req, res) => {
+// Upload property images
+router.post("/:id/images", authenticateToken, async (req, res) => {
   try {
     const property = await Property.findOne({
       where: {
         id: req.params.id,
-        owner_id: req.user.id,
+        ownerId: req.user.id,
       },
     });
 
     if (!property) {
-      return res.status(404).json({ message: "Property not found" });
+      return res.status(404).json({ error: "Property not found" });
     }
 
-    const phase = await Phase.create({
-      ...req.body,
-      property_id: property.id,
-    });
+    // Handle image upload logic here
+    // This is a placeholder for the actual implementation
+    const imageUrls = req.body.imageUrls || [];
 
-    res.status(201).json(phase);
+    property.images = [...property.images, ...imageUrls];
+    await property.save();
+
+    res.json(property);
   } catch (error) {
-    logger.error("Error creating phase:", error);
-    res.status(500).json({ message: "Error creating phase" });
-  }
-});
-
-// Update a phase
-router.put("/phases/:phaseId", authenticateToken, async (req, res) => {
-  try {
-    const phase = await Phase.findOne({
-      where: { id: req.params.phaseId },
-      include: [
-        {
-          model: Property,
-          as: "property",
-          where: { owner_id: req.user.id },
-        },
-      ],
-    });
-
-    if (!phase) {
-      return res.status(404).json({ message: "Phase not found" });
-    }
-
-    await phase.update(req.body);
-    res.json(phase);
-  } catch (error) {
-    logger.error("Error updating phase:", error);
-    res.status(500).json({ message: "Error updating phase" });
-  }
-});
-
-// Delete a phase
-router.delete("/phases/:phaseId", authenticateToken, async (req, res) => {
-  try {
-    const phase = await Phase.findOne({
-      where: { id: req.params.phaseId },
-      include: [
-        {
-          model: Property,
-          as: "property",
-          where: { owner_id: req.user.id },
-        },
-      ],
-    });
-
-    if (!phase) {
-      return res.status(404).json({ message: "Phase not found" });
-    }
-
-    await phase.destroy();
-    res.json({ message: "Phase deleted successfully" });
-  } catch (error) {
-    logger.error("Error deleting phase:", error);
-    res.status(500).json({ message: "Error deleting phase" });
+    res.status(500).json({ error: error.message });
   }
 });
 
