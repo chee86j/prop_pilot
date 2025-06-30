@@ -1,18 +1,22 @@
-import { Sequelize } from 'sequelize';
-import { logger } from '../utils/logger.js';
+import { Sequelize } from "sequelize";
+import dotenv from "dotenv";
 
-const sequelize = new Sequelize({
-  dialect: 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 5432,
-  database: process.env.DB_NAME || 'prop_pilot',
-  username: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD,
-  logging: (msg) => logger.debug(`🔍 ${msg}`),
-  define: {
-    timestamps: true,
-    underscored: true,
-  },
+dotenv.config();
+
+const {
+  DB_NAME = "prop_pilot",
+  DB_USER = "postgres",
+  DB_PASSWORD = "postgres",
+  DB_HOST = "localhost",
+  DB_PORT = 5432,
+  NODE_ENV = "development",
+} = process.env;
+
+const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
+  host: DB_HOST,
+  port: DB_PORT,
+  dialect: "postgres",
+  logging: NODE_ENV === "development" ? console.log : false,
   pool: {
     max: 5,
     min: 0,
@@ -21,4 +25,14 @@ const sequelize = new Sequelize({
   },
 });
 
-export { sequelize };
+export const testConnection = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log("✅ Database connection established successfully");
+  } catch (error) {
+    console.error("❌ Unable to connect to the database:", error);
+    throw error;
+  }
+};
+
+export default sequelize;

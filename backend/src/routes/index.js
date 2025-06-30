@@ -1,38 +1,19 @@
-import { Router } from 'express';
-import { logger } from '../utils/logger.js';
+import { Router } from "express";
+import authRoutes from "./auth.js";
+import { authenticateToken } from "../middleware/auth.js";
 
-// Import route handlers here as they are created
-// import authRoutes from './auth.js';
-// import propertyRoutes from './property.js';
-// etc...
+const router = Router();
 
-const setupRoutes = (app) => {
-  const apiRouter = Router();
+// Public routes
+router.use("/auth", authRoutes);
 
-  // Register routes here as they are created
-  // apiRouter.use('/auth', authRoutes);
-  // apiRouter.use('/properties', propertyRoutes);
-  // etc...
+// Health check route
+router.get("/", (req, res) => {
+  res.json({ message: "PropPilot API v1" });
+});
 
-  // Health check endpoint
-  apiRouter.get('/health', (req, res) => {
-    logger.debug('🏥 Health check requested');
-    res.json({ status: 'healthy', timestamp: new Date().toISOString() });
-  });
+// Protected routes (add these later)
+// router.use('/properties', authenticateToken, propertyRoutes);
+// router.use('/users', authenticateToken, userRoutes);
 
-  // Register the API router
-  app.use('/api', apiRouter);
-
-  // Handle 404 routes
-  app.use('*', (req, res) => {
-    logger.warn(`⚠️ Route not found: ${req.originalUrl}`);
-    res.status(404).json({
-      status: 'error',
-      message: `Route ${req.originalUrl} not found`,
-    });
-  });
-
-  logger.info('✅ Routes initialized successfully');
-};
-
-export { setupRoutes };
+export default router;

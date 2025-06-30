@@ -1,31 +1,26 @@
-import { sequelize } from '../config/database.js';
-import { logger } from '../utils/logger.js';
+import User from "./user.js";
+import Property from "./property.js";
+import Phase from "./phase.js";
 
-// Import models here as they are created
-// import User from './user.js';
-// import Property from './property.js';
-// etc...
+// Define associations
+User.hasMany(Property, {
+  foreignKey: "owner_id",
+  as: "owned_properties",
+});
 
-const initializeDatabase = async () => {
-  try {
-    logger.info('🔄 Initializing database connection...');
-    await sequelize.authenticate();
-    logger.info('✅ Database connection established successfully.');
+Property.belongsTo(User, {
+  foreignKey: "owner_id",
+  as: "owner",
+});
 
-    // Sync all models with database
-    if (process.env.NODE_ENV === 'development') {
-      await sequelize.sync({ alter: true });
-      logger.info('✅ Database models synchronized.');
-    }
+Property.hasMany(Phase, {
+  foreignKey: "property_id",
+  as: "phases",
+});
 
-    // Define model associations here as models are created
-    // User.hasMany(Property);
-    // Property.belongsTo(User);
-    // etc...
-  } catch (error) {
-    logger.error('❌ Unable to connect to the database:', error);
-    throw error;
-  }
-};
+Phase.belongsTo(Property, {
+  foreignKey: "property_id",
+  as: "property",
+});
 
-export { initializeDatabase, sequelize };
+export { User, Property, Phase };
