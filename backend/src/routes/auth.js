@@ -7,64 +7,72 @@ import {
 } from "../middleware/auth.js";
 import logger from "../utils/logger.js";
 import { OAuth2Client } from "google-auth-library";
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 const router = Router();
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 router.post("/register", async (req, res) => {
   try {
-    const { first_name, last_name, email, password } = req.body;
-
-    // Validate required fields
-    const requiredFields = {
-      first_name: "First name is required",
-      last_name: "Last name is required",
-      email: "Valid email is required",
-      password: "Password is required",
-    };
-
-    for (const [field, message] of Object.entries(requiredFields)) {
-      if (!req.body[field]) {
-        return res.status(400).json({ message: message });
-      }
-    }
+    const { email, password, firstName, lastName } = req.body;
 
     // Validate email and password
     if (!validateEmail(email)) {
-      return res.status(400).json({ message: "Invalid email format" });
+      return res.status(400).json({ message: 'Invalid email format' });
     }
 
     if (!validatePassword(password)) {
       return res.status(400).json({
-        message:
-          "Password must be at least 12 characters long and contain uppercase, lowercase, number, and special character",
+        message: 'Password must be at least 8 characters long and contain at least one number, one uppercase letter, and one special character'
       });
     }
 
     // Check if user already exists
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
-      return res.status(409).json({ message: "Email already registered" });
+      return res.status(409).json({ message: 'User already exists' });
     }
 
-    // Create new user
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Create user
     const user = await User.create({
-      first_name,
-      last_name,
       email,
+      password: hashedPassword,
+      firstName,
+      lastName
     });
 
-    await user.setPassword(password);
-    await user.save();
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: '1h' }
+    );
 
-    const authResponse = await createAuthResponse(user);
+    // Set cookie
+    res.cookie('jwt', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 3600000 // 1 hour
+    });
+
     res.status(201).json({
-      ...authResponse,
-      message: "User created successfully",
+      message: 'User registered successfully',
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName
+      }
     });
   } catch (error) {
-    logger.error("Registration error:", error);
-    res.status(500).json({ message: "An error occurred during registration" });
+    console.error('Registration error:', error);
+    res.status(500).json({ message: 'Error registering user' });
   }
 });
 
@@ -72,27 +80,45 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Email and password are required" });
-    }
-
+    // Find user
     const user = await User.findOne({ where: { email } });
     if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const isValidPassword = await user.checkPassword(password);
-    if (!isValidPassword) {
-      return res.status(401).json({ message: "Invalid credentials" });
+    // Verify password
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const authResponse = await createAuthResponse(user);
-    res.json(authResponse);
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: '1h' }
+    );
+
+    // Set cookie
+    res.cookie('jwt', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 3600000 // 1 hour
+    });
+
+    res.json({
+      message: 'Login successful',
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName
+      }
+    });
   } catch (error) {
-    logger.error("Login error:", error);
-    res.status(500).json({ message: "An error occurred during login" });
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Error logging in' });
   }
 });
 
@@ -144,7 +170,29 @@ router.post("/google", async (req, res) => {
 });
 
 router.post("/logout", (req, res) => {
+  res.clearCookie('jwt');
   res.json({ message: "Logged out successfully" });
+});
+
+router.get('/me', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+
+    const user = await User.findByPk(req.user.id, {
+      attributes: ['id', 'email', 'firstName', 'lastName']
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({ message: 'Error fetching user data' });
+  }
 });
 
 export default router;
