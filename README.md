@@ -82,6 +82,19 @@ Prop Pilot implements comprehensive security measures across its stack:
 - **Backend Security**: Secure environment configuration, JWT hardening
 - **Headers & CORS**: Strict security headers (HSTS, CSP, X-Frame-Options)
 
+### Google Sign-In (OAuth 2.0) Setup
+
+1. Go to Google Cloud Console → APIs & Services → Credentials.
+2. Create **OAuth 2.0 Client ID** (Application type = **Web application**).
+3. Authorized JavaScript origins:
+   - http://localhost:5173
+4. Authorized redirect URIs (pick the one your app actually handles):
+   - Backend callback (Flask): http://localhost:5000/auth/google/callback
+   - Or your existing route if different (e.g., /api/auth/callback)
+5. Scopes to request: `openid email profile`
+6. Put values in `.env` (see `.env.example`).
+
+
 ## Project Setup
 
 ### Prerequisites
