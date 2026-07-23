@@ -4,6 +4,9 @@ import compression from "vite-plugin-compression";
 import { visualizer } from "rollup-plugin-visualizer";
 
 export default defineConfig({
+  // Keep backend and frontend configuration in the repository-level .env file.
+  // Vite still exposes only variables prefixed with VITE_ to browser code.
+  envDir: "..",
   plugins: [
     react(),
     compression({
@@ -37,5 +40,8 @@ export default defineConfig({
     open: true,
     cors: true,
     host: true,
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+    },
   },
 });

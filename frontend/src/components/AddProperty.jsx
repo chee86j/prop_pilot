@@ -1,13 +1,19 @@
 /* this component allows auth user to create a new single property */
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Select from "react-select";
 import ResearchDropdown from "./ResearchDropdown";
-import { getCoordinatesFromAddress } from "../utils/property";
 
 const AddProperty = () => {
+  const location = useLocation();
+  const selectedScrapedProperties = Array.isArray(
+    location.state?.selectedScrapedProperties
+  )
+    ? location.state.selectedScrapedProperties
+    : [];
+
   const [property, setProperty] = useState({
     // Foreclosure Information
     detail_link: "",
@@ -150,15 +156,19 @@ const AddProperty = () => {
   });
 
   const [activeTab, setActiveTab] = useState("basic"); // Track active form section
-  const [progress, setProgress] = useState(0); // Track form completion progress
-  const [scrapedProperties, setScrapedProperties] = useState([]);
+  const [scrapedProperties, setScrapedProperties] = useState(
+    selectedScrapedProperties
+  );
   const [errorMessage, setErrorMessage] = useState("");
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Load scraped data when component mounts
-    fetchScrapedData();
+    if (selectedScrapedProperties.length === 0) {
+      fetchScrapedData();
+    }
+    // Route state is intentionally read only on initial navigation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchScrapedData = async () => {
@@ -647,6 +657,14 @@ const AddProperty = () => {
     toast.info("Property Details Pre-filled from Scraped Data");
   };
 
+  useEffect(() => {
+    if (selectedScrapedProperties.length > 0) {
+      handleUseScrapeData(selectedScrapedProperties[0]);
+    }
+    // Apply route-state import data once when this form opens.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProperty({ ...property, [name]: value });
@@ -663,30 +681,13 @@ const AddProperty = () => {
     }
 
     try {
-      // Get coordinates from address
-      const coordinates = await getCoordinatesFromAddress(
-        property.address,
-        property.city,
-        property.state,
-        property.zipCode
-      );
-
-      // Add coordinates to property data if available
-      const propertyData = {
-        ...property,
-        ...(coordinates && {
-          latitude: coordinates.latitude,
-          longitude: coordinates.longitude
-        })
-      };
-
       const response = await fetch("http://localhost:5000/api/properties", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
-        body: JSON.stringify(propertyData),
+        body: JSON.stringify(property),
       });
 
       if (!response.ok) {
@@ -955,32 +956,19 @@ const AddProperty = () => {
     },
   };
 
-  // Calculate and update progress whenever property or activeTab changes
-  useEffect(() => {
-    const calculateProgress = () => {
-      const totalFields = Object.values(formSections).reduce(
-        (acc, section) => acc + section.fields.length,
-        0
-      );
-
-      const filledFields = Object.values(formSections).reduce(
-        (acc, section) => {
-          return (
-            acc +
-            section.fields.filter(
-              (field) =>
-                property[field] && property[field].toString().trim() !== ""
-            ).length
-          );
-        },
-        0
-      );
-
-      setProgress(Math.round((filledFields / totalFields) * 100));
-    };
-
-    calculateProgress();
-  }, [property, activeTab]);
+  const totalFields = Object.values(formSections).reduce(
+    (count, section) => count + section.fields.length,
+    0
+  );
+  const filledFields = Object.values(formSections).reduce(
+    (count, section) =>
+      count +
+      section.fields.filter(
+        (field) => property[field] && property[field].toString().trim() !== ""
+      ).length,
+    0
+  );
+  const progress = Math.round((filledFields / totalFields) * 100);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -1020,7 +1008,9 @@ const AddProperty = () => {
           {scrapedProperties.length > 0 && (
             <div className="p-6 bg-blue-50 border-b border-blue-100">
               <h2 className="text-lg font-semibold text-blue-900 mb-3">
-                Quick Fill from Scraped Data
+                {selectedScrapedProperties.length > 0
+                  ? `Selected Properties (${scrapedProperties.length})`
+                  : "Quick Fill from Scraped Data"}
               </h2>
               <Select
                 className="w-full"

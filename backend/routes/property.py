@@ -5,7 +5,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
 from services.scraper.main import main as run_scraper
 import pandas as pd
-import os
+from pathlib import Path
 from models.exceptions import (
     DrawSequenceError, 
     DrawAmountError, 
@@ -496,25 +496,35 @@ def run_scraper_endpoint():
 def get_scraped_properties():
     """Get the list of scraped properties from the merged data CSV."""
     try:
-        # Path to the merged data file
-        merged_data_path = os.path.join('services', 'scraper', 'downloads', 'merged_data.csv')
+        backend_dir = Path(__file__).resolve().parents[1]
+        merged_data_path = (
+            backend_dir / 'services' / 'scraper' / 'downloads' / 'merged_data.csv'
+        )
         
-        if not os.path.exists(merged_data_path):
+        if not merged_data_path.exists():
             return jsonify({
                 'status': 'error',
                 'message': 'No scraped data available. Please run the scraper first.'
             }), 404
             
-        # Read the CSV file
         df = pd.read_csv(merged_data_path)
+
+        county = request.args.get('county', '').strip()
+        if county and 'county' in df.columns:
+            df = df[
+                df['county'].astype(str).str.casefold() == county.casefold()
+            ]
         
-        # Convert DataFrame to list of dictionaries
         properties = df.to_dict('records')
         
         if not properties:
             return jsonify({
                 'status': 'error',
-                'message': 'No properties found in the scraped data.'
+                'message': (
+                    f'No properties found for {county} County.'
+                    if county
+                    else 'No properties found in the scraped data.'
+                )
             }), 404
         
         return jsonify(properties), 200
@@ -580,4 +590,4 @@ def create_construction_draw():
         return jsonify({'error': str(e)}), 400
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500 
+        return jsonify({'error': str(e)}), 500

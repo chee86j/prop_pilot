@@ -7,21 +7,28 @@ import { initializePerformanceMonitoring } from "./utils/performance";
 // Initialize performance monitoring
 initializePerformanceMonitoring();
 
-// Register service worker
+// The service worker is a production optimization. Keeping it active during
+// development can serve stale Vite assets and obscure useful network errors.
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("/service-worker.js")
-      .then((registration) => {
-        console.log(
-          "✅ Service Worker registered successfully:",
-          registration.scope
-        );
-      })
-      .catch((error) => {
-        console.error("❌ Service Worker registration failed:", error);
-      });
-  });
+  if (import.meta.env.PROD) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker
+        .register("/service-worker.js")
+        .then((registration) => {
+          console.log(
+            "✅ Service Worker registered successfully:",
+            registration.scope
+          );
+        })
+        .catch((error) => {
+          console.error("❌ Service Worker registration failed:", error);
+        });
+    });
+  } else {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      registrations.forEach((registration) => registration.unregister());
+    });
+  }
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(

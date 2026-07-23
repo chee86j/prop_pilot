@@ -1,15 +1,31 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+.flaskenv
+
 # Python
 __pycache__/
 *.py[cod]
 *.so
 .Python
-.env
 .venv/
 env/
 venv/
 ENV/
+*.egg-info/
+.eggs/
+.tox/
+.nox/
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pytype/
+.hypothesis/
 .coverage
+.coverage.*
+coverage.xml
 coverage_html/
 htmlcov/
 
@@ -18,7 +34,14 @@ node_modules/
 **/node_modules/
 dist/
 dist-ssr/
-*.local
+coverage/
+.vite/
+.eslintcache
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
 # IDEs and editors
 .idea/
@@ -26,23 +49,20 @@ dist-ssr/
 *.swp
 *.swo
 .DS_Store
+Thumbs.db
+Desktop.ini
 
-# Project specific
+# Runtime and project-generated files
 *.log
 logs/
 downloads/
+scraped/
+services/scraper/downloads/
 *.sqlite
 *.sqlite3
 *.db
-/migrations/
-scraped/
-services/scraper/downloads/
-*.csv
-*.json
-!package.json
-!package-lock.json
 
 # Build outputs
 build/
 .next/
-.vite/
+frontend/stats.html

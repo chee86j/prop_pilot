@@ -1,24 +1,12 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { FaUserCircle, FaSearch, FaFilter } from "react-icons/fa";
-import {
-  Map,
-  Home,
-  Building,
-  Wrench,
-  DollarSign,
-  Calendar,
-} from "lucide-react";
-import TableSkeleton from "./core/TableSkeleton";
+import { useNavigate } from "react-router-dom";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-// eslint-disable-next-line no-unused-vars
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { fetchUserProfile } from "../utils/user";
 import { formatCurrency } from "../utils/format";
-import AuthManager from "../utils/auth";
 import SkyScrapers from "../assets/icons/skyscrapers.png";
 
 const PropertyList = () => {
@@ -32,6 +20,8 @@ const PropertyList = () => {
   });
   const [isScrapingData, setIsScrapingData] = useState(false);
   const [selectedCounty, setSelectedCounty] = useState("Morris");
+  const [scrapedProperties, setScrapedProperties] = useState([]);
+  const [selectedScrapedIds, setSelectedScrapedIds] = useState([]);
   const navigate = useNavigate();
 
   const isMobile = window.innerWidth <= 768;
@@ -150,6 +140,44 @@ const PropertyList = () => {
 
   const handleCountyChange = (e) => {
     setSelectedCounty(e.target.value);
+    setScrapedProperties([]);
+    setSelectedScrapedIds([]);
+  };
+
+  const getScrapedPropertyId = (property) =>
+    String(property.property_id || property.address);
+
+  const handleScrapedSelection = (property) => {
+    const propertyId = getScrapedPropertyId(property);
+    setSelectedScrapedIds((currentIds) =>
+      currentIds.includes(propertyId)
+        ? currentIds.filter((id) => id !== propertyId)
+        : [...currentIds, propertyId]
+    );
+  };
+
+  const handleSelectAllScraped = () => {
+    if (selectedScrapedIds.length === scrapedProperties.length) {
+      setSelectedScrapedIds([]);
+      return;
+    }
+
+    setSelectedScrapedIds(scrapedProperties.map(getScrapedPropertyId));
+  };
+
+  const handleImportSelected = () => {
+    const selectedProperties = scrapedProperties.filter((property) =>
+      selectedScrapedIds.includes(getScrapedPropertyId(property))
+    );
+
+    if (selectedProperties.length === 0) {
+      toast.info("Select at least one property to import.");
+      return;
+    }
+
+    navigate("/addproperty", {
+      state: { selectedScrapedProperties: selectedProperties },
+    });
   };
 
   const handleRunScraper = async () => {
@@ -179,7 +207,7 @@ const PropertyList = () => {
       );
 
       // Fetch the scraped properties for the selected county
-      fetchScrapedProperties(selectedCounty);
+      await fetchScrapedProperties(selectedCounty);
     } catch (error) {
       console.error("🚫 Scraper Error:", error);
       toast.error("❌ Failed to Run Foreclosure Scraper: " + error.message);
@@ -204,6 +232,8 @@ const PropertyList = () => {
       }
 
       const scrapedData = await response.json();
+      setScrapedProperties(scrapedData);
+      setSelectedScrapedIds([]);
       toast.info(
         `📊 Found ${scrapedData.length} properties in ${county} County`
       );
@@ -491,6 +521,114 @@ const PropertyList = () => {
           </button>
         </div>
       </div>
+
+      {scrapedProperties.length > 0 && (
+        <section className="mb-6 overflow-hidden rounded-xl border border-emerald-200 bg-white shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-emerald-50 px-4 py-3">
+            <div>
+              <h2 className="font-semibold text-emerald-950">
+                {selectedCounty} County foreclosure results
+              </h2>
+              <p className="text-sm text-emerald-700">
+                {scrapedProperties.length} properties found. Select the
+                properties you want to review and import.
+              </p>
+            </div>
+            <button
+              onClick={handleImportSelected}
+              disabled={selectedScrapedIds.length === 0}
+              className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+            >
+              Import Selected ({selectedScrapedIds.length})
+            </button>
+          </div>
+
+          <div className="max-h-96 overflow-auto">
+            <table className="w-full min-w-[760px] text-left text-sm">
+              <thead className="sticky top-0 bg-slate-100 text-slate-700">
+                <tr>
+                  <th className="w-12 px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={
+                        scrapedProperties.length > 0 &&
+                        selectedScrapedIds.length === scrapedProperties.length
+                      }
+                      onChange={handleSelectAllScraped}
+                      aria-label="Select all scraped properties"
+                      className="h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-600"
+                    />
+                  </th>
+                  <th className="px-4 py-3 font-semibold">Address</th>
+                  <th className="px-4 py-3 font-semibold">Sheriff Number</th>
+                  <th className="px-4 py-3 font-semibold">Status Date</th>
+                  <th className="px-4 py-3 font-semibold">Plaintiff</th>
+                  <th className="px-4 py-3 font-semibold">Links</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {scrapedProperties.map((property, index) => (
+                  <tr
+                    key={property.property_id || `${property.address}-${index}`}
+                    className="hover:bg-slate-50"
+                  >
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedScrapedIds.includes(
+                          getScrapedPropertyId(property)
+                        )}
+                        onChange={() => handleScrapedSelection(property)}
+                        aria-label={`Select ${property.address}`}
+                        className="h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-600"
+                      />
+                    </td>
+                    <td className="px-4 py-3 font-medium text-slate-900">
+                      {property.address}
+                    </td>
+                    <td className="px-4 py-3 text-slate-600">
+                      {property.sheriff_number || "N/A"}
+                    </td>
+                    <td className="px-4 py-3 text-slate-600">
+                      {property.status_date || "N/A"}
+                    </td>
+                    <td
+                      className="max-w-xs truncate px-4 py-3 text-slate-600"
+                      title={property.plaintiff}
+                    >
+                      {property.plaintiff || "N/A"}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-3">
+                        {property.detail_link && (
+                          <a
+                            href={property.detail_link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="font-medium text-blue-700 hover:underline"
+                          >
+                            Auction
+                          </a>
+                        )}
+                        {property["Zillow URL"] && (
+                          <a
+                            href={property["Zillow URL"]}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="font-medium text-blue-700 hover:underline"
+                          >
+                            Zillow
+                          </a>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
 
       <div
         className="ag-theme-alpine w-full"

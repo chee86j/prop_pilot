@@ -295,8 +295,8 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Default behavior for non-matched routes
-  event.respondWith(fetch(event.request));
+  // Let the browser handle unmatched requests. Wrapping a plain fetch here
+  // turns ordinary network failures into unhandled service-worker rejections.
 });
 
 // Handle push notifications
