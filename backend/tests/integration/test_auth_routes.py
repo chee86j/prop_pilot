@@ -323,7 +323,7 @@ def test_register_duplicate_email(client):
     ({'email': 'invalid-email', 'password': 'test_password_123', 'first_name': 'Test', 'last_name': 'User'},
      'Valid email is required'),
     ({'email': 'test@example.com', 'password': 'short', 'first_name': 'Test', 'last_name': 'User'},
-     'Password must be at least 8 characters'),
+     'Password must be at least 12 least 12, plus uppercase, lowercase, a number, and a symbol.'),
     ({'email': 'test@example.com', 'password': 'test_password_123', 'last_name': 'User'},
      'First name is required'),
     ({'email': 'test@example.com', 'password': 'test_password_123', 'first_name': 'Test'},

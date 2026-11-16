@@ -15,12 +15,12 @@ export const emailValidator = (email) => {
 
 /*
  * Validates a password meets security requirements
- * Must include: at least 8 chars, upper & lowercase letters, number, special char
+ * Must include: at least 12 chars, upper & lowercase letters, number, special char
  * @param {string} password - Password to validate
  * @returns {boolean} - True if password meets requirements
  */
 export const passwordValidator = (password) => {
-  const re = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_])[0-9a-zA-Z\W_]{8,}$/;
+  const re = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_])[0-9a-zA-Z\W_]{12,}$/;
   return re.test(password);
 };
 

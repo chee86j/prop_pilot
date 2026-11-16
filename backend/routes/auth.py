@@ -96,7 +96,7 @@ def register():
             'first_name': "First name is required",
             'last_name': "Last name is required",
             'email': "Valid email is required",
-            'password': "Password must be at least 8 characters"
+            'password': "Password must be at least 12 characters and include an uppercase letter, a lowercase letter, a number, and a symbol"
         }
         
         for field, message in required_fields.items():
@@ -107,7 +107,7 @@ def register():
             return jsonify({"message": "Valid email is required"}), HTTPStatus.BAD_REQUEST
             
         if not validate_password(data['password']):
-            return jsonify({"message": "Password must be at least 8 characters"}), HTTPStatus.BAD_REQUEST
+            return jsonify({"message": "Password must be at least 12 characters and include an uppercase letter, a lowercase letter, a number, and a symbol"}), HTTPStatus.BAD_REQUEST
 
         user = User(
             first_name=data['first_name'],

@@ -172,7 +172,7 @@ const AuthForm = () => {
     }
     if (!passwordValidator(password)) {
       setErrorMessage(
-        "Password must must contain at least one symbol, one number, one uppercase letter, one lowercase letter, and be at least 8 characters long."
+        "Password must be at least 12 characters and include a symbol, a number, an uppercase letter, and a lowercase letter."
       );
       return;
     }
