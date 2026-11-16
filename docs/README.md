@@ -1,5 +1,5 @@
 # Prop Pilot feature guide
-
+For proposed work, see [To Implement: Maintenance and work orders](To%20Implement/maintenance-work-orders/README.md).
 This guide describes the features present in the repository and where to find their implementation. The main workflow is to create an account, add a property, review its financial information, and track renovation phases, draws, and receipts.
 
 - [Accounts and profile](features/accounts/overview.md)
