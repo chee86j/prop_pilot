@@ -1,6 +1,6 @@
 # Maintenance and work orders
 
-**Status: Proposed.** This folder specifies a potential feature; the screens and contracts described here are not implemented. References to current behavior are identified explicitly.
+**Status: Partially implemented.** The existing maintenance API now checks property ownership and tenant management. The screens, new work order API, migration, and other proposed behavior in this folder are not yet implemented.
 
 ## Purpose
 
@@ -23,9 +23,9 @@ These files use a single proposed design to make the feature reviewable. Names, 
 
 ## Current starting point
 
-`PropertyMaintenanceRequest` stores `propertyId`, required `tenantId`, `description`, `status`, `timeToCompletion` in hours, and timestamps. Its existing API has list, read, create, update, and delete routes under `/api/property-maintenance-requests`. The create route validates a limited set of statuses, while the update route assigns supplied attributes more broadly. The routes require a JWT but currently do not scope requests to the property owner. There is no dedicated maintenance route in the frontend router.
+`PropertyMaintenanceRequest` stores `propertyId`, required `tenantId`, `description`, `status`, `timeToCompletion` in hours, and timestamps. Its existing API has list, read, create, update, and delete routes under `/api/property-maintenance-requests`. These routes require a JWT, scope records to the property owner, and check that newly assigned tenants are managed by that owner. Updates are limited to the existing request fields and validate status and duration. There is no dedicated maintenance route in the frontend router.
 
-The existing model is a reasonable starting point, but migration, ownership enforcement, and a compatible API plan are needed before exposing a user interface. See [existing maintenance documentation](../../features/operations/overview.md) and the [current endpoint inventory](../../reference/api/maintenance.md).
+The existing model is a reasonable starting point, but the proposed migration, tenant-to-property lease validation, and compatible new API still need implementation. See [existing maintenance documentation](../../features/operations/overview.md) and the [current endpoint inventory](../../reference/api/maintenance.md).
 
 ## First release boundary
 

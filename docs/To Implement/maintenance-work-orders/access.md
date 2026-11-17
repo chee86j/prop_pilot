@@ -4,7 +4,7 @@ This document defines proposed access rules. The first release has one role for 
 
 ## Current state
 
-The existing maintenance routes use `@jwt_required()`, but their queries do not filter by the authenticated user's ownership of the property. The list route without a property filter queries all maintenance requests; individual read, update, and delete handlers retrieve by request ID. Adding a frontend alone would therefore not provide the required data isolation. Both the new API and any still-enabled legacy routes need ownership enforcement on the server.
+The existing maintenance routes require a JWT and now scope listing, reading, updating, and deletion to properties owned by the authenticated user. Creation and reassignment check that the selected property belongs to the user and that a selected tenant is managed by the user. The update endpoint accepts only existing maintenance fields. The current API does not yet verify that the tenant has a lease for the property, and it permits reassignment between properties owned by the same user. The new API and attachment endpoints below remain proposed.
 
 ## Authorization rules
 
