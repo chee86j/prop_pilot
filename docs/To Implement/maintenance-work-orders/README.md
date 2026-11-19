@@ -26,7 +26,7 @@ These files use a single proposed design to make the feature reviewable. Names, 
 
 `PropertyMaintenanceRequest` includes the planned work order fields and makes `tenantId` nullable at the model level. Its existing API has list, read, create, update, and delete routes under `/api/property-maintenance-requests`. The legacy create route still requires a tenant and exposes its existing fields. These routes require a JWT, scope records to the property owner, and check that newly assigned tenants are managed by that owner. The legacy API presents stored `open` and `scheduled` statuses as `pending`. There is no dedicated maintenance route in the frontend router.
 
-The migration must be applied to an existing database before the updated model can be used. Tenant-to-property lease validation, the proposed new API, and the work order UI still need implementation. See [existing maintenance documentation](../../features/operations/overview.md) and the [current endpoint inventory](../../reference/api/maintenance.md).
+The migration must be applied to an existing database before the updated model can be used. Legacy create and tenant reassignment now require an owner-managed tenant with a lease for the selected property; historical leases qualify. The proposed new API and work order UI still need implementation. See [existing maintenance documentation](../../features/operations/overview.md) and the [current endpoint inventory](../../reference/api/maintenance.md).
 
 ## First release boundary
 

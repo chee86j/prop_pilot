@@ -4,7 +4,7 @@ This document defines proposed access rules. The first release has one role for 
 
 ## Current state
 
-The existing maintenance routes require a JWT and now scope listing, reading, updating, and deletion to properties owned by the authenticated user. Creation and reassignment check that the selected property belongs to the user and that a selected tenant is managed by the user. The update endpoint accepts only existing maintenance fields. The current API does not yet verify that the tenant has a lease for the property, and it permits reassignment between properties owned by the same user. The new API and attachment endpoints below remain proposed.
+The existing maintenance routes require a JWT and now scope listing, reading, updating, and deletion to properties owned by the authenticated user. Creation and tenant reassignment check that the selected tenant is managed by the user and has a lease for the associated property; historical leases qualify. The update endpoint accepts only existing maintenance fields. It still permits reassignment between properties owned by the same user. The new API and attachment endpoints below remain proposed.
 
 ## Authorization rules
 

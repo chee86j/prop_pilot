@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import db, PropertyMaintenanceRequest, Property, Tenant, User
+from models import db, PropertyMaintenanceRequest, Property, Tenant, User, Lease
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from datetime import datetime
 
@@ -45,6 +45,11 @@ def _owned_tenant(user, tenant_id):
     if tenant_id is None:
         return None
     return Tenant.query.filter_by(id=tenant_id, manager_id=user.id).first()
+
+
+def _tenant_leased_at_property(tenant_id, property_id):
+    """Historical leases are valid associations for maintenance history."""
+    return Lease.query.filter_by(tenantId=tenant_id, propertyId=property_id).first() is not None
 
 
 @maintenance_routes.route('/property-maintenance-requests', methods=['GET'])
@@ -123,6 +128,8 @@ def add_property_maintenance_request():
         tenant = _owned_tenant(user, data['tenantId'])
         if not tenant:
             return jsonify({"error": "Tenant not found"}), 404
+        if not _tenant_leased_at_property(tenant.id, property.id):
+            return jsonify({"error": "Tenant must have a lease for this property"}), 400
 
         # Validate status
         valid_statuses = ['pending', 'in_progress', 'completed', 'cancelled']
@@ -194,6 +201,10 @@ def update_property_maintenance_request(request_id):
         tenant = _owned_tenant(user, data['tenantId'])
         if not tenant:
             return jsonify({'error': 'Tenant not found'}), 404
+        if tenant.id != maintenance_request.tenantId and not _tenant_leased_at_property(
+            tenant.id, maintenance_request.propertyId
+        ):
+            return jsonify({'error': 'Tenant must have a lease for this property'}), 400
         data['tenantId'] = tenant.id
     if 'description' in data and (not isinstance(data['description'], str) or not data['description'].strip()):
         return jsonify({'error': 'Description is required'}), 400
