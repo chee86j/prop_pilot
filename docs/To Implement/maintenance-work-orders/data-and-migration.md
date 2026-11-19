@@ -1,6 +1,6 @@
 # Data model and migration
 
-This is a proposed schema and migration, not the current database structure. The current model is `backend/models/maintenance.py`; the existing database migrations are under `backend/migrations/versions/`.
+The work order fields and migration are implemented in `backend/models/maintenance.py` and `backend/migrations/versions/b51c7f2d8a40_maintenance_work_order_fields.py`. An existing database must be upgraded before the model can use those fields; see the [migration runbook](migration-runbook.md). The new API, attachment table, and property-deletion behavior described below remain proposed.
 
 ## Work order record
 

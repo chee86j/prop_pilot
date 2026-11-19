@@ -358,3 +358,62 @@ def test_update_rejects_ownership_bypasses_without_partial_changes(
 ])
 def test_maintenance_routes_require_authentication(client, method, path):
     assert getattr(client, method)(path).status_code == 401
+
+
+@pytest.mark.integration
+def test_legacy_create_and_update_preserve_work_order_compatibility(
+    client, auth_headers, test_property, test_tenant, db_session
+):
+    response = client.post('/api/property-maintenance-requests', headers=auth_headers, json={
+        'propertyId': test_property.id, 'tenantId': test_tenant.id,
+        'description': 'Repair', 'status': 'pending',
+    })
+    assert response.status_code == 201
+    request_id = response.json['id']
+    record = db_session.get(PropertyMaintenanceRequest, request_id)
+    assert record.status == 'open'
+    assert record.title == f'Maintenance request #{request_id}'
+    assert record.priority == 'normal'
+    assert record.version == 1
+
+    path = f'/api/property-maintenance-requests/{request_id}'
+    assert client.get(path, headers=auth_headers).json['status'] == 'pending'
+
+    record.status = 'scheduled'
+    db_session.commit()
+    assert client.get(path, headers=auth_headers).json['status'] == 'pending'
+    assert client.put(path, headers=auth_headers, json={'status': 'pending'}).status_code == 200
+    db_session.refresh(record)
+    assert record.status == 'scheduled'
+    assert record.version == 2
+
+    assert client.put(path, headers=auth_headers, json={'status': 'completed'}).status_code == 200
+    db_session.refresh(record)
+    completed_at = record.completedAt
+    assert completed_at is not None
+    assert record.version == 3
+    assert client.put(path, headers=auth_headers, json={'status': 'completed'}).status_code == 200
+    db_session.refresh(record)
+    assert record.completedAt == completed_at
+    assert client.put(path, headers=auth_headers, json={'status': 'pending'}).status_code == 200
+    db_session.refresh(record)
+    assert record.status == 'open'
+    assert record.completedAt is None
+    assert record.version == 5
+
+
+@pytest.mark.integration
+def test_invalid_legacy_update_does_not_change_completion_or_version(
+    client, auth_headers, maintenance_owners, db_session
+):
+    request_id = maintenance_owners['request_id']
+    response = client.put(
+        f'/api/property-maintenance-requests/{request_id}', headers=auth_headers,
+        json={'status': 'completed', 'timeToCompletion': -1},
+    )
+    assert response.status_code == 400
+    record = db_session.get(PropertyMaintenanceRequest, request_id)
+    db_session.refresh(record)
+    assert record.status == 'open'
+    assert record.completedAt is None
+    assert record.version == 1

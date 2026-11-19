@@ -1,8 +1,13 @@
 from flask import Blueprint, request, jsonify
 from models import db, PropertyMaintenanceRequest, Property, Tenant, User
 from flask_jwt_extended import get_jwt_identity, jwt_required
+from datetime import datetime
 
 maintenance_routes = Blueprint('maintenance', __name__)
+
+
+def _legacy_status(status):
+    return 'pending' if status in ('open', 'scheduled') else status
 
 
 def _current_user():
@@ -62,7 +67,7 @@ def get_property_maintenance_requests():
         'propertyId': req.propertyId,
         'tenantId': req.tenantId,
         'description': req.description,
-        'status': req.status,
+        'status': _legacy_status(req.status),
         'timeToCompletion': req.timeToCompletion,
         'createdAt': req.createdAt.isoformat(),
         'updatedAt': req.updatedAt.isoformat()
@@ -84,7 +89,7 @@ def get_property_maintenance_request(request_id):
         'propertyId': maintenance_request.propertyId,
         'tenantId': maintenance_request.tenantId,
         'description': maintenance_request.description,
-        'status': maintenance_request.status,
+        'status': _legacy_status(maintenance_request.status),
         'timeToCompletion': maintenance_request.timeToCompletion,
         'createdAt': maintenance_request.createdAt.isoformat(),
         'updatedAt': maintenance_request.updatedAt.isoformat()
@@ -142,11 +147,14 @@ def add_property_maintenance_request():
             propertyId=property.id,
             tenantId=tenant.id,
             description=data['description'],
-            status=status,
+            status='open' if status == 'pending' else status,
+            completedAt=datetime.utcnow() if status == 'completed' else None,
             timeToCompletion=time_to_completion
         )
 
         db.session.add(maintenance_request)
+        db.session.flush()
+        maintenance_request.title = f'Maintenance request #{maintenance_request.id}'
         db.session.commit()
 
         return jsonify({
@@ -191,6 +199,11 @@ def update_property_maintenance_request(request_id):
         return jsonify({'error': 'Description is required'}), 400
     if 'status' in data and data['status'] not in ['pending', 'in_progress', 'completed', 'cancelled']:
         return jsonify({'error': 'Invalid status'}), 400
+    if 'status' in data:
+        new_status = data['status']
+        if new_status == 'pending':
+            new_status = 'scheduled' if maintenance_request.status == 'scheduled' else 'open'
+        data['status'] = new_status
     if 'timeToCompletion' in data and data['timeToCompletion'] is not None:
         try:
             time_to_completion = int(data['timeToCompletion'])
@@ -200,8 +213,12 @@ def update_property_maintenance_request(request_id):
         except (TypeError, ValueError, OverflowError):
             return jsonify({'error': 'timeToCompletion must be a nonnegative integer'}), 400
     try:
+        if 'status' in data and data['status'] != maintenance_request.status:
+            maintenance_request.completedAt = datetime.utcnow() if data['status'] == 'completed' else None
         for key, value in data.items():
             setattr(maintenance_request, key, value)
+        # Increment in the database so overlapping legacy edits cannot reuse a version.
+        maintenance_request.version = PropertyMaintenanceRequest.version + 1
         db.session.commit()
         return jsonify({"message": "Maintenance request updated successfully"}), 200
     except Exception as e:

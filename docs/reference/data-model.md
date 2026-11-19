@@ -238,15 +238,26 @@ Source: `backend\models\tenant.py`.
 
 ## PropertyMaintenanceRequest
 
-Source: `backend\models\maintenance.py`.
+Source: `backend/models/maintenance.py`. An existing database requires the work order migration; see the [migration runbook](../To%20Implement/maintenance-work-orders/migration-runbook.md).
 
 | Field | SQLAlchemy column declaration |
 | --- | --- |
 | `id` | `db.Integer, primary_key=True` |
 | `propertyId` | `db.Integer, db.ForeignKey('property.id'), nullable=False` |
-| `tenantId` | `db.Integer, db.ForeignKey('tenant.id'), nullable=False` |
+| `tenantId` | `db.Integer, db.ForeignKey('tenant.id'), nullable=True` |
+| `title` | `db.String(160), nullable=False, default='Maintenance request'` |
 | `description` | `db.Text, nullable=False` |
-| `status` | `db.String(100), default='pending'` |
+| `status` | `db.String(100), nullable=False, default='open', server_default='open'` |
+| `priority` | `db.String(16), nullable=False, default='normal', server_default='normal'` |
+| `contractorName` | `db.String(160)` |
+| `contractorContact` | `db.String(255)` |
+| `targetDate` | `db.Date` |
+| `estimatedCost`, `actualCost` | `db.Numeric(12, 2)` |
+| `notes` | `db.Text` |
 | `timeToCompletion` | `db.Integer` |
 | `createdAt` | `db.DateTime, default=db.func.current_timestamp()` |
 | `updatedAt` | `db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp()` |
+| `completedAt` | `db.DateTime` |
+| `version` | `db.Integer, nullable=False, default=1, server_default='1'` |
+
+The model constrains status and priority values and nonnegative costs, and indexes property, status, and target date. The existing API retains its legacy fields and requires a tenant on creation.
